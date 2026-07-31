@@ -20,14 +20,14 @@ Allow users to make, view, and cancel reservations, while administrators can man
 
 | ID | Story |
 |----|-------|
-| US-029 | As a user, I want to create a reservation for an available slot. |
-| US-030 | As a user, I want to view my upcoming reservations. |
-| US-031 | As a user, I want to view my reservation history. |
-| US-032 | As a user, I want to cancel a reservation according to the cancellation policy. |
-| US-033 | As an administrator, I want to see all reservations of my complex. |
-| US-034 | As an administrator, I want to create a reservation manually for a user. |
-| US-035 | As an administrator, I want to cancel a reservation if necessary. |
-| US-036 | As an administrator, I want to mark a reservation as completed or no-show. |
+| [US-029](US-029.md) | As a user, I want to create a reservation for an available slot. |
+| [US-030](US-030.md) | As a user, I want to view my upcoming reservations. |
+| [US-031](US-031.md) | As a user, I want to view my reservation history. |
+| [US-032](US-032.md) | As a user, I want to cancel a reservation according to the cancellation policy. |
+| [US-033](US-033.md) | As an administrator, I want to see all reservations of my complex. |
+| [US-034](US-034.md) | As an administrator, I want to create a reservation manually for a user. |
+| [US-035](US-035.md) | As an administrator, I want to cancel a reservation if necessary. |
+| [US-036](US-036.md) | As an administrator, I want to mark a reservation as completed or no-show. |
 
 ## Acceptance criteria
 

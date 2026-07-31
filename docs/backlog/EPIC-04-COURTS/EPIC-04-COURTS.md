@@ -17,11 +17,11 @@ Allow complex administrators to create and manage courts, assign sports, set bus
 
 | ID | Story |
 |----|-------|
-| US-018 | As an administrator, I want to create a court with name, description, surface, and indoor/outdoor flag. |
-| US-019 | As an administrator, I want to assign one or more sports to a court. |
-| US-020 | As an administrator, I want to configure the days and hours a court is available. |
-| US-021 | As an administrator, I want to set the duration of each booking slot per court. |
-| US-022 | As an administrator, I want to activate or deactivate a court. |
+| [US-018](US-018.md) | As an administrator, I want to create a court with name, description, surface, and indoor/outdoor flag. |
+| [US-019](US-019.md) | As an administrator, I want to assign one or more sports to a court. |
+| [US-020](US-020.md) | As an administrator, I want to configure the days and hours a court is available. |
+| [US-021](US-021.md) | As an administrator, I want to set the duration of each booking slot per court. |
+| [US-022](US-022.md) | As an administrator, I want to activate or deactivate a court. |
 
 ## Acceptance criteria
 

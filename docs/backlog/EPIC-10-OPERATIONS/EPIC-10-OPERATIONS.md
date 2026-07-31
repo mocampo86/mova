@@ -17,11 +17,11 @@ Provide operational visibility, audit trails, monitoring, and basic maintenance 
 
 | ID | Story |
 |----|-------|
-| US-054 | As a super administrator, I want to see an audit log of administrative actions. |
-| US-055 | As an operator, I want to be alerted when error rates exceed a threshold. |
-| US-056 | As an operator, I want health checks to report the status of the API and database. |
-| US-057 | As a team, I want operational runbooks for common procedures. |
-| US-058 | As a security owner, I want rate limiting on login and reservation endpoints. |
+| [US-054](US-054.md) | As a super administrator, I want to see an audit log of administrative actions. |
+| [US-055](US-055.md) | As an operator, I want to be alerted when error rates exceed a threshold. |
+| [US-056](US-056.md) | As an operator, I want health checks to report the status of the API and database. |
+| [US-057](US-057.md) | As a team, I want operational runbooks for common procedures. |
+| [US-058](US-058.md) | As a security owner, I want rate limiting on login and reservation endpoints. |
 
 ## Acceptance criteria
 

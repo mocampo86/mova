@@ -17,13 +17,13 @@ Set up the backend, frontend, database, and CI/CD foundations so the team can bu
 
 | ID | Story |
 |----|-------|
-| US-001 | As a developer, I want a runnable .NET solution so I can implement API features. |
-| US-002 | As a developer, I want a React application scaffold so I can implement UI features. |
-| US-003 | As a developer, I want PostgreSQL running locally via Docker Compose so I can develop and test persistently. |
-| US-004 | As a developer, I want environment-based configuration and secret management so production credentials are never committed. |
-| US-005 | As an operator, I want structured logging and global exception handling so I can diagnose issues. |
-| US-006 | As an operator, I want health checks exposed so orchestrators can monitor the API. |
-| US-007 | As a team, I want a CI pipeline that builds and tests the solution on every PR. |
+| [US-001](US-001.md) | As a developer, I want a runnable .NET solution so I can implement API features. |
+| [US-002](US-002.md) | As a developer, I want a React application scaffold so I can implement UI features. |
+| [US-003](US-003.md) | As a developer, I want PostgreSQL running locally via Docker Compose so I can develop and test persistently. |
+| [US-004](US-004.md) | As a developer, I want environment-based configuration and secret management so production credentials are never committed. |
+| [US-005](US-005.md) | As an operator, I want structured logging and global exception handling so I can diagnose issues. |
+| [US-006](US-006.md) | As an operator, I want health checks exposed so orchestrators can monitor the API. |
+| [US-007](US-007.md) | As a team, I want a CI pipeline that builds and tests the solution on every PR. |
 
 ## Acceptance criteria
 

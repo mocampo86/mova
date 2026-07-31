@@ -17,12 +17,12 @@ Enable visitors and logged-in users to discover sports complexes, view courts, f
 
 | ID | Story |
 |----|-------|
-| US-023 | As a visitor, I want to see a landing page with the platform value proposition. |
-| US-024 | As a user, I want to search and list active sports complexes. |
-| US-025 | As a user, I want to view the details of a complex. |
-| US-026 | As a user, I want to list the courts of a complex. |
-| US-027 | As a user, I want to filter courts by sport. |
-| US-028 | As a user, I want to see available time slots for a court on a selected date. |
+| [US-023](US-023.md) | As a visitor, I want to see a landing page with the platform value proposition. |
+| [US-024](US-024.md) | As a user, I want to search and list active sports complexes. |
+| [US-025](US-025.md) | As a user, I want to view the details of a complex. |
+| [US-026](US-026.md) | As a user, I want to list the courts of a complex. |
+| [US-027](US-027.md) | As a user, I want to filter courts by sport. |
+| [US-028](US-028.md) | As a user, I want to see available time slots for a court on a selected date. |
 
 ## Acceptance criteria
 

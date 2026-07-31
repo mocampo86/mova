@@ -17,11 +17,11 @@ Allow administrators to register and manage sports complexes, their public infor
 
 | ID | Story |
 |----|-------|
-| US-013 | As an administrator, I want to create a complex with name, description, address, and contact data. |
-| US-014 | As an administrator, I want to edit my complex information so it is always up to date. |
-| US-015 | As an administrator, I want to activate or deactivate my complex so I can control public visibility. |
-| US-016 | As a super administrator, I want to see all complexes and activate/deactivate them if necessary. |
-| US-017 | As a system, I want to assign the first administrator to a complex automatically. |
+| [US-013](US-013.md) | As an administrator, I want to create a complex with name, description, address, and contact data. |
+| [US-014](US-014.md) | As an administrator, I want to edit my complex information so it is always up to date. |
+| [US-015](US-015.md) | As an administrator, I want to activate or deactivate my complex so I can control public visibility. |
+| [US-016](US-016.md) | As a super administrator, I want to see all complexes and activate/deactivate them if necessary. |
+| [US-017](US-017.md) | As a system, I want to assign the first administrator to a complex automatically. |
 
 ## Acceptance criteria
 

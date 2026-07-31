@@ -18,11 +18,11 @@ Allow complex administrators and users to create weekly recurring reservations, 
 
 | ID | Story |
 |----|-------|
-| US-037 | As a user, I want to book a fixed weekly slot for a period I define. |
-| US-038 | As an administrator, I want to create recurring reservations for customers. |
-| US-039 | As a user or administrator, I want to cancel one occurrence without affecting the rest. |
-| US-040 | As a user or administrator, I want to cancel the entire recurring series. |
-| US-041 | As a system, I want to detect conflicts when generating recurring reservations. |
+| [US-037](US-037.md) | As a user, I want to book a fixed weekly slot for a period I define. |
+| [US-038](US-038.md) | As an administrator, I want to create recurring reservations for customers. |
+| [US-039](US-039.md) | As a user or administrator, I want to cancel one occurrence without affecting the rest. |
+| [US-040](US-040.md) | As a user or administrator, I want to cancel the entire recurring series. |
+| [US-041](US-041.md) | As a system, I want to detect conflicts when generating recurring reservations. |
 
 ## Acceptance criteria
 

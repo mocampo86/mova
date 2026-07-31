@@ -19,12 +19,12 @@ Build a public-facing landing page and shared site shell that explains the platf
 
 | ID | Story |
 |----|-------|
-| US-048 | As a visitor, I want to understand what the platform offers. |
-| US-049 | As a player, I want to see how to find and book a court. |
-| US-050 | As an owner, I want to see how to list my complex. |
-| US-051 | As a visitor, I want to see featured or recently added complexes. |
-| US-052 | As a visitor, I want to access login and registration from the landing page. |
-| US-053 | As a search engine, I want basic SEO metadata on public pages. |
+| [US-048](US-048.md) | As a visitor, I want to understand what the platform offers. |
+| [US-049](US-049.md) | As a player, I want to see how to find and book a court. |
+| [US-050](US-050.md) | As an owner, I want to see how to list my complex. |
+| [US-051](US-051.md) | As a visitor, I want to see featured or recently added complexes. |
+| [US-052](US-052.md) | As a visitor, I want to access login and registration from the landing page. |
+| [US-053](US-053.md) | As a search engine, I want basic SEO metadata on public pages. |
 
 ## Acceptance criteria
 

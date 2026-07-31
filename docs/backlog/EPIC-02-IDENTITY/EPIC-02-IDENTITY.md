@@ -17,11 +17,11 @@ Allow users to register and log in with Google, complete their profile, and enfo
 
 | ID | Story |
 |----|-------|
-| US-008 | As a user, I want to log in with Google so I can access the platform securely. |
-| US-009 | As a user, I want to complete my profile with my phone number so I can make reservations. |
-| US-010 | As an administrator, I want the system to distinguish user, complex admin, and super admin roles so features are protected. |
-| US-011 | As a developer, I want protected routes in the React app so unauthorized users cannot access admin features. |
-| US-012 | As a developer, I want authorized API endpoints so only allowed actors can perform operations. |
+| [US-008](US-008.md) | As a user, I want to log in with Google so I can access the platform securely. |
+| [US-009](US-009.md) | As a user, I want to complete my profile with my phone number so I can make reservations. |
+| [US-010](US-010.md) | As an administrator, I want the system to distinguish user, complex admin, and super admin roles so features are protected. |
+| [US-011](US-011.md) | As a developer, I want protected routes in the React app so unauthorized users cannot access admin features. |
+| [US-012](US-012.md) | As a developer, I want authorized API endpoints so only allowed actors can perform operations. |
 
 ## Acceptance criteria
 

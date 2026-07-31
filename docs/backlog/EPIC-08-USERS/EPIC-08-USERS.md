@@ -18,12 +18,12 @@ Allow complex administrators to manage users of their complex, view reservation 
 
 | ID | Story |
 |----|-------|
-| US-042 | As an administrator, I want to search users who have made reservations in my complex. |
-| US-043 | As an administrator, I want to view a user's reservation history in my complex. |
-| US-044 | As an administrator, I want to block a user so they cannot make new reservations. |
-| US-045 | As an administrator, I want to unblock a user if the situation is resolved. |
-| US-046 | As an administrator, I want to set an optional expiration date for a block. |
-| US-047 | As a user, I want to see if I am blocked in a complex. |
+| [US-042](US-042.md) | As an administrator, I want to search users who have made reservations in my complex. |
+| [US-043](US-043.md) | As an administrator, I want to view a user's reservation history in my complex. |
+| [US-044](US-044.md) | As an administrator, I want to block a user so they cannot make new reservations. |
+| [US-045](US-045.md) | As an administrator, I want to unblock a user if the situation is resolved. |
+| [US-046](US-046.md) | As an administrator, I want to set an optional expiration date for a block. |
+| [US-047](US-047.md) | As a user, I want to see if I am blocked in a complex. |
 
 ## Acceptance criteria
 
