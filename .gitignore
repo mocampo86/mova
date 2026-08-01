@@ -69,9 +69,13 @@ dist/
 build/
 
 # Environment configuration
+.env
 *.env
 .env.local
 .env.*.local
+
+# .NET User Secrets and other local secrets
+**/secrets.json
 
 # Docker
 **/docker-compose.override.yml
