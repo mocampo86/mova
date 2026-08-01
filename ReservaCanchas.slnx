@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ReservaCanchas.Api/ReservaCanchas.Api.csproj" />
+    <Project Path="src/ReservaCanchas.Application/ReservaCanchas.Application.csproj" />
+    <Project Path="src/ReservaCanchas.Contracts/ReservaCanchas.Contracts.csproj" />
+    <Project Path="src/ReservaCanchas.Domain/ReservaCanchas.Domain.csproj" />
+    <Project Path="src/ReservaCanchas.Infrastructure/ReservaCanchas.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ReservaCanchas.ArchitectureTests/ReservaCanchas.ArchitectureTests.csproj" />
+    <Project Path="tests/ReservaCanchas.IntegrationTests/ReservaCanchas.IntegrationTests.csproj" />
+    <Project Path="tests/ReservaCanchas.UnitTests/ReservaCanchas.UnitTests.csproj" />
+  </Folder>
+</Solution>
