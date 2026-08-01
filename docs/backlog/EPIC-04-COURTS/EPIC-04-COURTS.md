@@ -1,5 +1,9 @@
 # EPIC-04 — Court Administration
 
+## Status
+
+Ready
+
 ## Objective
 
 Allow complex administrators to create and manage courts, assign sports, set business hours, and configure slot duration.

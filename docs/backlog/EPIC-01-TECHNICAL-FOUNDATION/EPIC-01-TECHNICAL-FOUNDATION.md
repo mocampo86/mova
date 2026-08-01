@@ -1,5 +1,9 @@
 # EPIC-01 — Technical Foundation
 
+## Status
+
+In Progress
+
 ## Objective
 
 Set up the backend, frontend, database, and CI/CD foundations so the team can build features on a stable, observable, and testable base.

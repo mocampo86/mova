@@ -1,5 +1,9 @@
 # EPIC-03 — Sports Complex Administration
 
+## Status
+
+Ready
+
 ## Objective
 
 Allow administrators to register and manage sports complexes, their public information, location, and responsible users.

@@ -1,5 +1,9 @@
 # EPIC-06 — Reservations
 
+## Status
+
+Ready
+
 ## Objective
 
 Allow users to make, view, and cancel reservations, while administrators can manage reservations manually, mark attendance, and handle conflicts.

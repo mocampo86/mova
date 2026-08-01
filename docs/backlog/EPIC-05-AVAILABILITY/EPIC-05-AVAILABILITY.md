@@ -1,5 +1,9 @@
 # EPIC-05 — Public Availability and Discovery
 
+## Status
+
+Ready
+
 ## Objective
 
 Enable visitors and logged-in users to discover sports complexes, view courts, filter by sport, and consult available time slots for a specific date.

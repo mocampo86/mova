@@ -1,5 +1,9 @@
 # EPIC-02 — Identity and Access
 
+## Status
+
+Ready
+
 ## Objective
 
 Allow users to register and log in with Google, complete their profile, and enforce role-based access for users, complex administrators, and super administrators.

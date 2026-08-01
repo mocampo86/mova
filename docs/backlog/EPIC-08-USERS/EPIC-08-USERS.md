@@ -1,5 +1,9 @@
 # EPIC-08 — User Management and Blocking
 
+## Status
+
+Ready
+
 ## Objective
 
 Allow complex administrators to manage users of their complex, view reservation history, and block or unblock users with a recorded reason.

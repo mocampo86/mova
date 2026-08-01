@@ -1,5 +1,9 @@
 # EPIC-09 — Landing Page and Public Site
 
+## Status
+
+Ready
+
 ## Objective
 
 Build a public-facing landing page and shared site shell that explains the platform, showcases complexes, and guides both players and owners to register or list their complex.

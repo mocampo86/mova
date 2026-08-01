@@ -1,5 +1,9 @@
 # EPIC-07 — Recurring Reservations
 
+## Status
+
+Ready
+
 ## Objective
 
 Allow complex administrators and users to create weekly recurring reservations, generate individual occurrences, and manage cancellations at the occurrence or series level.

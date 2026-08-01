@@ -1,5 +1,9 @@
 # EPIC-10 — Audit and Operations
 
+## Status
+
+Ready
+
 ## Objective
 
 Provide operational visibility, audit trails, monitoring, and basic maintenance tooling so the platform can be run reliably and securely.
