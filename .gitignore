@@ -77,6 +77,11 @@ build/
 # .NET User Secrets and other local secrets
 **/secrets.json
 
+# Environment-specific appsettings that may contain secrets
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.*.local.json
+
 # Docker
 **/docker-compose.override.yml
 
