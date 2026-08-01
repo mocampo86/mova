@@ -9,40 +9,32 @@
 - **Web app** runs locally via `npm run dev`.
 - **Migrations** are applied manually with `dotnet ef database update`.
 
-### Docker Compose (suggested)
+### Docker Compose
 
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: reservacanchas
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-volumes:
-  postgres_data:
-```
+The repository contains a `docker-compose.yml` file and an `.env.example` file.
+
+1. Copy `.env.example` to `.env` and set a strong `POSTGRES_PASSWORD`.
+2. Start PostgreSQL:
+
+   ```powershell
+   docker compose up -d
+   ```
+
+3. Stop PostgreSQL:
+
+   ```powershell
+   docker compose down
+   ```
 
 ### Local secrets
 
-Use .NET user secrets and a `.env` file for the web:
+Use .NET user secrets for the API connection string so the local password is not committed:
 
-```json
-// secrets.json
-{
-  "Authentication:Google:ClientId": "...",
-  "Authentication:Google:ClientSecret": "...",
-  "ConnectionStrings:DefaultConnection": "Host=localhost;Database=reservacanchas;Username=postgres;Password=postgres"
-}
+```powershell
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=reservacanchas;Username=postgres;Password=<your-password>" --project src/ReservaCanchas.Api
 ```
 
-Do not commit secrets files.
+Do not commit `.env` or `secrets.json`.
 
 ## Environments
 
