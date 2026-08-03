@@ -2,7 +2,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Npgsql;
+using ReservaCanchas.Application.Health;
 using ReservaCanchas.Infrastructure.Configuration;
+using ReservaCanchas.Infrastructure.HealthChecks;
 
 namespace ReservaCanchas.Infrastructure;
 
@@ -30,6 +32,8 @@ public static class DependencyInjection
             var builder = new NpgsqlConnectionStringBuilder(databaseOptions.ConnectionString);
             return NpgsqlDataSource.Create(builder.ConnectionString);
         });
+
+        services.AddSingleton<IDatabaseConnectionProbe, NpgsqlDatabaseConnectionProbe>();
 
         return services;
     }

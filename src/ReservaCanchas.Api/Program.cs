@@ -1,4 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ReservaCanchas.Api.Exceptions;
+using ReservaCanchas.Api.HealthChecks;
 using ReservaCanchas.Infrastructure;
 using ReservaCanchas.Infrastructure.Logging;
 using Serilog;
@@ -25,6 +29,8 @@ public class Program
         });
 
         builder.Services.AddInfrastructure(builder.Configuration);
+        builder.Services.AddHealthChecks()
+            .AddCheck<DatabaseHealthCheck>("database", tags: ["readiness"]);
         builder.Services.AddProblemDetails();
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -33,6 +39,18 @@ public class Program
         app.UseSerilogRequestLogging();
         app.UseExceptionHandler();
         app.UseHttpsRedirection();
+
+        app.MapHealthChecks("/health/live", new HealthCheckOptions
+        {
+            Predicate = _ => false,
+            ResponseWriter = HealthCheckResponseWriter.WriteResponseAsync
+        }).AllowAnonymous();
+
+        app.MapHealthChecks("/health/ready", new HealthCheckOptions
+        {
+            Predicate = registration => registration.Tags.Contains("readiness"),
+            ResponseWriter = HealthCheckResponseWriter.WriteResponseAsync
+        }).AllowAnonymous();
 
 #if DEBUG
         app.MapGet("/api/test/throw", static (HttpContext _) => throw new InvalidOperationException("Test exception"));
