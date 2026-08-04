@@ -1,0 +1,137 @@
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Mova.Contracts.Auth;
+using Mova.Domain.Entities;
+using Mova.Domain.Enums;
+using Mova.Infrastructure.Data;
+using Xunit;
+
+namespace Mova.IntegrationTests.Authentication;
+
+[Collection("AuthIntegrationTests")]
+public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
+{
+    private readonly MovaWebApplicationFactory _factory;
+
+    public AdminControllerTests(MovaWebApplicationFactory factory)
+    {
+        _factory = factory;
+    }
+
+    [Fact]
+    public async Task SuperAdminEndpoint_WithSuperAdminRole_ReturnsOk()
+    {
+        var suffix = $"super-{Guid.NewGuid()}";
+        await SeedUserAsync(suffix, [Role.SuperAdmin]);
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync("/api/v1/admin/super");
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    [Fact]
+    public async Task SuperAdminEndpoint_WithUserRole_ReturnsForbidden()
+    {
+        var suffix = $"user-{Guid.NewGuid()}";
+        await SeedUserAsync(suffix, [Role.User]);
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync("/api/v1/admin/super");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SuperAdminEndpoint_WithoutAuthentication_ReturnsUnauthorized()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/v1/admin/super");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ComplexAdminEndpoint_WithAssignedComplex_ReturnsOk()
+    {
+        var suffix = $"complex-admin-{Guid.NewGuid()}";
+        var complexId = Guid.NewGuid();
+        await SeedUserAsync(suffix, [Role.User, Role.ComplexAdmin], [complexId]);
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/admin/complexes/{complexId}");
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    [Fact]
+    public async Task ComplexAdminEndpoint_WithDifferentComplex_ReturnsForbidden()
+    {
+        var suffix = $"complex-admin-other-{Guid.NewGuid()}";
+        var assignedComplexId = Guid.NewGuid();
+        await SeedUserAsync(suffix, [Role.User, Role.ComplexAdmin], [assignedComplexId]);
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/admin/complexes/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ComplexAdminEndpoint_WithSuperAdmin_ReturnsOk()
+    {
+        var suffix = $"super-complex-{Guid.NewGuid()}";
+        await SeedUserAsync(suffix, [Role.SuperAdmin]);
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/admin/complexes/{Guid.NewGuid()}");
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    private async Task SeedUserAsync(string suffix, IReadOnlyCollection<Role> roles, IReadOnlyCollection<Guid>? complexIds = null)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+
+        var user = User.CreateFromGoogle(Guid.NewGuid(), $"sub-{suffix}", $"user-{suffix}@test.com", $"Test {suffix}");
+        foreach (var role in roles)
+        {
+            user.AddRole(role);
+        }
+
+        await context.Users.AddAsync(user);
+
+        if (complexIds is not null)
+        {
+            foreach (var complexId in complexIds)
+            {
+                await context.ComplexAdministrators.AddAsync(ComplexAdministrator.Create(complexId, user.Id, Role.ComplexAdmin));
+            }
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private async Task<string> LoginAsync(HttpClient client, string suffix)
+    {
+        var request = new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" };
+        var response = await client.PostAsJsonAsync("/api/v1/auth/google", request);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<GoogleLoginResponse>();
+        return result!.AccessToken;
+    }
+}

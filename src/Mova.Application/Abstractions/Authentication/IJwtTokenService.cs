@@ -5,5 +5,9 @@ namespace Mova.Application.Abstractions.Authentication;
 
 public interface IJwtTokenService
 {
-    Task<AuthToken> GenerateAsync(User user, IEnumerable<string> roles, CancellationToken cancellationToken = default);
+    Task<AuthToken> GenerateAsync(
+        User user,
+        IEnumerable<string> roles,
+        IEnumerable<UserComplexAssociation> complexAssociations,
+        CancellationToken cancellationToken = default);
 }

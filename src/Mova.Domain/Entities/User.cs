@@ -11,8 +11,11 @@ public sealed class User
     public string? PhoneNumber { get; private set; }
     public bool PhoneVerified { get; private set; }
     public UserStatus Status { get; private set; }
+    public IReadOnlyCollection<Role> Roles => _roles.AsReadOnly();
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
+
+    private readonly List<Role> _roles = [];
 
     private User()
     {
@@ -24,7 +27,7 @@ public sealed class User
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         ArgumentException.ThrowIfNullOrWhiteSpace(fullName);
 
-        return new User
+        var user = new User
         {
             Id = id,
             GoogleSubjectId = googleSubjectId,
@@ -33,6 +36,27 @@ public sealed class User
             Status = UserStatus.Active,
             CreatedAt = DateTime.UtcNow
         };
+
+        user.AddRole(Role.User);
+        return user;
+    }
+
+    public void AddRole(Role role)
+    {
+        if (!_roles.Contains(role))
+        {
+            _roles.Add(role);
+        }
+    }
+
+    public void RemoveRole(Role role)
+    {
+        _roles.Remove(role);
+    }
+
+    public bool HasRole(Role role)
+    {
+        return _roles.Contains(role);
     }
 
     public void UpdateProfile(string fullName)
