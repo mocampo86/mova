@@ -7,6 +7,11 @@ public sealed class FakeUserRepository : IUserRepository
 {
     private readonly List<User> _users = [];
 
+    public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_users.FirstOrDefault(u => u.Id == id));
+    }
+
     public Task<User?> GetByGoogleSubjectIdAsync(string googleSubjectId, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(_users.FirstOrDefault(u => u.GoogleSubjectId == googleSubjectId));
