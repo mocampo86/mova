@@ -68,6 +68,7 @@ public static class DependencyInjection
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ISportsComplexRepository, SportsComplexRepository>();
         services.AddScoped<IComplexAdministratorRepository, ComplexAdministratorRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

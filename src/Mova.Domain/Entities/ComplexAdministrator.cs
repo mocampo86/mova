@@ -6,6 +6,7 @@ public sealed class ComplexAdministrator
 {
     public Guid Id { get; private set; }
     public Guid SportsComplexId { get; private set; }
+    public SportsComplex? SportsComplex { get; private set; }
     public Guid UserId { get; private set; }
     public Role Role { get; private set; }
     public AdministratorStatus Status { get; private set; }
