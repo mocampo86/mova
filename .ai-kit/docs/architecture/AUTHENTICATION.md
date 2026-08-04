@@ -125,6 +125,10 @@ The `PhoneVerified` flag is stored but not verified in the MVP. A future impleme
 
 ## Implementation notes
 
-- Use ASP.NET Core `AddJwtBearer` with Google `ClientId` and `ClientSecret` for the external validation step.
+- Backend endpoint: `POST /api/v1/auth/google` receives a Google ID token and returns an access token plus user information.
+- Google ID token validation uses `Google.Apis.Auth` and the configured `Google:ClientId` only; no client secret is required for the ID token flow.
+- JWT signing uses a symmetric key configured in `Jwt:SecretKey` (>= 32 bytes), `Jwt:Issuer`, and `Jwt:Audience`.
+- Token lifetime is configured via `Jwt:ExpirationMinutes` (default 15 minutes).
+- Configure `Jwt:SecretKey` and `Google:ClientId` via user secrets or environment variables; do not commit them to source control.
 - Use custom `IAuthorizationHandler` for complex-scoped access.
 - Consider `PolicyServer` or a static policy mapping only if authorization complexity grows beyond roles and resource ownership.

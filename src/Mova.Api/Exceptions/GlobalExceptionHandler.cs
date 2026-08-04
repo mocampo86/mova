@@ -21,9 +21,9 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         _logger.LogError(exception, "Unhandled exception occurred. TraceId: {TraceId}", traceId);
 
-        var response = ErrorResponseBuilder.Build(exception, traceId, _environment.IsDevelopment());
+        var (response, statusCode) = ErrorResponseBuilder.BuildResponse(exception, traceId, _environment.IsDevelopment());
 
-        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        httpContext.Response.StatusCode = statusCode;
         httpContext.Response.ContentType = "application/json";
 
         try

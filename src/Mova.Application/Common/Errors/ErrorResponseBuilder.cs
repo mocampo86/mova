@@ -1,4 +1,7 @@
+using FluentValidation;
+using Mova.Application.Common.Exceptions;
 using Mova.Contracts.Errors;
+using Mova.Domain.Exceptions;
 
 namespace Mova.Application.Common.Errors;
 
@@ -9,29 +12,69 @@ public static class ErrorResponseBuilder
 
     public static ApiErrorResponse Build(Exception exception, string traceId, bool isDevelopment)
     {
-        var message = isDevelopment
-            ? exception.Message
-            : DefaultProductionMessage;
+        return BuildResponse(exception, traceId, isDevelopment).Response;
+    }
 
+    public static (ApiErrorResponse Response, int StatusCode) BuildResponse(Exception exception, string traceId, bool isDevelopment)
+    {
+        int statusCode;
+        string code;
+        string message;
         Dictionary<string, object?>? details = null;
-        if (isDevelopment)
+
+        switch (exception)
         {
-            details = new Dictionary<string, object?>
-            {
-                ["exceptionType"] = exception.GetType().FullName,
-                ["stackTrace"] = exception.StackTrace
-            };
+            case AuthenticationException:
+                statusCode = 401;
+                code = "UNAUTHORIZED";
+                message = exception.Message;
+                break;
+
+            case UserBlockedException:
+                statusCode = 403;
+                code = "USER_BLOCKED";
+                message = exception.Message;
+                break;
+
+            case ValidationException validationException:
+                statusCode = 400;
+                code = "VALIDATION_ERROR";
+                message = "One or more validation errors occurred.";
+                details = new Dictionary<string, object?>
+                {
+                    ["errors"] = validationException.Errors
+                        .Select(e => new { propertyName = e.PropertyName, message = e.ErrorMessage })
+                        .ToArray()
+                };
+                break;
+
+            default:
+                statusCode = 500;
+                code = DefaultErrorCode;
+                message = isDevelopment ? exception.Message : DefaultProductionMessage;
+                if (isDevelopment)
+                {
+                    details = new Dictionary<string, object?>
+                    {
+                        ["exceptionType"] = exception.GetType().FullName,
+                        ["stackTrace"] = exception.StackTrace
+                    };
+                }
+
+                break;
         }
 
-        return new ApiErrorResponse
+        var response = new ApiErrorResponse
         {
             Error = new ErrorDetails
             {
-                Code = DefaultErrorCode,
+                Code = code,
                 Message = message,
                 Details = details,
                 TraceId = traceId
             }
         };
+
+        return (response, statusCode);
     }
 }

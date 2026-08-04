@@ -1,9 +1,15 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Mova.Api.Exceptions;
 using Mova.Api.HealthChecks;
+using Mova.Application;
 using Mova.Infrastructure;
+using Mova.Infrastructure.Authentication.Options;
 using Mova.Infrastructure.Logging;
 using Serilog;
 using Serilog.Events;
@@ -28,17 +34,51 @@ public class Program
                 .WriteTo.Console(new SensitiveDataRedactingFormatter(new CompactJsonFormatter()));
         });
 
+        builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
         builder.Services.AddHealthChecks()
             .AddCheck<DatabaseHealthCheck>("database", tags: ["readiness"]);
         builder.Services.AddProblemDetails();
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+        builder.Services.AddControllers();
+        builder.Services.AddOpenApi();
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer();
+
+        builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<JwtOptions>>((jwtBearerOptions, jwtOptionsAccessor) =>
+            {
+                var jwtOptions = jwtOptionsAccessor.Value;
+                var keyBytes = Encoding.UTF8.GetBytes(jwtOptions.SecretKey);
+
+                jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+                    RoleClaimType = "roles"
+                };
+            });
+
+        builder.Services.AddAuthorization();
+
         var app = builder.Build();
 
         app.UseSerilogRequestLogging();
         app.UseExceptionHandler();
         app.UseHttpsRedirection();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapOpenApi();
+        app.MapControllers();
 
         app.MapHealthChecks("/health/live", new HealthCheckOptions
         {

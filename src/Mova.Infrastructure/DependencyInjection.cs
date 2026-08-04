@@ -1,10 +1,19 @@
+using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Npgsql;
+using Mova.Application.Abstractions.Authentication;
+using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Health;
+using Mova.Infrastructure.Authentication;
+using Mova.Infrastructure.Authentication.Options;
 using Mova.Infrastructure.Configuration;
+using Mova.Infrastructure.Data;
 using Mova.Infrastructure.HealthChecks;
+using Mova.Infrastructure.Persistence;
+using Mova.Infrastructure.Persistence.Repositories;
 
 namespace Mova.Infrastructure;
 
@@ -33,7 +42,33 @@ public static class DependencyInjection
             return NpgsqlDataSource.Create(builder.ConnectionString);
         });
 
+        services.AddDbContext<MovaDbContext>((serviceProvider, options) =>
+        {
+            var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
+            options.UseNpgsql(dataSource);
+        });
+
         services.AddSingleton<IDatabaseConnectionProbe, NpgsqlDatabaseConnectionProbe>();
+
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.SectionName)
+            .Validate(options =>
+            {
+                if (string.IsNullOrWhiteSpace(options.SecretKey))
+                {
+                    return false;
+                }
+
+                return Encoding.UTF8.GetBytes(options.SecretKey).Length >= 32;
+            }, "Jwt:SecretKey must be at least 32 bytes long.");
+
+        services.AddOptions<GoogleAuthOptions>()
+            .BindConfiguration(GoogleAuthOptions.SectionName);
+
+        services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
