@@ -62,13 +62,12 @@ public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
     public async Task ComplexAdminEndpoint_WithAssignedComplex_ReturnsOk()
     {
         var suffix = $"complex-admin-{Guid.NewGuid()}";
-        var complexId = Guid.NewGuid();
-        await SeedUserAsync(suffix, [Role.User, Role.ComplexAdmin], [complexId]);
+        var seededComplexIds = await SeedUserAsync(suffix, [Role.User, Role.ComplexAdmin], [Guid.NewGuid()]);
         var client = _factory.CreateClient();
         var token = await LoginAsync(client, suffix);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await client.GetAsync($"/api/v1/admin/complexes/{complexId}");
+        var response = await client.GetAsync($"/api/v1/admin/complexes/{seededComplexIds[0]}");
 
         response.EnsureSuccessStatusCode();
     }
@@ -77,8 +76,7 @@ public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
     public async Task ComplexAdminEndpoint_WithDifferentComplex_ReturnsForbidden()
     {
         var suffix = $"complex-admin-other-{Guid.NewGuid()}";
-        var assignedComplexId = Guid.NewGuid();
-        await SeedUserAsync(suffix, [Role.User, Role.ComplexAdmin], [assignedComplexId]);
+        await SeedUserAsync(suffix, [Role.User, Role.ComplexAdmin], [Guid.NewGuid()]);
         var client = _factory.CreateClient();
         var token = await LoginAsync(client, suffix);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -106,18 +104,17 @@ public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
     public async Task ComplexAdminEndpoint_WithInactiveAdmin_ReturnsForbidden()
     {
         var suffix = $"complex-admin-inactive-{Guid.NewGuid()}";
-        var complexId = Guid.NewGuid();
-        await SeedUserAsync(suffix, [Role.User, Role.ComplexAdmin], [complexId], isActive: false);
+        var seededComplexIds = await SeedUserAsync(suffix, [Role.User, Role.ComplexAdmin], [Guid.NewGuid()], isActive: false);
         var client = _factory.CreateClient();
         var token = await LoginAsync(client, suffix);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await client.GetAsync($"/api/v1/admin/complexes/{complexId}");
+        var response = await client.GetAsync($"/api/v1/admin/complexes/{seededComplexIds[0]}");
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
-    private async Task SeedUserAsync(
+    private async Task<IReadOnlyList<Guid>> SeedUserAsync(
         string suffix,
         IReadOnlyCollection<Role> roles,
         IReadOnlyCollection<Guid>? complexIds = null,
@@ -134,21 +131,37 @@ public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
 
         await context.Users.AddAsync(user);
 
+        var createdComplexIds = new List<Guid>();
+
         if (complexIds is not null)
         {
             foreach (var complexId in complexIds)
             {
-                var administrator = ComplexAdministrator.Create(complexId, user.Id, Role.ComplexAdmin);
+                var sportsComplex = SportsComplex.Create(
+                    $"Complex {complexId}",
+                    "Test complex",
+                    "Test address",
+                    "Test city",
+                    null,
+                    null,
+                    "+54 11 1234 5678",
+                    $"test-{complexId}@example.com");
+
+                createdComplexIds.Add(sportsComplex.Id);
+
+                var administrator = ComplexAdministrator.Create(sportsComplex.Id, user.Id, Role.ComplexAdmin);
                 if (!isActive)
                 {
                     administrator.Deactivate();
                 }
 
+                await context.SportsComplexes.AddAsync(sportsComplex);
                 await context.ComplexAdministrators.AddAsync(administrator);
             }
         }
 
         await context.SaveChangesAsync();
+        return createdComplexIds;
     }
 
     private async Task<string> LoginAsync(HttpClient client, string suffix)
