@@ -36,6 +36,12 @@ public static class ErrorResponseBuilder
                 message = exception.Message;
                 break;
 
+            case NotFoundException:
+                statusCode = 404;
+                code = "NOT_FOUND";
+                message = exception.Message;
+                break;
+
             case ValidationException validationException:
                 statusCode = 400;
                 code = "VALIDATION_ERROR";
