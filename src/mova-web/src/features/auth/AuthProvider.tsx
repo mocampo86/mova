@@ -9,13 +9,20 @@ interface AuthProviderProps {
 
 export default function AuthProvider({ children }: AuthProviderProps) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [requiresProfileCompletion, setRequiresProfileCompletion] = useState(false);
 
-  const login = useCallback((token: string) => {
+  const login = useCallback((token: string, needsProfileCompletion = false) => {
     setAccessToken(token);
+    setRequiresProfileCompletion(needsProfileCompletion);
   }, []);
 
   const logout = useCallback(() => {
     setAccessToken(null);
+    setRequiresProfileCompletion(false);
+  }, []);
+
+  const completeProfile = useCallback(() => {
+    setRequiresProfileCompletion(false);
   }, []);
 
   const user = useMemo(() => (accessToken ? mapJwtToUser(accessToken) : null), [accessToken]);
@@ -25,10 +32,12 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       accessToken,
       user,
       isAuthenticated: user !== null,
+      requiresProfileCompletion,
       login,
-      logout
+      logout,
+      completeProfile
     }),
-    [accessToken, user, login, logout]
+    [accessToken, user, requiresProfileCompletion, login, logout, completeProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

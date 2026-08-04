@@ -11,9 +11,10 @@ export interface GoogleLoginResponse {
     id: string;
     email: string;
     fullName: string;
-    roles: string[];
-    isProfileCompleted: boolean;
+    phoneNumber: string | null;
+    phoneVerified: boolean;
   };
+  requiresProfileCompletion: boolean;
 }
 
 export async function googleLogin(request: GoogleLoginRequest): Promise<GoogleLoginResponse> {

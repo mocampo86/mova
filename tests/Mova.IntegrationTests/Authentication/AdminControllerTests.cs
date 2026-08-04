@@ -102,7 +102,26 @@ public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
         response.EnsureSuccessStatusCode();
     }
 
-    private async Task SeedUserAsync(string suffix, IReadOnlyCollection<Role> roles, IReadOnlyCollection<Guid>? complexIds = null)
+    [Fact]
+    public async Task ComplexAdminEndpoint_WithInactiveAdmin_ReturnsForbidden()
+    {
+        var suffix = $"complex-admin-inactive-{Guid.NewGuid()}";
+        var complexId = Guid.NewGuid();
+        await SeedUserAsync(suffix, [Role.User, Role.ComplexAdmin], [complexId], isActive: false);
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/admin/complexes/{complexId}");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    private async Task SeedUserAsync(
+        string suffix,
+        IReadOnlyCollection<Role> roles,
+        IReadOnlyCollection<Guid>? complexIds = null,
+        bool isActive = true)
     {
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
@@ -119,7 +138,13 @@ public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
         {
             foreach (var complexId in complexIds)
             {
-                await context.ComplexAdministrators.AddAsync(ComplexAdministrator.Create(complexId, user.Id, Role.ComplexAdmin));
+                var administrator = ComplexAdministrator.Create(complexId, user.Id, Role.ComplexAdmin);
+                if (!isActive)
+                {
+                    administrator.Deactivate();
+                }
+
+                await context.ComplexAdministrators.AddAsync(administrator);
             }
         }
 

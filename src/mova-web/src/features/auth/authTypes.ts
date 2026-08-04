@@ -17,6 +17,8 @@ export interface AuthState {
   accessToken: string | null;
   user: AuthUser | null;
   isAuthenticated: boolean;
-  login: (accessToken: string) => void;
+  requiresProfileCompletion: boolean;
+  login: (accessToken: string, requiresProfileCompletion?: boolean) => void;
   logout: () => void;
+  completeProfile: () => void;
 }
