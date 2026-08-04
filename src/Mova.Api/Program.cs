@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Mova.Api.Authorization;
 using Mova.Api.Exceptions;
 using Mova.Api.HealthChecks;
 using Mova.Application;
@@ -61,12 +62,26 @@ public class Program
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
-                    RoleClaimType = "roles"
+                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
                 };
             });
 
-        builder.Services.AddAuthorization();
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy(AuthorizationPolicies.User, policy => policy.RequireAuthenticatedUser());
+            options.AddPolicy(AuthorizationPolicies.ComplexAdmin, policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.AddRequirements(new ComplexAdminRequirement());
+            });
+            options.AddPolicy(AuthorizationPolicies.SuperAdmin, policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireRole(AuthorizationPolicies.SuperAdmin);
+            });
+        });
+
+        builder.Services.AddSingleton<IAuthorizationHandler, ComplexAdminAuthorizationHandler>();
 
         var app = builder.Build();
 

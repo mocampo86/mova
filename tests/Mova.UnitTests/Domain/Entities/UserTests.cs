@@ -63,4 +63,43 @@ public class UserTests
 
         Assert.Equal(UserStatus.Blocked, user.Status);
     }
+
+    [Fact]
+    public void CreateFromGoogle_AssignsUserRole()
+    {
+        var user = User.CreateFromGoogle(Guid.NewGuid(), "sub", "email@test.com", "John Doe");
+
+        Assert.Contains(Role.User, user.Roles);
+    }
+
+    [Fact]
+    public void AddRole_WithNewRole_AddsRole()
+    {
+        var user = User.CreateFromGoogle(Guid.NewGuid(), "sub", "email@test.com", "John Doe");
+
+        user.AddRole(Role.ComplexAdmin);
+
+        Assert.Contains(Role.ComplexAdmin, user.Roles);
+    }
+
+    [Fact]
+    public void AddRole_WithDuplicateRole_DoesNotDuplicate()
+    {
+        var user = User.CreateFromGoogle(Guid.NewGuid(), "sub", "email@test.com", "John Doe");
+
+        user.AddRole(Role.User);
+        user.AddRole(Role.User);
+
+        Assert.Single(user.Roles, r => r == Role.User);
+    }
+
+    [Fact]
+    public void HasRole_WithAssignedRole_ReturnsTrue()
+    {
+        var user = User.CreateFromGoogle(Guid.NewGuid(), "sub", "email@test.com", "John Doe");
+
+        user.AddRole(Role.SuperAdmin);
+
+        Assert.True(user.HasRole(Role.SuperAdmin));
+    }
 }

@@ -11,12 +11,13 @@ namespace Mova.UnitTests.Application.Authentication;
 public class GoogleLoginHandlerTests
 {
     private readonly FakeUserRepository _userRepository = new();
+    private readonly FakeComplexAdministratorRepository _complexAdministratorRepository = new();
     private readonly FakeJwtTokenService _jwtTokenService = new();
     private readonly FakeGoogleTokenValidator _googleTokenValidator = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private GoogleLoginHandler CreateHandler() =>
-        new(_googleTokenValidator, _jwtTokenService, _userRepository, _unitOfWork);
+        new(_googleTokenValidator, _jwtTokenService, _userRepository, _complexAdministratorRepository, _unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WithNewUser_CreatesUserAndReturnsToken()
@@ -62,5 +63,37 @@ public class GoogleLoginHandlerTests
         var handler = CreateHandler();
 
         await Assert.ThrowsAsync<AuthenticationException>(() => handler.HandleAsync(new GoogleLoginCommand("invalid-token")));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithNewUser_PassesUserRoleToTokenService()
+    {
+        var handler = CreateHandler();
+
+        await handler.HandleAsync(new GoogleLoginCommand("new-user-token"));
+
+        Assert.NotNull(_jwtTokenService.LastRoles);
+        Assert.Contains(Role.User.ToString(), _jwtTokenService.LastRoles);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithComplexAdministrator_PassesRoleAndComplexAssociation()
+    {
+        var user = User.CreateFromGoogle(Guid.NewGuid(), "google-subject", "admin@test.com", "Admin User");
+        user.AddRole(Role.ComplexAdmin);
+        await _userRepository.AddAsync(user);
+
+        var complexId = Guid.NewGuid();
+        await _complexAdministratorRepository.AddAsync(ComplexAdministrator.Create(complexId, user.Id, Role.ComplexAdmin));
+
+        var handler = CreateHandler();
+        await handler.HandleAsync(new GoogleLoginCommand("admin-token"));
+
+        Assert.NotNull(_jwtTokenService.LastRoles);
+        Assert.Contains(Role.User.ToString(), _jwtTokenService.LastRoles);
+        Assert.Contains(Role.ComplexAdmin.ToString(), _jwtTokenService.LastRoles);
+
+        Assert.NotNull(_jwtTokenService.LastComplexAssociations);
+        Assert.Contains(_jwtTokenService.LastComplexAssociations, a => a.ComplexId == complexId && a.Role == Role.ComplexAdmin.ToString());
     }
 }

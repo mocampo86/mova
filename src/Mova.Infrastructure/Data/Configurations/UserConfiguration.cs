@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
@@ -39,6 +40,18 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Status)
             .IsRequired()
             .HasConversion<string>();
+
+        builder.Property(u => u.Roles)
+            .IsRequired()
+            .HasColumnType("text[]")
+            .HasDefaultValueSql("ARRAY[]::text[]")
+            .HasConversion(
+                roles => roles.Select(r => r.ToString()).ToList(),
+                values => values.Select(v => Enum.Parse<Role>(v)).ToList())
+            .Metadata.SetValueComparer(new ValueComparer<IReadOnlyCollection<Role>>(
+                (left, right) => left != null && right != null && left.SequenceEqual(right),
+                roles => roles.Aggregate(0, (hash, role) => HashCode.Combine(hash, (int)role)),
+                roles => roles.ToList()));
 
         builder.Property(u => u.CreatedAt)
             .IsRequired();

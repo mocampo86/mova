@@ -1,6 +1,7 @@
 using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Authentication.Commands;
+using Mova.Application.Authentication.Models;
 using Mova.Application.Common.Exceptions;
 using Mova.Contracts.Auth;
 using Mova.Contracts.Users;
@@ -15,17 +16,20 @@ public sealed class GoogleLoginHandler : IGoogleLoginHandler
     private readonly IGoogleTokenValidator _tokenValidator;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IUserRepository _userRepository;
+    private readonly IComplexAdministratorRepository _complexAdministratorRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public GoogleLoginHandler(
         IGoogleTokenValidator tokenValidator,
         IJwtTokenService jwtTokenService,
         IUserRepository userRepository,
+        IComplexAdministratorRepository complexAdministratorRepository,
         IUnitOfWork unitOfWork)
     {
         _tokenValidator = tokenValidator;
         _jwtTokenService = jwtTokenService;
         _userRepository = userRepository;
+        _complexAdministratorRepository = complexAdministratorRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -53,8 +57,13 @@ public sealed class GoogleLoginHandler : IGoogleLoginHandler
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var roles = new[] { Role.User.ToString() };
-        var authToken = await _jwtTokenService.GenerateAsync(user, roles, cancellationToken);
+        var roles = user.Roles.Select(r => r.ToString()).ToList();
+        var complexAssociations = await _complexAdministratorRepository.GetByUserIdAsync(user.Id, cancellationToken);
+        var complexClaims = complexAssociations
+            .Select(a => new UserComplexAssociation(a.SportsComplexId, a.Role.ToString()))
+            .ToList();
+
+        var authToken = await _jwtTokenService.GenerateAsync(user, roles, complexClaims, cancellationToken);
 
         return new GoogleLoginResponse
         {

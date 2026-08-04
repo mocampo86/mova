@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Mova.Application.Abstractions.Authentication;
@@ -19,7 +20,11 @@ public sealed class JwtTokenService : IJwtTokenService
         _options = options.Value;
     }
 
-    public Task<AuthToken> GenerateAsync(User user, IEnumerable<string> roles, CancellationToken cancellationToken = default)
+    public Task<AuthToken> GenerateAsync(
+        User user,
+        IEnumerable<string> roles,
+        IEnumerable<UserComplexAssociation> complexAssociations,
+        CancellationToken cancellationToken = default)
     {
         var keyBytes = Encoding.UTF8.GetBytes(_options.SecretKey);
         if (keyBytes.Length < 32)
@@ -40,6 +45,14 @@ public sealed class JwtTokenService : IJwtTokenService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
         claims.AddRange(roleClaims);
+
+        var associations = complexAssociations.ToList();
+        if (associations.Count > 0)
+        {
+            var complexesJson = JsonSerializer.Serialize(
+                associations.Select(a => new { complexId = a.ComplexId, role = a.Role }));
+            claims.Add(new Claim("complexes", complexesJson));
+        }
 
         var expires = DateTime.UtcNow.AddMinutes(_options.ExpirationMinutes);
 
