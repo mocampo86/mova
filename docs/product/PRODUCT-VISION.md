@@ -2,7 +2,7 @@
 
 ## One-liner
 
-Reserva Canchas is a web platform that lets sports complex owners publish and manage their courts while players easily check availability and make reservations online.
+Mova is a web platform that lets sports complex owners publish and manage their courts while players easily check availability and make reservations online.
 
 ## Problem
 

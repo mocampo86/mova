@@ -2,7 +2,7 @@
 
 ## Overview
 
-Reserva Canchas is a web platform for sports complex owners to publish and manage courts, and for end users to check availability and make reservations.
+Mova is a web platform for sports complex owners to publish and manage courts, and for end users to check availability and make reservations.
 
 The system is designed as a **modular monolith** with a clean vertical-slice organization. This keeps initial cost and operational complexity low while preserving the ability to extract services later if needed.
 
@@ -42,16 +42,16 @@ The backend follows a layered, modular monolith organization:
 
 ```text
 src/
-├── ReservaCanchas.Api             # HTTP layer, middleware, auth, config
-├── ReservaCanchas.Application     # Use cases, commands, queries, validators
-├── ReservaCanchas.Domain          # Entities, value objects, business rules
-├── ReservaCanchas.Infrastructure    # EF Core, PostgreSQL, repositories, integrations
-└── ReservaCanchas.Contracts       # Public API contracts, DTOs
+├── Mova.Api             # HTTP layer, middleware, auth, config
+├── Mova.Application     # Use cases, commands, queries, validators
+├── Mova.Domain          # Entities, value objects, business rules
+├── Mova.Infrastructure    # EF Core, PostgreSQL, repositories, integrations
+└── Mova.Contracts       # Public API contracts, DTOs
 
 tests/
-├── ReservaCanchas.UnitTests
-├── ReservaCanchas.IntegrationTests
-└── ReservaCanchas.ArchitectureTests
+├── Mova.UnitTests
+├── Mova.IntegrationTests
+└── Mova.ArchitectureTests
 ```
 
 ### Layer responsibilities
@@ -147,13 +147,13 @@ src/
 ## C4 Level 1 - System Context
 
 ```text
-[User] --(reserves courts, manages profile)--> [Reserva Canchas Web App]
-[Complex Admin] --(manages complex, courts, reservations, blocks)--> [Reserva Canchas Web App]
-[Super Admin] --(manages tenants, audits, metrics)--> [Reserva Canchas Web App]
+[User] --(reserves courts, manages profile)--> [Mova Web App]
+[Complex Admin] --(manages complex, courts, reservations, blocks)--> [Mova Web App]
+[Super Admin] --(manages tenants, audits, metrics)--> [Mova Web App]
 
-[Reserva Canchas Web App] --(authenticates)--> [Google Identity]
-[Reserva Canchas Web App] --(reads/writes data)--> [PostgreSQL]
-[Reserva Canchas Web App] --(logs/metrics)--> [Application Insights]
+[Mova Web App] --(authenticates)--> [Google Identity]
+[Mova Web App] --(reads/writes data)--> [PostgreSQL]
+[Mova Web App] --(logs/metrics)--> [Application Insights]
 ```
 
 ## C4 Level 2 - Container Diagram

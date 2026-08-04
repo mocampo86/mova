@@ -144,7 +144,7 @@ Query parameters:
 
 - The API exposes an OpenAPI/Swagger document generated from controller metadata and XML comments.
 - Available at `/swagger/v1/swagger.json` and `/swagger/index.html` in development.
-- Contract DTOs are located in `ReservaCanchas.Contracts`.
+- Contract DTOs are located in `Mova.Contracts`.
 
 ## Security headers
 

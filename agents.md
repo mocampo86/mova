@@ -1,6 +1,6 @@
 # MOVA Agent Registry
 
-This file is the central registry for all AI agents that participate in the **Reserva Canchas** (MOVA) project. It defines the agent roster, their system context, how they are invoked, and how they collaborate.
+This file is the central registry for all AI agents that participate in the **Mova** (MOVA) project. It defines the agent roster, their system context, how they are invoked, and how they collaborate.
 
 ## Active agents
 

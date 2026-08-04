@@ -10,7 +10,7 @@ The platform must support multiple sports complexes, user authentication, reserv
 
 ## Decision
 
-We will implement Reserva Canchas as a **modular monolith**.
+We will implement Mova as a **modular monolith**.
 
 ## Consequences
 

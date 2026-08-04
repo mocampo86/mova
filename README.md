@@ -1,8 +1,8 @@
-# Reserva Canchas
+# Mova
 
 A web platform for sports complexes, clubs, and owners to publish and manage courts, while end users check availability and make reservations.
 
-This repository contains the MVP for **Reserva Canchas**, built as a modular monolith:
+This repository contains the MVP for **Mova**, built as a modular monolith:
 
 - **Backend**: ASP.NET Core Web API on .NET 10 with Clean Architecture layers.
 - **Frontend**: React 18 + TypeScript + Vite SPA.
@@ -68,7 +68,7 @@ For detailed architecture, domain, and workflow docs, see [.ai-kit/docs](.ai-kit
 4. Configure the API connection string as a user secret (recommended) or environment variable:
 
    ```powershell
-   dotnet user-secrets set "Database:ConnectionString" "Host=localhost;Port=5432;Database=reservacanchas;Username=postgres;Password=<YOUR_PASSWORD>;GSS Encryption Mode=Disable" --project src/ReservaCanchas.Api
+   dotnet user-secrets set "Database:ConnectionString" "Host=localhost;Port=5432;Database=mova;Username=postgres;Password=<YOUR_PASSWORD>;GSS Encryption Mode=Disable" --project src/Mova.Api
    ```
 
    Replace `<YOUR_PASSWORD>` with the value from `.env`.
@@ -76,17 +76,17 @@ For detailed architecture, domain, and workflow docs, see [.ai-kit/docs](.ai-kit
 5. Apply database migrations once migrations are available:
 
    ```powershell
-   dotnet ef database update --startup-project src/ReservaCanchas.Api
+   dotnet ef database update --startup-project src/Mova.Api
    ```
 
 6. Run the API and the web application (in separate terminals):
 
    ```powershell
    # API
-   dotnet run --project src/ReservaCanchas.Api
+   dotnet run --project src/Mova.Api
 
    # Web
-   cd src/reservacanchas-web
+   cd src/mova-web
    npm ci
    npm run dev
    ```
@@ -104,18 +104,18 @@ For detailed architecture, domain, and workflow docs, see [.ai-kit/docs](.ai-kit
 ├── .github/workflows         # CI/CD pipelines
 ├── docker-compose.yml        # Local PostgreSQL container
 ├── .env.example              # Example environment variables for Docker
-├── ReservaCanchas.slnx       # .NET solution file
+├── Mova.slnx       # .NET solution file
 ├── src/
-│   ├── ReservaCanchas.Api              # HTTP layer, middleware, health checks, config
-│   ├── ReservaCanchas.Application      # Use cases, commands, queries, validators
-│   ├── ReservaCanchas.Domain           # Entities, value objects, business rules
-│   ├── ReservaCanchas.Infrastructure   # EF Core, PostgreSQL, external integrations
-│   ├── ReservaCanchas.Contracts        # Public API DTOs and error contracts
-│   └── reservacanchas-web              # React SPA (Vite + TypeScript + MUI)
+│   ├── Mova.Api              # HTTP layer, middleware, health checks, config
+│   ├── Mova.Application      # Use cases, commands, queries, validators
+│   ├── Mova.Domain           # Entities, value objects, business rules
+│   ├── Mova.Infrastructure   # EF Core, PostgreSQL, external integrations
+│   ├── Mova.Contracts        # Public API DTOs and error contracts
+│   └── mova-web              # React SPA (Vite + TypeScript + MUI)
 └── tests/
-    ├── ReservaCanchas.UnitTests
-    ├── ReservaCanchas.IntegrationTests
-    └── ReservaCanchas.ArchitectureTests
+    ├── Mova.UnitTests
+    ├── Mova.IntegrationTests
+    └── Mova.ArchitectureTests
 ```
 
 ---
@@ -173,7 +173,7 @@ The API uses the standard ASP.NET Core configuration hierarchy:
 ### Setting user secrets
 
 ```powershell
-dotnet user-secrets set "Database:ConnectionString" "Host=localhost;Port=5432;Database=reservacanchas;Username=postgres;Password=<PASSWORD>;GSS Encryption Mode=Disable" --project src/ReservaCanchas.Api
+dotnet user-secrets set "Database:ConnectionString" "Host=localhost;Port=5432;Database=mova;Username=postgres;Password=<PASSWORD>;GSS Encryption Mode=Disable" --project src/Mova.Api
 ```
 
 > Never commit secrets, `.env`, or user secrets files to source control. They are already ignored by `.gitignore`.
@@ -182,24 +182,24 @@ dotnet user-secrets set "Database:ConnectionString" "Host=localhost;Port=5432;Da
 
 ## Database and migrations
 
-Migrations are managed with Entity Framework Core. The `ReservaCanchas.Infrastructure` project is the intended home for the `DbContext` and migrations.
+Migrations are managed with Entity Framework Core. The `Mova.Infrastructure` project is the intended home for the `DbContext` and migrations.
 
 ### Create a migration
 
 ```powershell
-dotnet ef migrations add <MigrationName> --project src/ReservaCanchas.Infrastructure --startup-project src/ReservaCanchas.Api
+dotnet ef migrations add <MigrationName> --project src/Mova.Infrastructure --startup-project src/Mova.Api
 ```
 
 ### Apply migrations
 
 ```powershell
-dotnet ef database update --startup-project src/ReservaCanchas.Api
+dotnet ef database update --startup-project src/Mova.Api
 ```
 
 ### Revert a migration
 
 ```powershell
-dotnet ef database update <PreviousMigrationName> --startup-project src/ReservaCanchas.Api
+dotnet ef database update <PreviousMigrationName> --startup-project src/Mova.Api
 ```
 
 ### Local PostgreSQL with Docker
@@ -225,13 +225,13 @@ docker compose down -v
 ### Backend only
 
 ```powershell
-dotnet run --project src/ReservaCanchas.Api --launch-profile https
+dotnet run --project src/Mova.Api --launch-profile https
 ```
 
 ### Frontend only
 
 ```powershell
-cd src/reservacanchas-web
+cd src/mova-web
 npm ci
 npm run dev
 ```
@@ -239,9 +239,9 @@ npm run dev
 ### Full stack
 
 1. Start PostgreSQL: `docker compose up -d`
-2. Run migrations: `dotnet ef database update --startup-project src/ReservaCanchas.Api`
-3. Run the API: `dotnet run --project src/ReservaCanchas.Api`
-4. Run the web app: `cd src/reservacanchas-web && npm run dev`
+2. Run migrations: `dotnet ef database update --startup-project src/Mova.Api`
+3. Run the API: `dotnet run --project src/Mova.Api`
+4. Run the web app: `cd src/mova-web && npm run dev`
 
 ---
 
@@ -265,7 +265,7 @@ dotnet test --filter "FullyQualifiedName~ArchitectureTests"
 ### Frontend
 
 ```powershell
-cd src/reservacanchas-web
+cd src/mova-web
 
 # Install dependencies
 npm ci

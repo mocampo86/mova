@@ -31,7 +31,7 @@ The repository contains a `docker-compose.yml` file and an `.env.example` file.
 Use .NET user secrets for the API connection string so the local password is not committed:
 
 ```powershell
-dotnet user-secrets set "Database:ConnectionString" "Host=localhost;Port=5432;Database=reservacanchas;Username=postgres;Password=<your-password>;GSS Encryption Mode=Disable" --project src/ReservaCanchas.Api
+dotnet user-secrets set "Database:ConnectionString" "Host=localhost;Port=5432;Database=mova;Username=postgres;Password=<your-password>;GSS Encryption Mode=Disable" --project src/Mova.Api
 ```
 
 Do not commit `.env` or `secrets.json`.

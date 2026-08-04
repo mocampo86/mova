@@ -30,16 +30,16 @@ jobs:
         with:
           filters: |
             backend:
-              - 'src/ReservaCanchas.Api/**'
-              - 'src/ReservaCanchas.Application/**'
-              - 'src/ReservaCanchas.Domain/**'
-              - 'src/ReservaCanchas.Infrastructure/**'
-              - 'src/ReservaCanchas.Contracts/**'
+              - 'src/Mova.Api/**'
+              - 'src/Mova.Application/**'
+              - 'src/Mova.Domain/**'
+              - 'src/Mova.Infrastructure/**'
+              - 'src/Mova.Contracts/**'
               - 'tests/**'
-              - 'ReservaCanchas.slnx'
+              - 'Mova.slnx'
               - '.github/workflows/ci.yml'
             frontend:
-              - 'src/reservacanchas-web/**'
+              - 'src/mova-web/**'
               - '.github/workflows/ci.yml'
 
   backend:
@@ -52,11 +52,11 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
-          POSTGRES_DB: reservacanchas
+          POSTGRES_DB: mova
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d reservacanchas"
+          --health-cmd "pg_isready -U postgres -d mova"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 5
@@ -70,13 +70,13 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore ReservaCanchas.slnx
+        run: dotnet restore Mova.slnx
 
       - name: Build
-        run: dotnet build ReservaCanchas.slnx --no-restore
+        run: dotnet build Mova.slnx --no-restore
 
       - name: Test
-        run: dotnet test ReservaCanchas.slnx --no-build --verbosity normal
+        run: dotnet test Mova.slnx --no-build --verbosity normal
 
   frontend:
     name: Frontend build and test
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/reservacanchas-web
+        working-directory: src/mova-web
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -95,7 +95,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: src/reservacanchas-web/package-lock.json
+          cache-dependency-path: src/mova-web/package-lock.json
 
       - name: Install dependencies
         run: npm ci

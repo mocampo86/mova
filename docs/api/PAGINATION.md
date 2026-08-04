@@ -85,5 +85,5 @@ When `page` exceeds `totalPages`, the API returns an empty `items` array:
 
 - Use IQueryable deferred execution and `Skip`/`Take` in the repository or handler.
 - Always calculate `totalItems` with the same filters as the paged query.
-- Avoid returning the full entity graph; project to DTOs defined in `ReservaCanchas.Contracts`.
+- Avoid returning the full entity graph; project to DTOs defined in `Mova.Contracts`.
 - For very large lists, consider keyset pagination as a future optimization.

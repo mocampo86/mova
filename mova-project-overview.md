@@ -1,15 +1,15 @@
-# Reserva Canchas — Documento General del Proyecto
+# Mova — Documento General del Proyecto
 
 ## 1. Información general
 
-**Nombre provisional:** Reserva Canchas  
+**Nombre provisional:** Mova  
 **Tipo de producto:** Plataforma web para gestión y reserva de canchas deportivas  
 **Estado:** Definición inicial del MVP  
 **Plataformas:** Web responsive para PC, tablet y dispositivos móviles  
 
 ## 2. Visión del producto
 
-Reserva Canchas será una plataforma web que permitirá a complejos deportivos, clubes y propietarios publicar y administrar sus canchas, mientras que los usuarios podrán consultar disponibilidad y realizar reservas de forma simple.
+Mova será una plataforma web que permitirá a complejos deportivos, clubes y propietarios publicar y administrar sus canchas, mientras que los usuarios podrán consultar disponibilidad y realizar reservas de forma simple.
 
 La solución estará preparada para administrar canchas de fútbol y de cualquier otro deporte, evitando que el modelo de negocio quede limitado a una única disciplina.
 
@@ -373,21 +373,21 @@ Esta arquitectura permite:
 
 ```text
 src/
-├── ReservaCanchas.Api
-├── ReservaCanchas.Application
-├── ReservaCanchas.Domain
-├── ReservaCanchas.Infrastructure
-└── ReservaCanchas.Contracts
+├── Mova.Api
+├── Mova.Application
+├── Mova.Domain
+├── Mova.Infrastructure
+└── Mova.Contracts
 
 tests/
-├── ReservaCanchas.UnitTests
-├── ReservaCanchas.IntegrationTests
-└── ReservaCanchas.ArchitectureTests
+├── Mova.UnitTests
+├── Mova.IntegrationTests
+└── Mova.ArchitectureTests
 ```
 
 ### 9.2 Responsabilidades
 
-#### ReservaCanchas.Api
+#### Mova.Api
 
 - Endpoints HTTP.
 - Configuración de la aplicación.
@@ -396,7 +396,7 @@ tests/
 - OpenAPI.
 - Health checks.
 
-#### ReservaCanchas.Application
+#### Mova.Application
 
 - Casos de uso.
 - Commands y queries.
@@ -404,7 +404,7 @@ tests/
 - Interfaces de servicios externos.
 - Orquestación de reglas de negocio.
 
-#### ReservaCanchas.Domain
+#### Mova.Domain
 
 - Entidades.
 - Value Objects.
@@ -412,7 +412,7 @@ tests/
 - Eventos de dominio, si resultan necesarios.
 - Enumeraciones y contratos propios del dominio.
 
-#### ReservaCanchas.Infrastructure
+#### Mova.Infrastructure
 
 - Entity Framework Core.
 - PostgreSQL.
@@ -421,7 +421,7 @@ tests/
 - Integraciones externas.
 - Persistencia de auditoría.
 
-#### ReservaCanchas.Contracts
+#### Mova.Contracts
 
 - Requests.
 - Responses.
