@@ -105,12 +105,12 @@ A task is complete when:
 
 ```powershell
 # Backend
-cd src/ReservaCanchas.Api
+cd src/Mova.Api
 dotnet build
 dotnet test
 
 # Frontend
-cd src/reservacanchas-web
+cd src/mova-web
 npm ci
 npm run lint
 npm run build
@@ -123,7 +123,7 @@ CI runs on every pull request targeting `main` or `develop` via GitHub Actions (
 
 - A `detect-changes` job uses `dorny/paths-filter` to determine whether backend or frontend files changed.
 - The `backend` job (if backend files changed) restores, builds, and runs `dotnet test` against the solution, with a PostgreSQL service container available for integration tests.
-- The `frontend` job (if frontend files changed) runs `npm ci`, `npm run lint`, `npm run build`, and `npm run test` in `src/reservacanchas-web`.
+- The `frontend` job (if frontend files changed) runs `npm ci`, `npm run lint`, `npm run build`, and `npm run test` in `src/mova-web`.
 - `backend` and `frontend` run in parallel; both must pass for the pipeline to succeed.
 - Third-party actions are pinned to a specific commit SHA to reduce supply-chain risk.
 - No pull request should be merged until the pipeline is green.

@@ -16,20 +16,20 @@
 ### Unit tests
 
 - **Scope**: domain entities, value objects, validators, pure logic.
-- **Location**: `tests/ReservaCanchas.UnitTests`.
+- **Location**: `tests/Mova.UnitTests`.
 - **Command**: `dotnet test --filter FullyQualifiedName~UnitTests`.
 
 ### Integration tests
 
 - **Scope**: API endpoints, repositories, EF Core mappings, PostgreSQL persistence.
-- **Location**: `tests/ReservaCanchas.IntegrationTests`.
+- **Location**: `tests/Mova.IntegrationTests`.
 - **Database**: PostgreSQL via Testcontainers.
 - **Command**: `dotnet test --filter FullyQualifiedName~IntegrationTests`.
 
 ### Architecture tests
 
 - **Scope**: layer dependencies, naming conventions, forbidden dependencies.
-- **Location**: `tests/ReservaCanchas.ArchitectureTests`.
+- **Location**: `tests/Mova.ArchitectureTests`.
 - **Command**: `dotnet test --filter FullyQualifiedName~ArchitectureTests`.
 
 ### Concurrency tests

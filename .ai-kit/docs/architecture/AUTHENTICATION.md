@@ -43,8 +43,8 @@ The platform JWT contains:
   "email": "user@example.com",
   "name": "Juan Pérez",
   "roles": ["User"],
-  "iss": "ReservaCanchas",
-  "aud": "ReservaCanchas.Api",
+  "iss": "Mova",
+  "aud": "Mova.Api",
   "iat": 1234567890,
   "exp": 1234571490
 }

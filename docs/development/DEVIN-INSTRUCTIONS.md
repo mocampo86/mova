@@ -1,6 +1,6 @@
 # Devin Instructions
 
-This document explains how to write, submit, and validate tasks for Devin and other AI agents working on Reserva Canchas (MOVA).
+This document explains how to write, submit, and validate tasks for Devin and other AI agents working on Mova (MOVA).
 
 ## Before assigning a task
 
@@ -86,7 +86,7 @@ Devin must read the `.ai-kit/docs` knowledge base before starting:
 ### Backend
 
 ```powershell
-cd src/ReservaCanchas.Api
+cd src/Mova.Api
 dotnet build
 dotnet test
 ```
@@ -94,7 +94,7 @@ dotnet test
 ### Frontend
 
 ```powershell
-cd src/reservacanchas-web
+cd src/mova-web
 npm ci
 npm run lint
 npm run build
@@ -105,7 +105,7 @@ npm run test
 
 ```powershell
 docker compose up -d
-dotnet ef database update --project src/ReservaCanchas.Infrastructure
+dotnet ef database update --project src/Mova.Infrastructure
 ```
 
 ## Task submission format

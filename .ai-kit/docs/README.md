@@ -1,6 +1,6 @@
 # MOVA .ai-kit Docs
 
-This `.ai-kit/docs` package contains the technical knowledge base for the **Reserva Canchas** project. It is designed to be consumed by AI agents and human developers during planning, implementation, review, and operations.
+This `.ai-kit/docs` package contains the technical knowledge base for the **Mova** project. It is designed to be consumed by AI agents and human developers during planning, implementation, review, and operations.
 
 ## What is .ai-kit?
 

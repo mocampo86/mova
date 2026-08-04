@@ -14,11 +14,11 @@
 
 ```text
 src/
-├── ReservaCanchas.Api
-├── ReservaCanchas.Application
-├── ReservaCanchas.Domain
-├── ReservaCanchas.Infrastructure
-└── ReservaCanchas.Contracts
+├── Mova.Api
+├── Mova.Application
+├── Mova.Domain
+├── Mova.Infrastructure
+└── Mova.Contracts
 ```
 
 ### Layer rules
@@ -40,7 +40,7 @@ src/
 
 ### Naming
 
-- Projects: `PascalCase`, e.g. `ReservaCanchas.Application`.
+- Projects: `PascalCase`, e.g. `Mova.Application`.
 - Folders: `PascalCase` for namespaces; lowercase for non-code assets.
 - Classes: `PascalCase` nouns.
 - Interfaces: `PascalCase` prefixed with `I`.

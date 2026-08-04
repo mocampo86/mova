@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADRs)
 
-This folder contains Architecture Decision Records (ADRs) for Reserva Canchas (MOVA).
+This folder contains Architecture Decision Records (ADRs) for Mova (MOVA).
 
 ## What is an ADR?
 
