@@ -81,7 +81,7 @@ public class Program
             });
         });
 
-        builder.Services.AddSingleton<IAuthorizationHandler, ComplexAdminAuthorizationHandler>();
+        builder.Services.AddScoped<IAuthorizationHandler, ComplexAdminAuthorizationHandler>();
 
         var app = builder.Build();
 
