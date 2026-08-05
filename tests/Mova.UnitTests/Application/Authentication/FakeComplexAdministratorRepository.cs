@@ -1,5 +1,6 @@
 using Mova.Application.Abstractions.Persistence;
 using Mova.Domain.Entities;
+using Mova.Domain.Enums;
 
 namespace Mova.UnitTests.Application.Authentication;
 
@@ -10,13 +11,15 @@ public sealed class FakeComplexAdministratorRepository : IComplexAdministratorRe
     public Task<IReadOnlyCollection<ComplexAdministrator>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return Task.FromResult<IReadOnlyCollection<ComplexAdministrator>>(
-            _complexAdministrators.Where(ca => ca.UserId == userId).ToList());
+            _complexAdministrators
+                .Where(ca => ca.UserId == userId && ca.Status == AdministratorStatus.Active)
+                .ToList());
     }
 
     public Task<ComplexAdministrator?> GetByUserAndComplexAsync(Guid userId, Guid sportsComplexId, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(_complexAdministrators.FirstOrDefault(
-            ca => ca.UserId == userId && ca.SportsComplexId == sportsComplexId));
+            ca => ca.UserId == userId && ca.SportsComplexId == sportsComplexId && ca.Status == AdministratorStatus.Active));
     }
 
     public Task AddAsync(ComplexAdministrator complexAdministrator, CancellationToken cancellationToken = default)
