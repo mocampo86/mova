@@ -85,6 +85,7 @@ Other stories, APIs, or environments.
 - Forms validated with Zod and React Hook Form.
 - Components are typed and reusable.
 - Avoid prop drilling; prefer context or state management only when needed.
+- When adding a new page, update `src/mova-web/README.md` with the route, description, and required access.
 
 ## Definition of Done
 
