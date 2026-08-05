@@ -27,6 +27,8 @@ POST   /api/v1/complexes
 PUT    /api/v1/complexes/{id}
 PATCH  /api/v1/complexes/{id}/status
 
+GET    /api/v1/admin/complexes
+
 GET    /api/v1/complexes/{complexId}/courts
 POST   /api/v1/complexes/{complexId}/courts
 GET    /api/v1/courts/{id}

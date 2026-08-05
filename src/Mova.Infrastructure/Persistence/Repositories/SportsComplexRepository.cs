@@ -46,4 +46,22 @@ public sealed class SportsComplexRepository : ISportsComplexRepository
 
         return (items, totalItems);
     }
+
+    public async Task<(IReadOnlyList<SportsComplex> Items, int TotalItems)> GetAllComplexesAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 1 : pageSize;
+        pageSize = pageSize > MaxPageSize ? MaxPageSize : pageSize;
+
+        var query = _context.SportsComplexes
+            .OrderByDescending(s => s.CreatedAt);
+
+        var totalItems = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
+    }
 }

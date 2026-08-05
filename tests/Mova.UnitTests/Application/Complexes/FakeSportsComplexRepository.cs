@@ -37,4 +37,22 @@ public sealed class FakeSportsComplexRepository : ISportsComplexRepository
 
         return Task.FromResult((items as IReadOnlyList<SportsComplex>, totalItems));
     }
+
+    public Task<(IReadOnlyList<SportsComplex> Items, int TotalItems)> GetAllComplexesAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var query = _sportsComplexes
+            .OrderByDescending(s => s.CreatedAt)
+            .ToList();
+
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 1 : pageSize;
+
+        var totalItems = query.Count;
+        var items = query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return Task.FromResult((items as IReadOnlyList<SportsComplex>, totalItems));
+    }
 }

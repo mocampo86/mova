@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<IUpdateComplexHandler, UpdateComplexHandler>();
         services.AddScoped<IGetActiveComplexesHandler, GetActiveComplexesHandler>();
         services.AddScoped<IGetActiveComplexByIdHandler, GetActiveComplexByIdHandler>();
+        services.AddScoped<IGetAllComplexesHandler, GetAllComplexesHandler>();
         services.AddScoped<IUpdateComplexStatusHandler, UpdateComplexStatusHandler>();
 
         return services;
