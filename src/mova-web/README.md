@@ -24,3 +24,16 @@ npm run build
 ## Authentication
 
 The application uses Google Sign-In to obtain an ID token, which is exchanged with the Mova API for a JWT access token. The access token is parsed to extract roles and complex associations used by the protected route guards.
+
+## Available routes
+
+| Route | Description | Access |
+| --- | --- | --- |
+| `/` | Public landing page. | Public |
+| `/login` | Sign in with Google. | Public |
+| `/complete-profile` | Complete the user profile (phone number). | Authenticated users |
+| `/user` | User portal home. | Authenticated users |
+| `/admin/super` | Super admin dashboard. | `SuperAdmin` |
+| `/admin/complex/:complexId` | Complex admin dashboard placeholder. | `ComplexAdmin` of the requested complex |
+
+There is currently no UI for creating or editing a sports complex; those operations are exposed through the backend API at `POST /api/v1/complexes` and `PUT /api/v1/complexes/{complexId}`.
