@@ -213,6 +213,40 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
     }
 
     [Fact]
+    public async Task Update_ImmediatelyAfterCreation_WithSameToken_ReturnsUpdatedComplex()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"immediate-admin-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var createRequest = CreateValidRequest();
+        var createResponse = await client.PostAsJsonAsync("/api/v1/complexes", createRequest);
+        createResponse.EnsureSuccessStatusCode();
+        var created = await createResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(created);
+
+        var updateRequest = new UpdateComplexRequest
+        {
+            Name = "Updated Club",
+            Description = "Updated description",
+            Address = "Updated address",
+            City = "Updated city",
+            PhoneNumber = "+54 11 9999 9999",
+            Email = "updated@clubpadel.com",
+            Status = "Active"
+        };
+
+        var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{created.Id}", updateRequest);
+        updateResponse.EnsureSuccessStatusCode();
+
+        var result = await updateResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(result);
+        Assert.Equal(created.Id, result.Id);
+        Assert.Equal("Updated Club", result.Name);
+    }
+
+    [Fact]
     public async Task Update_AsNonAdmin_ReturnsForbidden()
     {
         var client = _factory.CreateClient();

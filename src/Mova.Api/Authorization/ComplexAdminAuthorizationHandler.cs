@@ -23,11 +23,6 @@ public sealed class ComplexAdminAuthorizationHandler : AuthorizationHandler<Comp
             return;
         }
 
-        if (!context.User.IsInRole(AuthorizationPolicies.ComplexAdmin))
-        {
-            return;
-        }
-
         if (context.Resource is not HttpContext httpContext)
         {
             return;
