@@ -15,6 +15,9 @@ public sealed class MovaDbContext : DbContext
     public DbSet<SportsComplex> SportsComplexes => Set<SportsComplex>();
 
     public DbSet<ComplexAdministrator> ComplexAdministrators => Set<ComplexAdministrator>();
+    public DbSet<Court> Courts => Set<Court>();
+    public DbSet<Sport> Sports => Set<Sport>();
+    public DbSet<CourtSport> CourtSports => Set<CourtSport>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

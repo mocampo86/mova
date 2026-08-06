@@ -70,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ISportsComplexRepository, SportsComplexRepository>();
         services.AddScoped<IComplexAdministratorRepository, ComplexAdministratorRepository>();
+        services.AddScoped<ICourtRepository, CourtRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
