@@ -36,6 +36,12 @@ PUT    /api/v1/courts/{id}
 
 GET    /api/v1/complexes/{complexId}/availability?courtId=&date=
 
+PUT    /api/v1/complexes/{complexId}/courts/{courtId}/availability
+GET    /api/v1/complexes/{complexId}/courts/{courtId}/availability
+
+PUT    /api/v1/complexes/{complexId}/business-hours
+GET    /api/v1/complexes/{complexId}/business-hours
+
 POST   /api/v1/reservations
 GET    /api/v1/reservations/{id}
 GET    /api/v1/users/me/reservations

@@ -4,6 +4,7 @@ using FluentValidation;
 using Mova.Api.Authorization;
 using Mova.Application.Courts.Commands;
 using Mova.Application.Courts.Handlers;
+using Mova.Application.Courts.Queries;
 using Mova.Contracts.Courts;
 
 namespace Mova.Api.Controllers;
@@ -14,8 +15,11 @@ namespace Mova.Api.Controllers;
 public sealed class CourtsController(
     ICreateCourtHandler createHandler,
     IAssignCourtSportsHandler assignSportsHandler,
+    IUpdateCourtAvailabilityRulesHandler updateAvailabilityHandler,
+    IGetCourtAvailabilityRulesHandler getAvailabilityHandler,
     FluentValidation.IValidator<CreateCourtCommand> validator,
-    FluentValidation.IValidator<AssignCourtSportsCommand> assignSportsValidator) : ControllerBase
+    FluentValidation.IValidator<AssignCourtSportsCommand> assignSportsValidator,
+    FluentValidation.IValidator<UpdateCourtAvailabilityRulesCommand> updateAvailabilityValidator) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<CourtInfo>> Create(Guid complexId, CreateCourtRequest request, CancellationToken cancellationToken)
@@ -33,6 +37,25 @@ public sealed class CourtsController(
         var command = new AssignCourtSportsCommand(complexId, courtId, request.SportIds);
         await assignSportsValidator.ValidateAndThrowAsync(command, cancellationToken);
         var result = await assignSportsHandler.HandleAsync(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{courtId:guid}/availability")]
+    public async Task<ActionResult<IReadOnlyCollection<CourtAvailabilityRuleInfo>>> GetAvailability(
+        Guid complexId, Guid courtId, CancellationToken cancellationToken)
+    {
+        var result = await getAvailabilityHandler.HandleAsync(new GetCourtAvailabilityRulesQuery(complexId, courtId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPut("{courtId:guid}/availability")]
+    public async Task<ActionResult<IReadOnlyCollection<CourtAvailabilityRuleInfo>>> UpdateAvailability(
+        Guid complexId, Guid courtId, UpdateCourtAvailabilityRulesRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateCourtAvailabilityRulesCommand(complexId, courtId, request.Rules
+            .Select(r => new CourtAvailabilityRuleItem(r.DayOfWeek, r.StartTime, r.EndTime, r.SlotDurationMinutes, r.IsActive)).ToArray());
+        await updateAvailabilityValidator.ValidateAndThrowAsync(command, cancellationToken);
+        var result = await updateAvailabilityHandler.HandleAsync(command, cancellationToken);
         return Ok(result);
     }
 }
