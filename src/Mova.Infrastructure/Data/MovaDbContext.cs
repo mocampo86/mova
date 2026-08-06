@@ -18,6 +18,8 @@ public sealed class MovaDbContext : DbContext
     public DbSet<Court> Courts => Set<Court>();
     public DbSet<Sport> Sports => Set<Sport>();
     public DbSet<CourtSport> CourtSports => Set<CourtSport>();
+    public DbSet<CourtAvailabilityRule> CourtAvailabilityRules => Set<CourtAvailabilityRule>();
+    public DbSet<BusinessHours> BusinessHours => Set<BusinessHours>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
