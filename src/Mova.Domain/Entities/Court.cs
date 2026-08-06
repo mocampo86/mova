@@ -38,6 +38,28 @@ public sealed class Court
 
     public bool CanAcceptReservations() => Status == CourtStatus.Active && CourtSports.Any(x => x.Sport?.Status == SportStatus.Active);
 
+    public void Activate()
+    {
+        if (Status == CourtStatus.Active)
+        {
+            return;
+        }
+
+        Status = CourtStatus.Active;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Deactivate()
+    {
+        if (Status == CourtStatus.Inactive)
+        {
+            return;
+        }
+
+        Status = CourtStatus.Inactive;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void AssignSports(IEnumerable<Guid> sportIds)
     {
         ArgumentNullException.ThrowIfNull(sportIds);

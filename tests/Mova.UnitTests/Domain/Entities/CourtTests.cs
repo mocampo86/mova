@@ -1,3 +1,4 @@
+using System.Reflection;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
 
@@ -45,5 +46,102 @@ public sealed class CourtTests
         var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
 
         Assert.Throws<ArgumentException>(() => court.AssignSports([]));
+    }
+
+    [Fact]
+    public void Activate_WithInactiveCourt_SetsStatusActiveAndUpdatesTimestamp()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+        court.Deactivate();
+        court.Activate();
+
+        Assert.Equal(CourtStatus.Active, court.Status);
+        Assert.NotNull(court.UpdatedAt);
+    }
+
+    [Fact]
+    public void Activate_WithAlreadyActiveCourt_IsIdempotent()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+        var updatedAt = court.UpdatedAt;
+
+        court.Activate();
+
+        Assert.Equal(CourtStatus.Active, court.Status);
+        Assert.Equal(updatedAt, court.UpdatedAt);
+    }
+
+    [Fact]
+    public void Deactivate_WithActiveCourt_SetsStatusInactiveAndUpdatesTimestamp()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+
+        court.Deactivate();
+
+        Assert.Equal(CourtStatus.Inactive, court.Status);
+        Assert.NotNull(court.UpdatedAt);
+    }
+
+    [Fact]
+    public void Deactivate_WithAlreadyInactiveCourt_IsIdempotent()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+        court.Deactivate();
+        var updatedAt = court.UpdatedAt;
+
+        court.Deactivate();
+
+        Assert.Equal(CourtStatus.Inactive, court.Status);
+        Assert.Equal(updatedAt, court.UpdatedAt);
+    }
+
+    [Fact]
+    public void CanAcceptReservations_WhenActiveWithActiveSport_ReturnsTrue()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+        var sport = Sport.Create("Football");
+        court.AssignSports([sport.Id]);
+        SetSportOnCourtSports(court, sport);
+        court.Activate();
+
+        Assert.True(court.CanAcceptReservations());
+    }
+
+    [Fact]
+    public void CanAcceptReservations_WhenInactive_ReturnsFalse()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+        var sport = Sport.Create("Football");
+        court.AssignSports([sport.Id]);
+        SetSportOnCourtSports(court, sport);
+        court.Deactivate();
+
+        Assert.False(court.CanAcceptReservations());
+    }
+
+    [Fact]
+    public void CanAcceptReservations_WhenActiveWithInactiveSport_ReturnsFalse()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+        var sport = Sport.Create("Football");
+        typeof(Sport).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public)!.SetValue(sport, SportStatus.Inactive);
+        court.AssignSports([sport.Id]);
+        SetSportOnCourtSports(court, sport);
+
+        Assert.False(court.CanAcceptReservations());
+    }
+
+    [Fact]
+    public void CanAcceptReservations_WhenActiveWithoutSports_ReturnsFalse()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+
+        Assert.False(court.CanAcceptReservations());
+    }
+
+    private static void SetSportOnCourtSports(Court court, Sport sport)
+    {
+        var property = typeof(CourtSport).GetProperty("Sport", BindingFlags.Instance | BindingFlags.Public)!;
+        property.SetValue(court.CourtSports.Single(), sport);
     }
 }

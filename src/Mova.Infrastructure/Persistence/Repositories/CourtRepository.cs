@@ -1,16 +1,50 @@
 using Microsoft.EntityFrameworkCore;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Domain.Entities;
+using Mova.Domain.Enums;
 using Mova.Infrastructure.Data;
 
 namespace Mova.Infrastructure.Persistence.Repositories;
 
 public sealed class CourtRepository(MovaDbContext context) : ICourtRepository
 {
+    private const int MaxPageSize = 100;
+
     public Task AddAsync(Court court, CancellationToken cancellationToken = default) => context.Courts.AddAsync(court, cancellationToken).AsTask();
 
     public Task<Court?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         context.Courts.Include(x => x.CourtSports).ThenInclude(x => x.Sport).SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+    public Task<Court?> GetActiveByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+        context.Courts
+            .Include(x => x.CourtSports)
+            .ThenInclude(x => x.Sport)
+            .SingleOrDefaultAsync(x => x.Id == id && x.Status == CourtStatus.Active && x.SportsComplex!.Status == ComplexStatus.Active, cancellationToken);
+
+    public async Task<(IReadOnlyList<Court> Items, int TotalItems)> GetActiveCourtsByComplexIdAsync(
+        Guid sportsComplexId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 1 : pageSize;
+        pageSize = pageSize > MaxPageSize ? MaxPageSize : pageSize;
+
+        var query = context.Courts
+            .Include(x => x.CourtSports)
+            .ThenInclude(x => x.Sport)
+            .Where(x => x.SportsComplexId == sportsComplexId && x.Status == CourtStatus.Active && x.SportsComplex!.Status == ComplexStatus.Active)
+            .OrderByDescending(x => x.CreatedAt);
+
+        var totalItems = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
+    }
 
     public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
         context.Courts.AnyAsync(x => x.SportsComplexId == sportsComplexId && x.Name.ToLower() == name.Trim().ToLower(), cancellationToken);
