@@ -6,8 +6,12 @@ using Mova.Api.Authorization;
 using Mova.Application.Complexes.Commands;
 using Mova.Application.Complexes.Handlers;
 using Mova.Application.Complexes.Queries;
+using Mova.Application.Courts.Handlers;
+using Mova.Application.Courts.Queries;
+using Mova.Application.Courts.Validators;
 using Mova.Contracts.Common;
 using Mova.Contracts.Complexes;
+using Mova.Contracts.Courts;
 using Mova.Domain.Enums;
 
 namespace Mova.Api.Controllers;
@@ -22,9 +26,11 @@ public class ComplexesController : ControllerBase
     private readonly IGetActiveComplexesHandler _getActiveComplexesHandler;
     private readonly IGetActiveComplexByIdHandler _getActiveComplexByIdHandler;
     private readonly IUpdateComplexStatusHandler _updateComplexStatusHandler;
+    private readonly IGetCourtAvailabilityHandler _getCourtAvailabilityHandler;
     private readonly IValidator<CreateComplexCommand> _createValidator;
     private readonly IValidator<UpdateComplexCommand> _updateValidator;
     private readonly IValidator<UpdateComplexStatusCommand> _updateComplexStatusValidator;
+    private readonly IValidator<GetCourtAvailabilityQuery> _getCourtAvailabilityValidator;
 
     public ComplexesController(
         ICreateComplexHandler createHandler,
@@ -32,18 +38,22 @@ public class ComplexesController : ControllerBase
         IGetActiveComplexesHandler getActiveComplexesHandler,
         IGetActiveComplexByIdHandler getActiveComplexByIdHandler,
         IUpdateComplexStatusHandler updateComplexStatusHandler,
+        IGetCourtAvailabilityHandler getCourtAvailabilityHandler,
         IValidator<CreateComplexCommand> createValidator,
         IValidator<UpdateComplexCommand> updateValidator,
-        IValidator<UpdateComplexStatusCommand> updateComplexStatusValidator)
+        IValidator<UpdateComplexStatusCommand> updateComplexStatusValidator,
+        IValidator<GetCourtAvailabilityQuery> getCourtAvailabilityValidator)
     {
         _createHandler = createHandler;
         _updateHandler = updateHandler;
         _getActiveComplexesHandler = getActiveComplexesHandler;
         _getActiveComplexByIdHandler = getActiveComplexByIdHandler;
         _updateComplexStatusHandler = updateComplexStatusHandler;
+        _getCourtAvailabilityHandler = getCourtAvailabilityHandler;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _updateComplexStatusValidator = updateComplexStatusValidator;
+        _getCourtAvailabilityValidator = getCourtAvailabilityValidator;
     }
 
     [HttpGet]
@@ -81,6 +91,21 @@ public class ComplexesController : ControllerBase
             return NotFound();
         }
 
+        return Ok(result);
+    }
+
+    [HttpGet("{complexId:guid}/availability")]
+    [AllowAnonymous]
+    public async Task<ActionResult<IReadOnlyCollection<CourtAvailabilitySlotInfo>>> GetAvailability(
+        Guid complexId,
+        [FromQuery] Guid courtId,
+        [FromQuery] DateOnly date,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetCourtAvailabilityQuery(complexId, courtId, date);
+        await _getCourtAvailabilityValidator.ValidateAndThrowAsync(query, cancellationToken);
+
+        var result = await _getCourtAvailabilityHandler.HandleAsync(query, cancellationToken);
         return Ok(result);
     }
 

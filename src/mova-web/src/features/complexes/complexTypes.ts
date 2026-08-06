@@ -14,6 +14,8 @@ export interface SportsComplex {
   city: string;
   phoneNumber: string;
   email: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface Court {
@@ -24,4 +26,15 @@ export interface Court {
   surfaceType: string;
   indoor: boolean;
   sportIds: string[];
+}
+
+export interface Sport {
+  id: string;
+  name: string;
+}
+
+export interface CourtAvailabilitySlot {
+  courtId: string;
+  startAt: string;
+  endAt: string;
 }
