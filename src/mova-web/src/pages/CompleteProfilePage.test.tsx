@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CompleteProfilePage from './CompleteProfilePage';
+import { API_BASE_URL } from '../services/apiClient';
 import { renderWithAuth } from '../test-utils';
 
 describe('CompleteProfilePage', () => {
@@ -82,7 +83,7 @@ describe('CompleteProfilePage', () => {
 
     await waitFor(() => {
       expect(fetchSpy).toHaveBeenCalledWith(
-        'http://localhost:5000/api/v1/users/me',
+        `${API_BASE_URL}/api/v1/users/me`,
         expect.objectContaining({
           method: 'PATCH',
           body: JSON.stringify({ phoneNumber: '+54 11 1234 5678' })

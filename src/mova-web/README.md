@@ -9,7 +9,7 @@ Create a `.env` file in this directory based on the following variables:
 | Variable | Description | Default |
 | --- | --- | --- |
 | `VITE_GOOGLE_CLIENT_ID` | Google OAuth 2.0 client ID for Google Sign-In. | Required |
-| `VITE_API_BASE_URL` | Base URL of the Mova API. | `http://localhost:5000` |
+| `VITE_API_BASE_URL` | Base URL of the Mova API. | `http://localhost:5098` |
 
 ## Development
 

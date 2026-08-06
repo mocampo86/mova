@@ -45,6 +45,31 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
 
+        var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+        if (allowedOrigins.Length == 0 && builder.Environment.IsDevelopment())
+        {
+            allowedOrigins = ["http://localhost:5173"];
+        }
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                if (allowedOrigins.Length > 0)
+                {
+                    policy.WithOrigins(allowedOrigins);
+                }
+                else
+                {
+                    policy.SetIsOriginAllowed(_ => false);
+                }
+
+                policy.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer();
 
@@ -88,6 +113,8 @@ public class Program
         app.UseSerilogRequestLogging();
         app.UseExceptionHandler();
         app.UseHttpsRedirection();
+
+        app.UseCors();
 
         app.UseAuthentication();
         app.UseAuthorization();

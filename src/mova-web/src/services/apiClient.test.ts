@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient } from './apiClient';
+import { apiClient, API_BASE_URL } from './apiClient';
 
 describe('apiClient', () => {
   let fetchSpy: ReturnType<typeof vi.spyOn>;
@@ -21,7 +21,7 @@ describe('apiClient', () => {
     await apiClient('/api/v1/test', { method: 'POST', body: JSON.stringify({ value: 1 }) });
 
     expect(fetchSpy).toHaveBeenCalledWith(
-      'http://localhost:5000/api/v1/test',
+      `${API_BASE_URL}/api/v1/test`,
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ value: 1 }),

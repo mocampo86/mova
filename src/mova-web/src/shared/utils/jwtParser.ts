@@ -4,8 +4,8 @@ interface JwtPayload {
   sub: string;
   email: string;
   name: string;
-  roles?: UserRole[];
-  complexes?: UserComplexAssociation[];
+  roles?: UserRole | UserRole[];
+  complexes?: string | UserComplexAssociation[];
 }
 
 export function parseJwtPayload(token: string): JwtPayload {
@@ -25,6 +25,36 @@ export function parseJwtPayload(token: string): JwtPayload {
   return JSON.parse(jsonPayload) as JwtPayload;
 }
 
+function normalizeRoles(roles: UserRole | UserRole[] | undefined): UserRole[] {
+  if (roles === undefined || roles === null) {
+    return [];
+  }
+
+  return Array.isArray(roles) ? roles : [roles];
+}
+
+function normalizeComplexes(
+  complexes: string | UserComplexAssociation[] | undefined
+): UserComplexAssociation[] | undefined {
+  if (complexes === undefined || complexes === null) {
+    return undefined;
+  }
+
+  if (Array.isArray(complexes)) {
+    return complexes;
+  }
+
+  if (typeof complexes === 'string') {
+    try {
+      return JSON.parse(complexes) as UserComplexAssociation[];
+    } catch {
+      return undefined;
+    }
+  }
+
+  return [complexes as UserComplexAssociation];
+}
+
 export function mapJwtToUser(token: string): AuthUser {
   const payload = parseJwtPayload(token);
 
@@ -32,7 +62,7 @@ export function mapJwtToUser(token: string): AuthUser {
     id: payload.sub,
     email: payload.email,
     fullName: payload.name,
-    roles: payload.roles ?? [],
-    complexes: payload.complexes
+    roles: normalizeRoles(payload.roles),
+    complexes: normalizeComplexes(payload.complexes)
   };
 }
