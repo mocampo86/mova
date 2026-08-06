@@ -25,4 +25,25 @@ public sealed class CourtTests
         Assert.Throws<ArgumentException>(() => Court.Create(Guid.NewGuid(), "Name", "", "Surface", false));
         Assert.Throws<ArgumentException>(() => Court.Create(Guid.NewGuid(), "Name", "Description", "", false));
     }
+
+    [Fact]
+    public void AssignSports_ReplacesAssociationsAndUpdatesTimestamp()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+        var sportIds = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
+
+        court.AssignSports([sportIds[0], sportIds[1], sportIds[1], sportIds[2]]);
+
+        Assert.Equal(sportIds, court.CourtSports.Select(x => x.SportId));
+        Assert.NotNull(court.UpdatedAt);
+        Assert.False(court.CanAcceptReservations());
+    }
+
+    [Fact]
+    public void AssignSports_WithoutSports_Throws()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+
+        Assert.Throws<ArgumentException>(() => court.AssignSports([]));
+    }
 }

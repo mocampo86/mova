@@ -11,7 +11,11 @@ namespace Mova.Api.Controllers;
 [ApiController]
 [Route("api/v1/complexes/{complexId:guid}/courts")]
 [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
-public sealed class CourtsController(ICreateCourtHandler createHandler, FluentValidation.IValidator<CreateCourtCommand> validator) : ControllerBase
+public sealed class CourtsController(
+    ICreateCourtHandler createHandler,
+    IAssignCourtSportsHandler assignSportsHandler,
+    FluentValidation.IValidator<CreateCourtCommand> validator,
+    FluentValidation.IValidator<AssignCourtSportsCommand> assignSportsValidator) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<CourtInfo>> Create(Guid complexId, CreateCourtRequest request, CancellationToken cancellationToken)
@@ -20,5 +24,15 @@ public sealed class CourtsController(ICreateCourtHandler createHandler, FluentVa
         await validator.ValidateAndThrowAsync(command, cancellationToken);
         var result = await createHandler.HandleAsync(command, cancellationToken);
         return Created($"/api/v1/complexes/{complexId}/courts/{result.Id}", result);
+    }
+
+    [HttpPut("{courtId:guid}/sports")]
+    public async Task<ActionResult<CourtInfo>> AssignSports(
+        Guid complexId, Guid courtId, AssignCourtSportsRequest request, CancellationToken cancellationToken)
+    {
+        var command = new AssignCourtSportsCommand(complexId, courtId, request.SportIds);
+        await assignSportsValidator.ValidateAndThrowAsync(command, cancellationToken);
+        var result = await assignSportsHandler.HandleAsync(command, cancellationToken);
+        return Ok(result);
     }
 }
