@@ -30,6 +30,9 @@ export default function HomePage() {
               <Button component={RouterLink} to="/login" variant="contained" size="large" color="secondary">
                 Get started
               </Button>
+              <Button component={RouterLink} to="/complexes" variant="outlined" size="large" sx={{ color: 'common.white', borderColor: 'rgba(255,255,255,.7)' }}>
+                Browse complexes
+              </Button>
               <Button href="#how-it-works" variant="outlined" size="large" sx={{ color: 'common.white', borderColor: 'rgba(255,255,255,.7)' }}>
                 Learn more
               </Button>

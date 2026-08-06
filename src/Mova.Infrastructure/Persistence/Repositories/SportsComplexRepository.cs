@@ -28,15 +28,24 @@ public sealed class SportsComplexRepository : ISportsComplexRepository
         await _context.SportsComplexes.AddAsync(sportsComplex, cancellationToken);
     }
 
-    public async Task<(IReadOnlyList<SportsComplex> Items, int TotalItems)> GetActiveComplexesAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<(IReadOnlyList<SportsComplex> Items, int TotalItems)> GetActiveComplexesAsync(int page, int pageSize, string? search = null, CancellationToken cancellationToken = default)
     {
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 1 ? 1 : pageSize;
         pageSize = pageSize > MaxPageSize ? MaxPageSize : pageSize;
 
-        var query = _context.SportsComplexes
+        IQueryable<SportsComplex> query = _context.SportsComplexes
             .Where(s => s.Status == ComplexStatus.Active)
             .OrderByDescending(s => s.CreatedAt);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var normalizedSearch = search.Trim();
+            var pattern = $"%{normalizedSearch}%";
+            query = query.Where(s => EF.Functions.ILike(s.Name, pattern)
+                || EF.Functions.ILike(s.City, pattern)
+                || EF.Functions.ILike(s.Address, pattern));
+        }
 
         var totalItems = await query.CountAsync(cancellationToken);
         var items = await query

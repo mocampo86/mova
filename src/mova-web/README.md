@@ -30,6 +30,8 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | Route | Description | Access |
 | --- | --- | --- |
 | `/` | Public landing page with Mova's value proposition and sign-in call to action. | Public |
+| `/complexes` | Search and browse active sports complexes. | Public |
+| `/complexes/:complexId` | View an active complex and its active courts. | Public |
 | `/login` | Sign in with Google. | Public |
 | `/complete-profile` | Complete the user profile (phone number). | Authenticated users |
 | `/user` | User portal home. | Authenticated users |

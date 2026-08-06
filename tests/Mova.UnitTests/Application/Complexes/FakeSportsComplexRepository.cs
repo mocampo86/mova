@@ -19,7 +19,7 @@ public sealed class FakeSportsComplexRepository : ISportsComplexRepository
         return Task.CompletedTask;
     }
 
-    public Task<(IReadOnlyList<SportsComplex> Items, int TotalItems)> GetActiveComplexesAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    public Task<(IReadOnlyList<SportsComplex> Items, int TotalItems)> GetActiveComplexesAsync(int page, int pageSize, string? search = null, CancellationToken cancellationToken = default)
     {
         var query = _sportsComplexes
             .Where(s => s.Status == ComplexStatus.Active)
@@ -28,6 +28,13 @@ public sealed class FakeSportsComplexRepository : ISportsComplexRepository
 
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 1 ? 1 : pageSize;
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(s => s.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
+                || s.City.Contains(search, StringComparison.OrdinalIgnoreCase)
+                || s.Address.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
 
         var totalItems = query.Count;
         var items = query

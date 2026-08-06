@@ -59,6 +59,7 @@ public sealed class GetActiveCourtByIdHandlerTests
             Guid sportsComplexId,
             int page,
             int pageSize,
+            Guid? sportId = null,
             CancellationToken cancellationToken = default) =>
             Task.FromResult<(IReadOnlyList<Court> Items, int TotalItems)>(([], 0));
 

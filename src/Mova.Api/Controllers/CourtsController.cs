@@ -34,10 +34,16 @@ public sealed class CourtsController(
         Guid complexId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
+        [FromQuery] Guid? sportId = null,
         CancellationToken cancellationToken = default)
     {
+        if (page < 1 || pageSize is < 1 or > 100)
+        {
+            return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Invalid pagination parameters." } });
+        }
+
         var result = await getActiveCourtsHandler.HandleAsync(
-            new GetActiveCourtsByComplexQuery(complexId, page, pageSize),
+            new GetActiveCourtsByComplexQuery(complexId, page, pageSize, sportId),
             cancellationToken);
 
         return Ok(result);

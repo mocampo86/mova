@@ -19,6 +19,7 @@ public sealed class GetActiveComplexesHandler : IGetActiveComplexesHandler
         var (items, totalItems) = await _sportsComplexRepository.GetActiveComplexesAsync(
             query.Page,
             query.PageSize,
+            query.Search,
             cancellationToken);
 
         var mappedItems = items.Select(SportsComplexInfoMapper.ToInfo).ToList();
