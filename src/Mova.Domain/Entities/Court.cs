@@ -38,6 +38,21 @@ public sealed class Court
 
     public bool CanAcceptReservations() => Status == CourtStatus.Active && CourtSports.Any(x => x.Sport?.Status == SportStatus.Active);
 
+    public void AssignSports(IEnumerable<Guid> sportIds)
+    {
+        ArgumentNullException.ThrowIfNull(sportIds);
+        var ids = sportIds.Distinct().ToArray();
+        if (ids.Length == 0) throw new ArgumentException("A court must have at least one assigned sport.", nameof(sportIds));
+        if (ids.Any(x => x == Guid.Empty)) throw new ArgumentException("Sport identifiers cannot be empty.", nameof(sportIds));
+
+        CourtSports.Clear();
+        foreach (var sportId in ids)
+        {
+            CourtSports.Add(new CourtSport(Id, sportId));
+        }
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     private static void Validate(string name, string description, string surfaceType)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);

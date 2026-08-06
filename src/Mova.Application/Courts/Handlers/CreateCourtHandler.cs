@@ -10,10 +10,11 @@ public sealed class CreateCourtHandler : ICreateCourtHandler
 {
     private readonly ISportsComplexRepository _complexes;
     private readonly ICourtRepository _courts;
+    private readonly ISportRepository _sports;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateCourtHandler(ISportsComplexRepository complexes, ICourtRepository courts, IUnitOfWork unitOfWork)
-        => (_complexes, _courts, _unitOfWork) = (complexes, courts, unitOfWork);
+    public CreateCourtHandler(ISportsComplexRepository complexes, ICourtRepository courts, ISportRepository sports, IUnitOfWork unitOfWork)
+        => (_complexes, _courts, _sports, _unitOfWork) = (complexes, courts, sports, unitOfWork);
 
     public async Task<CourtInfo> HandleAsync(CreateCourtCommand command, CancellationToken cancellationToken = default)
     {
@@ -21,7 +22,12 @@ public sealed class CreateCourtHandler : ICreateCourtHandler
         if (await _courts.ExistsByNameAsync(command.SportsComplexId, command.Name, cancellationToken))
             throw new ConflictException("A court with this name already exists in the sports complex.");
 
-        var court = Court.Create(command.SportsComplexId, command.Name, command.Description, command.SurfaceType, command.Indoor, command.SportIds);
+        var sportIds = (command.SportIds ?? []).Distinct().ToArray();
+        var existingSportIds = (await _sports.GetByIdsAsync(sportIds, cancellationToken)).Select(x => x.Id).ToHashSet();
+        if (sportIds.Any(x => !existingSportIds.Contains(x)))
+            throw new NotFoundException("One or more sports were not found.");
+
+        var court = Court.Create(command.SportsComplexId, command.Name, command.Description, command.SurfaceType, command.Indoor, sportIds);
         await _courts.AddAsync(court, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return CourtMapper.ToInfo(court);

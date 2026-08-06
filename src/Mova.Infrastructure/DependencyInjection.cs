@@ -71,6 +71,7 @@ public static class DependencyInjection
         services.AddScoped<ISportsComplexRepository, SportsComplexRepository>();
         services.AddScoped<IComplexAdministratorRepository, ComplexAdministratorRepository>();
         services.AddScoped<ICourtRepository, CourtRepository>();
+        services.AddScoped<ISportRepository, SportRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
