@@ -42,6 +42,12 @@ public static class ErrorResponseBuilder
                 message = exception.Message;
                 break;
 
+            case ConflictException:
+                statusCode = 409;
+                code = "CONFLICT";
+                message = exception.Message;
+                break;
+
             case ValidationException validationException:
                 statusCode = 400;
                 code = "VALIDATION_ERROR";

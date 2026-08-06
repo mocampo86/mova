@@ -4,6 +4,7 @@ using Mova.Application.Authentication.Handlers;
 using Mova.Application.Authentication.Validators;
 using Mova.Application.Complexes.Handlers;
 using Mova.Application.Users.Handlers;
+using Mova.Application.Courts.Handlers;
 
 namespace Mova.Application;
 
@@ -20,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IGetActiveComplexByIdHandler, GetActiveComplexByIdHandler>();
         services.AddScoped<IGetAllComplexesHandler, GetAllComplexesHandler>();
         services.AddScoped<IUpdateComplexStatusHandler, UpdateComplexStatusHandler>();
+        services.AddScoped<ICreateCourtHandler, CreateCourtHandler>();
 
         return services;
     }
