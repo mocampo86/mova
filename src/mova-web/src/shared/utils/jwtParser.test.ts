@@ -62,4 +62,23 @@ describe('mapJwtToUser', () => {
     expect(user.fullName).toBe('Test User');
     expect(user.roles).toEqual(['SuperAdmin']);
   });
+
+  it('maps a JWT token with a single role as a string and complexes as a JSON string', () => {
+    const payload = {
+      sub: 'user-id',
+      email: 'user@example.com',
+      name: 'Test User',
+      roles: 'User',
+      complexes: '[{"complexId":"complex-1","role":"ComplexAdmin"}]'
+    };
+    const token = createToken(payload);
+
+    const user = mapJwtToUser(token);
+
+    expect(user.id).toBe('user-id');
+    expect(user.email).toBe('user@example.com');
+    expect(user.fullName).toBe('Test User');
+    expect(user.roles).toEqual(['User']);
+    expect(user.complexes).toEqual([{ complexId: 'complex-1', role: 'ComplexAdmin' }]);
+  });
 });
