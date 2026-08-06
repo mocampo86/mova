@@ -4,6 +4,7 @@ using Mova.Application.Courts.Commands;
 using Mova.Application.Courts.Handlers;
 using Mova.Application.Courts.Validators;
 using Mova.Domain.Entities;
+using Mova.Domain.Enums;
 using Mova.UnitTests.Application.Authentication;
 
 namespace Mova.UnitTests.Application.Courts;
@@ -61,6 +62,10 @@ public sealed class UpdateCourtAvailabilityRulesHandlerTests
         public Task AddAsync(Court court, CancellationToken cancellationToken = default) => Task.CompletedTask;
         public Task<Court?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
             Task.FromResult(court is not null && id == court.Id ? court : null);
+        public Task<Court?> GetActiveByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+            Task.FromResult(court is not null && id == court.Id && court.Status == CourtStatus.Active ? court : null);
+        public Task<(IReadOnlyList<Court> Items, int TotalItems)> GetActiveCourtsByComplexIdAsync(Guid sportsComplexId, int page, int pageSize, CancellationToken cancellationToken = default) =>
+            Task.FromResult<(IReadOnlyList<Court> Items, int TotalItems)>(([], 0));
         public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
             Task.FromResult(false);
     }
