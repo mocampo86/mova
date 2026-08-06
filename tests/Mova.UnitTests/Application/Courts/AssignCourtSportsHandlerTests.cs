@@ -51,5 +51,8 @@ public sealed class AssignCourtSportsHandlerTests
         private readonly IReadOnlyCollection<Sport> _sports = sports.ToArray();
         public Task<IReadOnlyCollection<Sport>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyCollection<Sport>>(_sports.Where(x => ids.Contains(x.Id)).ToArray());
+
+        public Task<IReadOnlyCollection<Sport>> GetActiveAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyCollection<Sport>>(_sports.Where(x => x.Status == SportStatus.Active).ToArray());
     }
 }

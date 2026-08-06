@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../services/apiClient';
-import type { Court, PagedResult, SportsComplex } from './complexTypes';
+import type { Court, CourtAvailabilitySlot, PagedResult, Sport, SportsComplex } from './complexTypes';
 
 export function useActiveComplexes(search: string, page = 1) {
   const params = new URLSearchParams({ page: String(page), pageSize: '12' });
@@ -28,5 +28,22 @@ export function useActiveCourts(complexId: string, sportId?: string) {
     queryKey: ['active-courts', complexId, sportId],
     queryFn: () => apiClient<PagedResult<Court>>(`/api/v1/complexes/${complexId}/courts?${params}`),
     enabled: Boolean(complexId)
+  });
+}
+
+export function useSports() {
+  return useQuery({
+    queryKey: ['active-sports'],
+    queryFn: () => apiClient<Sport[]>('/api/v1/sports')
+  });
+}
+
+export function useCourtAvailability(complexId: string, courtId: string, date: string) {
+  const params = new URLSearchParams({ courtId, date });
+
+  return useQuery({
+    queryKey: ['court-availability', complexId, courtId, date],
+    queryFn: () => apiClient<CourtAvailabilitySlot[]>(`/api/v1/complexes/${complexId}/availability?${params}`),
+    enabled: Boolean(complexId && courtId && date)
   });
 }
