@@ -79,6 +79,22 @@ public class GetActiveComplexesHandlerTests
     }
 
     [Fact]
+    public async Task HandleAsync_WithSearch_ReturnsOnlyMatchingActiveComplexes()
+    {
+        await _sportsComplexRepository.AddAsync(SportsComplex.Create("North Courts", "Description", "Main Street", "Montevideo", null, null, "+598 0000 0000", "north@test.com"));
+        await _sportsComplexRepository.AddAsync(SportsComplex.Create("South Courts", "Description", "Other Street", "Canelones", null, null, "+598 0000 0001", "south@test.com"));
+        var inactive = SportsComplex.Create("North Inactive", "Description", "Main Street", "Montevideo", null, null, "+598 0000 0002", "inactive@test.com");
+        inactive.Deactivate();
+        await _sportsComplexRepository.AddAsync(inactive);
+
+        var result = await CreateHandler().HandleAsync(new GetActiveComplexesQuery(1, 20, "monte"));
+
+        Assert.Single(result.Items);
+        Assert.Equal("North Courts", result.Items[0].Name);
+        Assert.Equal(1, result.TotalItems);
+    }
+
+    [Fact]
     public async Task HandleAsync_WithNoActiveComplexes_ReturnsEmptyResult()
     {
         var inactiveComplex = SportsComplex.Create(

@@ -33,6 +33,8 @@ All list endpoints that may return more than one page must support pagination wi
 
 ```http
 GET /api/v1/complexes?page=1&pageSize=20
+GET /api/v1/complexes?page=1&pageSize=20&search=Montevideo
+GET /api/v1/complexes/{complexId}/courts?page=1&pageSize=20&sportId=<sport-guid>
 GET /api/v1/complexes/{complexId}/reservations?page=2&pageSize=50&sort=startAt:desc
 GET /api/v1/users/me/reservations?page=1&pageSize=10&status=Confirmed
 ```
@@ -59,6 +61,8 @@ Use query parameters named after the field or a `filter` parameter:
 ```text
 GET /api/v1/complexes/{complexId}/reservations?status=Confirmed&date=2026-08-10
 GET /api/v1/complexes?city=Buenos+Aires
+GET /api/v1/complexes?search=tennis
+GET /api/v1/complexes/{complexId}/courts?sportId=<sport-guid>
 ```
 
 Recommended patterns:
@@ -66,6 +70,8 @@ Recommended patterns:
 - Exact match: `?status=Confirmed`
 - Date range: `?from=2026-08-01&to=2026-08-31`
 - Contains (case-insensitive): `?name=search-term` (document the behavior explicitly)
+- Public complex search matches `name`, `city`, and `address` case-insensitively through `search`.
+- Public court filtering uses `sportId` and returns only active courts linked to an active sport.
 
 ## Empty pages
 

@@ -97,6 +97,7 @@ public sealed class UpdateCourtStatusHandlerTests
             Guid sportsComplexId,
             int page,
             int pageSize,
+            Guid? sportId = null,
             CancellationToken cancellationToken = default)
         {
             var query = _courts.Where(c => c.SportsComplexId == sportsComplexId && c.Status == CourtStatus.Active).ToList();

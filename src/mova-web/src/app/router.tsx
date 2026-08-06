@@ -4,6 +4,8 @@ import { RequireRole } from '../features/auth/RequireRole';
 import PublicLayout from '../layouts/PublicLayout';
 import CompleteProfilePage from '../pages/CompleteProfilePage';
 import ComplexAdminPage from '../pages/ComplexAdminPage';
+import ComplexDetailPage from '../pages/ComplexDetailPage';
+import ComplexesPage from '../pages/ComplexesPage';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import NotFoundPage from '../pages/NotFoundPage';
@@ -16,6 +18,8 @@ export default function AppRouter() {
     <Routes>
       <Route path="/" element={<PublicLayout />}>
         <Route index element={<HomePage />} />
+        <Route path="complexes" element={<ComplexesPage />} />
+        <Route path="complexes/:complexId" element={<ComplexDetailPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="unauthorized" element={<UnauthorizedPage />} />
         <Route

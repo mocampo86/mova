@@ -52,6 +52,7 @@ public sealed class GetActiveCourtsByComplexHandlerTests
             Guid sportsComplexId,
             int page,
             int pageSize,
+            Guid? sportId = null,
             CancellationToken cancellationToken = default)
         {
             var query = _courts

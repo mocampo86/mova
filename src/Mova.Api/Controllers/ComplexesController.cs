@@ -51,10 +51,16 @@ public class ComplexesController : ControllerBase
     public async Task<ActionResult<PagedResult<SportsComplexInfo>>> GetActiveList(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
+        if (page < 1 || pageSize is < 1 or > 100 || search?.Length > 100)
+        {
+            return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Invalid pagination or search parameters." } });
+        }
+
         var result = await _getActiveComplexesHandler.HandleAsync(
-            new GetActiveComplexesQuery(page, pageSize),
+            new GetActiveComplexesQuery(page, pageSize, search),
             cancellationToken);
 
         return Ok(result);

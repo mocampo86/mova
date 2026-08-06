@@ -25,17 +25,23 @@ public sealed class CourtRepository(MovaDbContext context) : ICourtRepository
         Guid sportsComplexId,
         int page,
         int pageSize,
+        Guid? sportId = null,
         CancellationToken cancellationToken = default)
     {
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 1 ? 1 : pageSize;
         pageSize = pageSize > MaxPageSize ? MaxPageSize : pageSize;
 
-        var query = context.Courts
+        IQueryable<Court> query = context.Courts
             .Include(x => x.CourtSports)
             .ThenInclude(x => x.Sport)
             .Where(x => x.SportsComplexId == sportsComplexId && x.Status == CourtStatus.Active && x.SportsComplex!.Status == ComplexStatus.Active)
             .OrderByDescending(x => x.CreatedAt);
+
+        if (sportId.HasValue)
+        {
+            query = query.Where(x => x.CourtSports.Any(cs => cs.SportId == sportId.Value && cs.Sport.Status == SportStatus.Active));
+        }
 
         var totalItems = await query.CountAsync(cancellationToken);
         var items = await query

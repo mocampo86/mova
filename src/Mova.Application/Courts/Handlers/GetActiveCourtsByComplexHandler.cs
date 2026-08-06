@@ -14,6 +14,7 @@ public sealed class GetActiveCourtsByComplexHandler(
             query.SportsComplexId,
             query.Page,
             query.PageSize,
+            query.SportId,
             cancellationToken);
 
         var mappedItems = items.Select(CourtMapper.ToInfo).ToList();

@@ -64,7 +64,7 @@ public sealed class UpdateCourtAvailabilityRulesHandlerTests
             Task.FromResult(court is not null && id == court.Id ? court : null);
         public Task<Court?> GetActiveByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
             Task.FromResult(court is not null && id == court.Id && court.Status == CourtStatus.Active ? court : null);
-        public Task<(IReadOnlyList<Court> Items, int TotalItems)> GetActiveCourtsByComplexIdAsync(Guid sportsComplexId, int page, int pageSize, CancellationToken cancellationToken = default) =>
+        public Task<(IReadOnlyList<Court> Items, int TotalItems)> GetActiveCourtsByComplexIdAsync(Guid sportsComplexId, int page, int pageSize, Guid? sportId = null, CancellationToken cancellationToken = default) =>
             Task.FromResult<(IReadOnlyList<Court> Items, int TotalItems)>(([], 0));
         public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
             Task.FromResult(false);
