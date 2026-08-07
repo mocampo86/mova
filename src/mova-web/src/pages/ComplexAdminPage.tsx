@@ -74,7 +74,7 @@ export default function ComplexAdminPage() {
   const complex = data?.complex;
 
   return (
-    <Container component="main" maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       <Stack spacing={4}>
         <Box>
           {isLoading || !complex ? (
