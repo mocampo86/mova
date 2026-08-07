@@ -104,6 +104,15 @@ public sealed class UpdateCourtStatusHandlerTests
             return Task.FromResult<(IReadOnlyList<Court> Items, int TotalItems)>((query, query.Count));
         }
 
+        public Task<(int ActiveCount, int InactiveCount)> GetCourtStatusCountsByComplexIdAsync(
+            Guid sportsComplexId,
+            CancellationToken cancellationToken = default)
+        {
+            var activeCount = _courts.Count(c => c.SportsComplexId == sportsComplexId && c.Status == CourtStatus.Active);
+            var inactiveCount = _courts.Count(c => c.SportsComplexId == sportsComplexId && c.Status == CourtStatus.Inactive);
+            return Task.FromResult((activeCount, inactiveCount));
+        }
+
         public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
             Task.FromResult(false);
     }

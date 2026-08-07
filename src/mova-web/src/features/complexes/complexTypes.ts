@@ -38,3 +38,28 @@ export interface CourtAvailabilitySlot {
   startAt: string;
   endAt: string;
 }
+
+export interface DashboardComplexSummary {
+  id: string;
+  name: string;
+  status: string;
+  lastUpdatedAt?: string | null;
+}
+
+export interface DashboardCourtSummary {
+  active: number;
+  inactive: number;
+}
+
+export interface DashboardReservationsSummary {
+  confirmed: number;
+  cancelled: number;
+  completed: number;
+}
+
+export interface ComplexDashboard {
+  complex: DashboardComplexSummary;
+  courts: DashboardCourtSummary;
+  reservationsToday: DashboardReservationsSummary;
+  blockedUsers: number;
+}

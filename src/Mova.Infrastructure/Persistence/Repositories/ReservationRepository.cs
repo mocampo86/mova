@@ -16,4 +16,20 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
             .Where(r => r.Status != ReservationStatus.CancelledByUser && r.Status != ReservationStatus.CancelledByAdmin)
             .ToArrayAsync(cancellationToken);
     }
+
+    public async Task<(int Confirmed, int Cancelled, int Completed)> GetTodayStatusCountsByComplexIdAsync(
+        Guid sportsComplexId,
+        DateTime start,
+        DateTime end,
+        CancellationToken cancellationToken = default)
+    {
+        var query = context.Reservations
+            .Where(r => r.SportsComplexId == sportsComplexId && r.StartAt >= start && r.StartAt < end);
+
+        var confirmed = await query.CountAsync(r => r.Status == ReservationStatus.Confirmed, cancellationToken);
+        var cancelled = await query.CountAsync(r => r.Status == ReservationStatus.CancelledByUser || r.Status == ReservationStatus.CancelledByAdmin, cancellationToken);
+        var completed = await query.CountAsync(r => r.Status == ReservationStatus.Completed, cancellationToken);
+
+        return (confirmed, cancelled, completed);
+    }
 }

@@ -1,10 +1,16 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Mova.Contracts.Auth;
 using Mova.Contracts.Common;
 using Mova.Contracts.Complexes;
 using Mova.Contracts.Users;
+using Mova.Domain.Entities;
+using Mova.Domain.Enums;
+using Mova.Infrastructure.Data;
 using Mova.IntegrationTests.Authentication;
 using Xunit;
 
@@ -357,6 +363,105 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
 
         var response = await client.PatchAsJsonAsync($"/api/v1/complexes/{created.Id}/status", new UpdateComplexStatusRequest { Status = "Unknown" });
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetDashboard_AsComplexAdmin_ReturnsAggregatedMetrics()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"dashboard-admin-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var createResponse = await client.PostAsJsonAsync("/api/v1/complexes", CreateValidRequest());
+        createResponse.EnsureSuccessStatusCode();
+        var created = await createResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(created);
+
+        await SeedDashboardDataAsync(created.Id, suffix);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{created.Id}/dashboard");
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<ComplexDashboardInfo>();
+        Assert.NotNull(result);
+        Assert.Equal(created.Id, result.Complex.Id);
+        Assert.Equal(created.Name, result.Complex.Name);
+        Assert.Equal("Active", result.Complex.Status);
+        Assert.Equal(1, result.Courts.Active);
+        Assert.Equal(1, result.Courts.Inactive);
+        Assert.Equal(2, result.ReservationsToday.Confirmed);
+        Assert.Equal(1, result.ReservationsToday.Cancelled);
+        Assert.Equal(1, result.ReservationsToday.Completed);
+        Assert.Equal(2, result.BlockedUsers);
+    }
+
+    [Fact]
+    public async Task GetDashboard_WithoutAuthorization_ReturnsUnauthorized()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync($"/api/v1/complexes/{Guid.NewGuid()}/dashboard");
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetDashboard_AsAdminOfDifferentComplex_ReturnsForbidden()
+    {
+        var client = _factory.CreateClient();
+
+        var adminSuffix = $"dashboard-owner-{Guid.NewGuid()}";
+        var ownerToken = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ownerToken);
+
+        var createResponse = await client.PostAsJsonAsync("/api/v1/complexes", CreateValidRequest());
+        createResponse.EnsureSuccessStatusCode();
+        var created = await createResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(created);
+
+        var otherSuffix = $"dashboard-other-{Guid.NewGuid()}";
+        var otherToken = await LoginAsync(client, otherSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", otherToken);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{created.Id}/dashboard");
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    private async Task SeedDashboardDataAsync(Guid complexId, string suffix)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+
+        var admin = await context.Users.FirstAsync(u => u.GoogleSubjectId == $"sub-{suffix}");
+
+        var activeCourt = Court.Create(complexId, "Active Court", "Court", "Synthetic", true);
+        var inactiveCourt = Court.Create(complexId, "Inactive Court", "Court", "Grass", false);
+        inactiveCourt.Deactivate();
+        context.Courts.Add(activeCourt);
+        context.Courts.Add(inactiveCourt);
+
+        var player = User.CreateFromGoogle(Guid.NewGuid(), $"player-{suffix}", $"player-{suffix}@test.com", $"Player {suffix}");
+        context.Users.Add(player);
+
+        var today = DateTime.UtcNow.Date;
+        var start = new DateTime(today.Year, today.Month, today.Day, 0, 0, 0, DateTimeKind.Utc);
+
+        var confirmed1 = Reservation.Create(complexId, activeCourt.Id, player.Id, start.AddHours(10), start.AddHours(11), ReservationSource.Web);
+        confirmed1.Confirm();
+        var confirmed2 = Reservation.Create(complexId, activeCourt.Id, player.Id, start.AddHours(12), start.AddHours(13), ReservationSource.Web);
+        confirmed2.Confirm();
+        var cancelled = Reservation.Create(complexId, activeCourt.Id, player.Id, start.AddHours(14), start.AddHours(15), ReservationSource.Web);
+        cancelled.Cancel();
+        var completed = Reservation.Create(complexId, activeCourt.Id, player.Id, start.AddHours(16), start.AddHours(17), ReservationSource.Web);
+        completed.Confirm();
+        context.Entry(completed).Property(r => r.Status).CurrentValue = ReservationStatus.Completed;
+
+        context.Reservations.AddRange(confirmed1, confirmed2, cancelled, completed);
+
+        var blocked1 = BlockedUser.Create(complexId, Guid.NewGuid(), admin.Id);
+        var blocked2 = BlockedUser.Create(complexId, Guid.NewGuid(), admin.Id);
+        context.BlockedUsers.AddRange(blocked1, blocked2);
+
+        await context.SaveChangesAsync();
     }
 
     private static CreateComplexRequest CreateValidRequest() =>
