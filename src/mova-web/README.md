@@ -36,6 +36,6 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/complete-profile` | Complete the user profile (phone number). | Authenticated users |
 | `/user` | User portal home. | Authenticated users |
 | `/admin/super` | Super admin dashboard. | `SuperAdmin` |
-| `/admin/complex/:complexId` | Complex admin dashboard placeholder. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId` | Complex admin dashboard overview with courts, reservations, and blocked users summaries. | `ComplexAdmin` of the requested complex |
 
 There is currently no UI for creating or editing a sports complex; those operations are exposed through the backend API at `POST /api/v1/complexes` and `PUT /api/v1/complexes/{complexId}`.

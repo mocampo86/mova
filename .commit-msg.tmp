@@ -1,0 +1,15 @@
+fix(US-062): resolve locale-dependent dashboard test and DB migration state
+
+- Update ComplexAdminPage test to match "Last updated" text with a regex
+  instead of a locale-specific date string, making it pass in CI runners
+  with different default locales.
+- Verify and apply the AddBlockedUsers EF migration to the development
+  database so the BlockedUsers table exists at runtime.
+
+Frontend: npm run lint + build + test passed (34/34).
+Backend: dotnet test Mova.slnx passed (247 tests across Unit, Integration,
+Architecture).
+
+Generated with [Devin](https://devin.ai)
+
+Co-Authored-By: Devin <158243242+devin-ai-integration[bot]@users.noreply.github.com>

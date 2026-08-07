@@ -54,4 +54,18 @@ public sealed class CourtRepository(MovaDbContext context) : ICourtRepository
 
     public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
         context.Courts.AnyAsync(x => x.SportsComplexId == sportsComplexId && x.Name.ToLower() == name.Trim().ToLower(), cancellationToken);
+
+    public async Task<(int ActiveCount, int InactiveCount)> GetCourtStatusCountsByComplexIdAsync(Guid sportsComplexId, CancellationToken cancellationToken = default)
+    {
+        var counts = await context.Courts
+            .Where(x => x.SportsComplexId == sportsComplexId)
+            .GroupBy(x => x.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        var activeCount = counts.FirstOrDefault(c => c.Status == CourtStatus.Active)?.Count ?? 0;
+        var inactiveCount = counts.FirstOrDefault(c => c.Status == CourtStatus.Inactive)?.Count ?? 0;
+
+        return (activeCount, inactiveCount);
+    }
 }
