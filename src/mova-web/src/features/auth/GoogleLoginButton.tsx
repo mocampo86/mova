@@ -2,8 +2,12 @@ import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useGoogleLogin } from './useGoogleLogin';
 
-export function GoogleLoginButton() {
-  const { mutate, isPending, error } = useGoogleLogin();
+interface GoogleLoginButtonProps {
+  intent?: 'user' | 'complex';
+}
+
+export function GoogleLoginButton({ intent = 'user' }: GoogleLoginButtonProps) {
+  const { mutate, isPending, error } = useGoogleLogin(intent);
 
   const handleSuccess = (credentialResponse: CredentialResponse) => {
     if (credentialResponse.credential) {

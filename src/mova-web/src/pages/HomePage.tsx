@@ -27,14 +27,14 @@ export default function HomePage() {
               Discover nearby sports complexes, check court availability, and reserve the time that works for you.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Button component={RouterLink} to="/login" variant="contained" size="large" color="secondary">
-                Get started
+              <Button component={RouterLink} to="/login?intent=user" variant="contained" size="large" color="secondary">
+                Play / Book a court
+              </Button>
+              <Button component={RouterLink} to="/login?intent=complex" variant="outlined" size="large" sx={{ color: 'common.white', borderColor: 'rgba(255,255,255,.7)' }}>
+                Manage your complex
               </Button>
               <Button component={RouterLink} to="/complexes" variant="outlined" size="large" sx={{ color: 'common.white', borderColor: 'rgba(255,255,255,.7)' }}>
                 Browse complexes
-              </Button>
-              <Button href="#how-it-works" variant="outlined" size="large" sx={{ color: 'common.white', borderColor: 'rgba(255,255,255,.7)' }}>
-                Learn more
               </Button>
             </Stack>
           </Stack>
@@ -75,10 +75,15 @@ export default function HomePage() {
           <Typography id="cta-title" component="h2" variant="h5" sx={{ fontWeight: 700 }}>
             Ready to get moving?
           </Typography>
-          <Typography color="text.secondary">Join Mova and make your next match easier to plan.</Typography>
-          <Button component={RouterLink} to="/login" variant="contained" size="large">
-            Sign in to Mova
-          </Button>
+          <Typography color="text.secondary">Join Mova as a player or bring your complex online.</Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <Button component={RouterLink} to="/login?intent=user" variant="contained" size="large">
+              Sign in to play
+            </Button>
+            <Button component={RouterLink} to="/login?intent=complex" variant="outlined" size="large">
+              Register your complex
+            </Button>
+          </Stack>
         </Stack>
       </Box>
     </Box>

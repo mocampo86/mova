@@ -1,0 +1,2 @@
+-Coplex:
+-poder abrir google maps con la ubicación del complejo
