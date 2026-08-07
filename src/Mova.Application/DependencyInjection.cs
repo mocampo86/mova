@@ -14,6 +14,7 @@ public static class DependencyInjection
     {
         services.AddValidatorsFromAssemblyContaining<GoogleLoginCommandValidator>();
         services.AddScoped<IGoogleLoginHandler, GoogleLoginHandler>();
+        services.AddScoped<ICompleteComplexAdminHandler, CompleteComplexAdminHandler>();
         services.AddScoped<ICompleteProfileHandler, CompleteProfileHandler>();
         services.AddScoped<ICreateComplexHandler, CreateComplexHandler>();
         services.AddScoped<IUpdateComplexHandler, UpdateComplexHandler>();

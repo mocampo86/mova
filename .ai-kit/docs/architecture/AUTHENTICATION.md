@@ -6,10 +6,12 @@ The platform uses **Google OpenID Connect** for user authentication and **JWT Be
 
 ## Authentication flow
 
+### Player sign-in
+
 ```text
 [User]
   │
-  ├─ clicks "Sign in with Google" in the React SPA
+  ├─ clicks "Play / Book a court" in the React SPA
   │
   ▼
 [Google Identity]
@@ -31,6 +33,48 @@ The platform uses **Google OpenID Connect** for user authentication and **JWT Be
 [React SPA]
   ├─ stores access token securely (memory; refresh in httpOnly cookie if used)
   ├─ sends Bearer token on every authenticated request
+```
+
+### Complex owner sign-up
+
+```text
+[Visitor]
+  │
+  ├─ clicks "Register your complex" in the React SPA
+  │
+  ▼
+[Google Identity]
+  │
+  ├─ returns ID token
+  │
+  ▼
+[React SPA]
+  │
+  ├─ sends ID token to /api/v1/auth/google
+  │
+  ▼
+[API]
+  ├─ validates ID token and creates/updates user
+  ├─ issues platform JWT with User role
+  │
+  ▼
+[React SPA]
+  ├─ redirects to /complete-complex-admin
+  ├─ user submits phone number and complex details
+  ├─ sends data to /api/v1/auth/complete-complex-admin
+  │
+  ▼
+[API]
+  ├─ updates user phone number
+  ├─ creates SportsComplex with Pending status
+  ├─ creates ComplexAdministrator association
+  ├─ adds ComplexAdmin role to user
+  ├─ issues a new JWT with ComplexAdmin role and complex association
+  │
+  ▼
+[React SPA]
+  ├─ stores new access token
+  ├─ redirects to /admin/complex/{complexId}
 ```
 
 ## Token contents
@@ -97,6 +141,10 @@ For any endpoint scoped to a complex (`/api/v1/complexes/{complexId}/...`):
 
 After the first Google login, if the user has not completed their profile (`PhoneNumber` missing), the frontend must redirect to `/complete-profile` before allowing reservations.
 
+## Complex owner onboarding
+
+Visitors who want to register a complex choose the "Register your complex" path on the landing page. After Google authentication they are redirected to `/complete-complex-admin`, where they submit their phone number and the complex details. The backend creates the `SportsComplex` with `Pending` status and a `ComplexAdministrator` association, then issues a new JWT containing the `ComplexAdmin` role and the complex association. A `SuperAdmin` must approve the complex (change status from `Pending` to `Active`) before it appears in public listings.
+
 ## Security requirements
 
 - All tokens must be transmitted over HTTPS in production.
@@ -125,7 +173,9 @@ The `PhoneVerified` flag is stored but not verified in the MVP. A future impleme
 
 ## Implementation notes
 
-- Backend endpoint: `POST /api/v1/auth/google` receives a Google ID token and returns an access token plus user information.
+- Backend endpoints:
+  - `POST /api/v1/auth/google` receives a Google ID token and returns an access token plus user information.
+  - `POST /api/v1/auth/complete-complex-admin` receives the user's phone number and complex details, creates a pending `SportsComplex`, links the user as `ComplexAdmin`, and returns a new access token.
 - Google ID token validation uses `Google.Apis.Auth` and the configured `Google:ClientId` only; no client secret is required for the ID token flow.
 - JWT signing uses a symmetric key configured in `Jwt:SecretKey` (>= 32 bytes), `Jwt:Issuer`, and `Jwt:Audience`.
 - Token lifetime is configured via `Jwt:ExpirationMinutes` (default 15 minutes).

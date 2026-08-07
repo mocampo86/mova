@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { RequireComplexAdmin } from '../features/auth/RequireComplexAdmin';
 import { RequireRole } from '../features/auth/RequireRole';
 import PublicLayout from '../layouts/PublicLayout';
+import CompleteComplexAdminPage from '../pages/CompleteComplexAdminPage';
 import CompleteProfilePage from '../pages/CompleteProfilePage';
 import ComplexAdminPage from '../pages/ComplexAdminPage';
 import ComplexDetailPage from '../pages/ComplexDetailPage';
@@ -27,6 +28,14 @@ export default function AppRouter() {
           element={
             <RequireRole allowedRoles={['User', 'ComplexAdmin', 'SuperAdmin']}>
               <CompleteProfilePage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="complete-complex-admin"
+          element={
+            <RequireRole allowedRoles={['User', 'ComplexAdmin', 'SuperAdmin']}>
+              <CompleteComplexAdminPage />
             </RequireRole>
           }
         />

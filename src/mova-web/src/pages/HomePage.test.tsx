@@ -9,7 +9,7 @@ describe('HomePage', () => {
 
     expect(screen.getByRole('heading', { name: 'Find your next game.' })).toBeTruthy();
     expect(screen.getByText(/Discover nearby sports complexes/)).toBeTruthy();
-    expect(screen.getAllByRole('link', { name: /get started|sign in to mova/i })).toHaveLength(2);
+    expect(screen.getAllByRole('link', { name: /play|sign in to play|register your complex/i })).toHaveLength(3);
     expect(screen.getByRole('heading', { name: 'Everything you need to play' })).toBeTruthy();
   });
 });

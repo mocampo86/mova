@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Mova.Contracts.Auth;
 using Xunit;
@@ -74,5 +75,81 @@ public class AuthControllerTests : IClassFixture<MovaWebApplicationFactory>
         var response = await _client.PostAsJsonAsync("/api/v1/auth/google", request);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CompleteComplexAdmin_WithValidData_CreatesPendingComplexAndReturnsToken()
+    {
+        var suffix = $"complex-admin-{Guid.NewGuid()}";
+        var token = await LoginAsync(suffix);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var request = new CompleteComplexAdminRequest
+        {
+            PhoneNumber = "+54 11 1234 5678",
+            Name = "Club Padel",
+            Description = "A premium padel club",
+            Address = "Av. Libertador 1234",
+            City = "Buenos Aires",
+            Latitude = -34.6m,
+            Longitude = -58.3m,
+            ComplexPhoneNumber = "+54 11 1234 5678",
+            ComplexEmail = "contact@clubpadel.com"
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/v1/auth/complete-complex-admin", request);
+
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<CompleteComplexAdminResponse>();
+
+        Assert.NotNull(result);
+        Assert.False(string.IsNullOrWhiteSpace(result.AccessToken));
+        Assert.NotEqual(Guid.Empty, result.ComplexId);
+        Assert.False(result.RequiresProfileCompletion);
+        Assert.Equal("+54 11 1234 5678", result.User.PhoneNumber);
+    }
+
+    [Fact]
+    public async Task CompleteComplexAdmin_WithInvalidData_ReturnsBadRequest()
+    {
+        var suffix = $"complex-admin-invalid-{Guid.NewGuid()}";
+        var token = await LoginAsync(suffix);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var request = new CompleteComplexAdminRequest { Name = "" };
+
+        var response = await _client.PostAsJsonAsync("/api/v1/auth/complete-complex-admin", request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CompleteComplexAdmin_WithoutAuthorization_ReturnsUnauthorized()
+    {
+        _client.DefaultRequestHeaders.Authorization = null;
+
+        var request = new CompleteComplexAdminRequest
+        {
+            PhoneNumber = "+54 11 1234 5678",
+            Name = "Club Padel",
+            Description = "A premium padel club",
+            Address = "Av. Libertador 1234",
+            City = "Buenos Aires",
+            ComplexPhoneNumber = "+54 11 1234 5678",
+            ComplexEmail = "contact@clubpadel.com"
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/v1/auth/complete-complex-admin", request);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    private async Task<string> LoginAsync(string suffix)
+    {
+        var request = new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" };
+        var response = await _client.PostAsJsonAsync("/api/v1/auth/google", request);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<GoogleLoginResponse>();
+        return result!.AccessToken;
     }
 }
