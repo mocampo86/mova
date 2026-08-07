@@ -8,6 +8,7 @@ import CompleteProfilePage from '../pages/CompleteProfilePage';
 import ComplexAdminPage from '../pages/ComplexAdminPage';
 import ComplexAdminPlaceholderPage from '../pages/ComplexAdminPlaceholderPage';
 import ComplexDetailPage from '../pages/ComplexDetailPage';
+import ComplexProfilePage from '../pages/ComplexProfilePage';
 import ComplexesPage from '../pages/ComplexesPage';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
@@ -28,6 +29,7 @@ export default function AppRouter() {
         }
       >
         <Route index element={<ComplexAdminPage />} />
+        <Route path="profile" element={<ComplexProfilePage />} />
         <Route path="*" element={<ComplexAdminPlaceholderPage />} />
       </Route>
       <Route path="/" element={<PublicLayout />}>

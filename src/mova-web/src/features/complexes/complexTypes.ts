@@ -16,6 +16,21 @@ export interface SportsComplex {
   email: string;
   latitude?: number | null;
   longitude?: number | null;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string | null;
+}
+
+export interface UpdateComplexRequest {
+  name: string;
+  description: string;
+  address: string;
+  city: string;
+  phoneNumber: string;
+  email: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  status: string;
 }
 
 export interface Court {
