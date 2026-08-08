@@ -14,6 +14,9 @@ export interface SportsComplex {
   city: string;
   phoneNumber: string;
   email: string;
+  status: string;
+  createdAt: string;
+  updatedAt?: string | null;
   latitude?: number | null;
   longitude?: number | null;
 }
