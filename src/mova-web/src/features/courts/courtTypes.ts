@@ -19,3 +19,11 @@ export interface CreateCourtRequest {
   indoor: boolean;
   sportIds: string[];
 }
+
+export interface UpdateCourtRequest {
+  name: string;
+  description: string;
+  surfaceType: string;
+  indoor: boolean;
+  sportIds: string[];
+}

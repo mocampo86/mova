@@ -72,4 +72,9 @@ public sealed class FakeCourtRepository : ICourtRepository
     {
         return Task.FromResult(_courts.Any(c => c.SportsComplexId == sportsComplexId && c.Name == name));
     }
+
+    public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, Guid excludeCourtId, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_courts.Any(c => c.SportsComplexId == sportsComplexId && c.Id != excludeCourtId && c.Name == name));
+    }
 }

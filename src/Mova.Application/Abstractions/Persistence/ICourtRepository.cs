@@ -12,4 +12,5 @@ public interface ICourtRepository
     Task<(IReadOnlyList<Court> Items, int TotalItems)> GetCourtsByComplexIdAsync(Guid sportsComplexId, int page, int pageSize, Guid? sportId = null, CourtStatus? status = null, CancellationToken cancellationToken = default);
     Task<(int ActiveCount, int InactiveCount)> GetCourtStatusCountsByComplexIdAsync(Guid sportsComplexId, CancellationToken cancellationToken = default);
     Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default);
+    Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, Guid excludeCourtId, CancellationToken cancellationToken = default);
 }

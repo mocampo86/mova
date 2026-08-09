@@ -7,38 +7,52 @@ using Xunit;
 
 namespace Mova.UnitTests.Application.Courts;
 
-public sealed class GetActiveCourtByIdHandlerTests
+public sealed class GetCourtByIdHandlerTests
 {
     [Fact]
-    public async Task HandleAsync_WithActiveCourt_ReturnsCourtInfo()
+    public async Task HandleAsync_WithExistingCourt_ReturnsCourtInfo()
     {
-        var court = Court.Create(Guid.NewGuid(), "Court", "Description", "Surface", false);
-        var handler = new GetActiveCourtByIdHandler(new FakeCourtRepository([court]));
+        var complexId = Guid.NewGuid();
+        var court = Court.Create(complexId, "Court", "Description", "Synthetic", false);
+        var handler = new GetCourtByIdHandler(new FakeCourtRepository([court]));
 
-        var result = await handler.HandleAsync(new GetActiveCourtByIdQuery(court.Id));
+        var result = await handler.HandleAsync(new GetCourtByIdQuery(complexId, court.Id));
 
         Assert.NotNull(result);
         Assert.Equal(court.Id, result.Id);
     }
 
     [Fact]
-    public async Task HandleAsync_WithInactiveCourt_ReturnsNull()
+    public async Task HandleAsync_WithCourtFromDifferentComplex_ReturnsNull()
     {
-        var court = Court.Create(Guid.NewGuid(), "Court", "Description", "Surface", false);
-        court.Deactivate();
-        var handler = new GetActiveCourtByIdHandler(new FakeCourtRepository([court]));
+        var court = Court.Create(Guid.NewGuid(), "Court", "Description", "Synthetic", false);
+        var handler = new GetCourtByIdHandler(new FakeCourtRepository([court]));
 
-        var result = await handler.HandleAsync(new GetActiveCourtByIdQuery(court.Id));
+        var result = await handler.HandleAsync(new GetCourtByIdQuery(Guid.NewGuid(), court.Id));
 
         Assert.Null(result);
     }
 
     [Fact]
+    public async Task HandleAsync_WithInactiveCourt_ReturnsCourtInfo()
+    {
+        var complexId = Guid.NewGuid();
+        var court = Court.Create(complexId, "Court", "Description", "Synthetic", false);
+        court.Deactivate();
+        var handler = new GetCourtByIdHandler(new FakeCourtRepository([court]));
+
+        var result = await handler.HandleAsync(new GetCourtByIdQuery(complexId, court.Id));
+
+        Assert.NotNull(result);
+        Assert.Equal(court.Id, result.Id);
+    }
+
+    [Fact]
     public async Task HandleAsync_WithNonExistentCourt_ReturnsNull()
     {
-        var handler = new GetActiveCourtByIdHandler(new FakeCourtRepository([]));
+        var handler = new GetCourtByIdHandler(new FakeCourtRepository([]));
 
-        var result = await handler.HandleAsync(new GetActiveCourtByIdQuery(Guid.NewGuid()));
+        var result = await handler.HandleAsync(new GetCourtByIdQuery(Guid.NewGuid(), Guid.NewGuid()));
 
         Assert.Null(result);
     }
@@ -74,12 +88,8 @@ public sealed class GetActiveCourtByIdHandlerTests
 
         public Task<(int ActiveCount, int InactiveCount)> GetCourtStatusCountsByComplexIdAsync(
             Guid sportsComplexId,
-            CancellationToken cancellationToken = default)
-        {
-            var activeCount = _courts.Count(c => c.SportsComplexId == sportsComplexId && c.Status == CourtStatus.Active);
-            var inactiveCount = _courts.Count(c => c.SportsComplexId == sportsComplexId && c.Status == CourtStatus.Inactive);
-            return Task.FromResult((activeCount, inactiveCount));
-        }
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult((0, 0));
 
         public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
             Task.FromResult(false);

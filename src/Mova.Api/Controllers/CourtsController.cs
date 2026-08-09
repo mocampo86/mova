@@ -17,6 +17,8 @@ namespace Mova.Api.Controllers;
 [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
 public sealed class CourtsController(
     ICreateCourtHandler createHandler,
+    IUpdateCourtHandler updateCourtHandler,
+    IGetCourtByIdHandler getCourtByIdHandler,
     IAssignCourtSportsHandler assignSportsHandler,
     IUpdateCourtStatusHandler updateStatusHandler,
     IUpdateCourtAvailabilityRulesHandler updateAvailabilityHandler,
@@ -26,6 +28,7 @@ public sealed class CourtsController(
     IGetActiveCourtByIdHandler getActiveCourtByIdHandler,
     IAuthorizationService authorizationService,
     FluentValidation.IValidator<CreateCourtCommand> validator,
+    FluentValidation.IValidator<UpdateCourtCommand> updateCourtValidator,
     FluentValidation.IValidator<AssignCourtSportsCommand> assignSportsValidator,
     FluentValidation.IValidator<UpdateCourtStatusCommand> updateStatusValidator,
     FluentValidation.IValidator<UpdateCourtAvailabilityRulesCommand> updateAvailabilityValidator) : ControllerBase
@@ -113,6 +116,19 @@ public sealed class CourtsController(
         return Ok(result);
     }
 
+    [HttpGet("{courtId:guid}")]
+    public async Task<ActionResult<CourtInfo>> GetById(Guid complexId, Guid courtId, CancellationToken cancellationToken)
+    {
+        var result = await getCourtByIdHandler.HandleAsync(new GetCourtByIdQuery(complexId, courtId), cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
     [HttpPost]
     public async Task<ActionResult<CourtInfo>> Create(Guid complexId, CreateCourtRequest request, CancellationToken cancellationToken)
     {
@@ -120,6 +136,15 @@ public sealed class CourtsController(
         await validator.ValidateAndThrowAsync(command, cancellationToken);
         var result = await createHandler.HandleAsync(command, cancellationToken);
         return Created($"/api/v1/complexes/{complexId}/courts/{result.Id}", result);
+    }
+
+    [HttpPut("{courtId:guid}")]
+    public async Task<ActionResult<CourtInfo>> Update(Guid complexId, Guid courtId, UpdateCourtRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateCourtCommand(complexId, courtId, request.Name, request.Description, request.SurfaceType, request.Indoor, request.SportIds);
+        await updateCourtValidator.ValidateAndThrowAsync(command, cancellationToken);
+        var result = await updateCourtHandler.HandleAsync(command, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPut("{courtId:guid}/sports")]

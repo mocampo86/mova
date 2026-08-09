@@ -32,7 +32,8 @@ GET    /api/v1/admin/complexes
 GET    /api/v1/complexes/{complexId}/courts
 POST   /api/v1/complexes/{complexId}/courts
 GET    /api/v1/courts/{id}
-PUT    /api/v1/courts/{id}
+GET    /api/v1/complexes/{complexId}/courts/{courtId}
+PUT    /api/v1/complexes/{complexId}/courts/{courtId}
 PATCH  /api/v1/complexes/{complexId}/courts/{courtId}/status
 
 GET    /api/v1/complexes/{complexId}/availability?courtId=&date=

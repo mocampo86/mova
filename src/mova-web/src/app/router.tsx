@@ -9,6 +9,7 @@ import ComplexAdminPage from '../pages/ComplexAdminPage';
 import ComplexAdminPlaceholderPage from '../pages/ComplexAdminPlaceholderPage';
 import ComplexCourtsPage from '../pages/ComplexCourtsPage';
 import CreateCourtPage from '../pages/CreateCourtPage';
+import EditCourtPage from '../pages/EditCourtPage';
 import ComplexDetailPage from '../pages/ComplexDetailPage';
 import ComplexProfilePage from '../pages/ComplexProfilePage';
 import ComplexesPage from '../pages/ComplexesPage';
@@ -34,6 +35,7 @@ export default function AppRouter() {
         <Route path="profile" element={<ComplexProfilePage />} />
         <Route path="courts" element={<ComplexCourtsPage />} />
         <Route path="courts/new" element={<CreateCourtPage />} />
+        <Route path="courts/:courtId/edit" element={<EditCourtPage />} />
         <Route path="*" element={<ComplexAdminPlaceholderPage />} />
       </Route>
       <Route path="/" element={<PublicLayout />}>

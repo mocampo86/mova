@@ -132,5 +132,8 @@ public sealed class UpdateCourtStatusHandlerTests
 
         public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
             Task.FromResult(false);
+
+        public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, Guid excludeCourtId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(false);
     }
 }
