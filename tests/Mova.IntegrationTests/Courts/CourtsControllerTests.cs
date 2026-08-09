@@ -160,6 +160,116 @@ public sealed class CourtsControllerTests : IClassFixture<MovaWebApplicationFact
     }
 
     [Fact]
+    public async Task GetById_AsAdmin_WithInactiveCourt_ReturnsCourt()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"get-admin-inactive-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/courts/{court.Id}/status", new UpdateCourtStatusRequest { Status = "Inactive" });
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/courts/{court.Id}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<CourtInfo>();
+        Assert.NotNull(result);
+        Assert.Equal(court.Id, result.Id);
+        Assert.Equal("Inactive", result.Status);
+    }
+
+    [Fact]
+    public async Task GetById_WithoutAuthorization_ReturnsUnauthorized()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync($"/api/v1/complexes/{Guid.NewGuid()}/courts/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_WithValidData_ReturnsUpdatedCourt()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"update-admin-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/courts/{court.Id}", new UpdateCourtRequest
+        {
+            Name = "Updated Court",
+            Description = "Updated description",
+            SurfaceType = "Grass",
+            Indoor = true,
+            SportIds = []
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<CourtInfo>();
+        Assert.NotNull(result);
+        Assert.Equal(court.Id, result.Id);
+        Assert.Equal("Updated Court", result.Name);
+        Assert.Equal("Updated description", result.Description);
+        Assert.Equal("Grass", result.SurfaceType);
+        Assert.True(result.Indoor);
+        Assert.NotNull(result.UpdatedAt);
+    }
+
+    [Fact]
+    public async Task Update_WithoutAuthorization_ReturnsUnauthorized()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{Guid.NewGuid()}/courts/{Guid.NewGuid()}", new UpdateCourtRequest
+        {
+            Name = "Court",
+            Description = "Description",
+            SurfaceType = "Synthetic"
+        });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_WithInvalidData_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"update-invalid-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/courts/{court.Id}", new UpdateCourtRequest
+        {
+            Name = "",
+            Description = "",
+            SurfaceType = ""
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_WithDuplicateName_ReturnsConflict()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"update-duplicate-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+        var firstCourt = await CreateCourtAsync(client, complex.Id);
+        var secondCourt = await CreateCourtAsync(client, complex.Id);
+
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/courts/{firstCourt.Id}", new UpdateCourtRequest
+        {
+            Name = secondCourt.Name,
+            Description = "Updated description",
+            SurfaceType = "Synthetic"
+        });
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
     public async Task UpdateAvailability_WithValidData_ReturnsUpdatedRules()
     {
         var client = _factory.CreateClient();

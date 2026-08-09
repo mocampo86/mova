@@ -46,6 +46,7 @@ public sealed class AssignCourtSportsHandlerTests
         public Task<(IReadOnlyList<Court> Items, int TotalItems)> GetCourtsByComplexIdAsync(Guid sportsComplexId, int page, int pageSize, Guid? sportId = null, CourtStatus? status = null, CancellationToken cancellationToken = default) => Task.FromResult<(IReadOnlyList<Court> Items, int TotalItems)>(([], 0));
         public Task<(int ActiveCount, int InactiveCount)> GetCourtStatusCountsByComplexIdAsync(Guid sportsComplexId, CancellationToken cancellationToken = default) => Task.FromResult((0, 0));
         public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) => Task.FromResult(false);
+        public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, Guid excludeCourtId, CancellationToken cancellationToken = default) => Task.FromResult(false);
     }
 
     private sealed class FakeSportRepository(IEnumerable<Sport> sports) : ISportRepository

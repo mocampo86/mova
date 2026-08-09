@@ -55,6 +55,9 @@ public sealed class CourtRepository(MovaDbContext context) : ICourtRepository
     public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
         context.Courts.AnyAsync(x => x.SportsComplexId == sportsComplexId && x.Name.ToLower() == name.Trim().ToLower(), cancellationToken);
 
+    public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, Guid excludeCourtId, CancellationToken cancellationToken = default) =>
+        context.Courts.AnyAsync(x => x.SportsComplexId == sportsComplexId && x.Id != excludeCourtId && x.Name.ToLower() == name.Trim().ToLower(), cancellationToken);
+
     public async Task<(IReadOnlyList<Court> Items, int TotalItems)> GetCourtsByComplexIdAsync(
         Guid sportsComplexId,
         int page,

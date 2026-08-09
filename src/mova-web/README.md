@@ -40,6 +40,7 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/admin/complex/:complexId/profile` | Edit the complex public profile. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/courts` | List and manage the courts of the complex. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/courts/new` | Create a new court for the complex. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/courts/:courtId/edit` | Edit an existing court of the complex. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/reservations` | Complex admin reservations. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/users` | Complex admin user management. | `ComplexAdmin` of the requested complex |
 

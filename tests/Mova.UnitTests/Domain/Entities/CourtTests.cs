@@ -139,6 +139,65 @@ public sealed class CourtTests
         Assert.False(court.CanAcceptReservations());
     }
 
+    [Fact]
+    public void Update_WithValidData_UpdatesFieldsAndTimestamp()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+
+        court.Update("Updated Court", "Updated description", "Grass", true);
+
+        Assert.Equal("Updated Court", court.Name);
+        Assert.Equal("Updated description", court.Description);
+        Assert.Equal("Grass", court.SurfaceType);
+        Assert.True(court.Indoor);
+        Assert.NotNull(court.UpdatedAt);
+    }
+
+    [Fact]
+    public void Update_WithSports_ReplacesAssociationsAndUpdatesTimestamp()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+        var sportIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
+
+        court.Update("Court 1", "Description", "Surface", false, sportIds);
+
+        Assert.Equal(sportIds, court.CourtSports.Select(x => x.SportId));
+        Assert.NotNull(court.UpdatedAt);
+    }
+
+    [Fact]
+    public void Update_WithEmptySports_ClearsAssociations()
+    {
+        var football = Sport.Create("Football");
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false, [football.Id]);
+
+        court.Update("Court 1", "Description", "Surface", false, []);
+
+        Assert.Empty(court.CourtSports);
+    }
+
+    [Fact]
+    public void Update_WithNullSportIds_LeavesAssociationsUnchanged()
+    {
+        var football = Sport.Create("Football");
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false, [football.Id]);
+
+        court.Update("Court 1", "Description", "Surface", false, null);
+
+        Assert.Single(court.CourtSports);
+        Assert.Equal(football.Id, court.CourtSports.Single().SportId);
+    }
+
+    [Fact]
+    public void Update_WithMissingRequiredField_Throws()
+    {
+        var court = Court.Create(Guid.NewGuid(), "Court 1", "Description", "Surface", false);
+
+        Assert.Throws<ArgumentException>(() => court.Update("", "Description", "Surface", false));
+        Assert.Throws<ArgumentException>(() => court.Update("Name", "", "Surface", false));
+        Assert.Throws<ArgumentException>(() => court.Update("Name", "Description", "", false));
+    }
+
     private static void SetSportOnCourtSports(Court court, Sport sport)
     {
         var property = typeof(CourtSport).GetProperty("Sport", BindingFlags.Instance | BindingFlags.Public)!;

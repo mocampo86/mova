@@ -60,6 +60,30 @@ public sealed class Court
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void Update(string name, string description, string surfaceType, bool indoor, IEnumerable<Guid>? sportIds = null)
+    {
+        Validate(name, description, surfaceType);
+        Name = name.Trim();
+        Description = description.Trim();
+        SurfaceType = surfaceType.Trim();
+        Indoor = indoor;
+        UpdatedAt = DateTime.UtcNow;
+
+        if (sportIds is null)
+        {
+            return;
+        }
+
+        var ids = sportIds.Distinct().ToArray();
+        if (ids.Any(x => x == Guid.Empty)) throw new ArgumentException("Sport identifiers cannot be empty.", nameof(sportIds));
+
+        CourtSports.Clear();
+        foreach (var sportId in ids)
+        {
+            CourtSports.Add(new CourtSport(Id, sportId));
+        }
+    }
+
     public void AssignSports(IEnumerable<Guid> sportIds)
     {
         ArgumentNullException.ThrowIfNull(sportIds);

@@ -24,8 +24,10 @@ public static class DependencyInjection
         services.AddScoped<IGetComplexDashboardHandler, GetComplexDashboardHandler>();
         services.AddScoped<IUpdateComplexStatusHandler, UpdateComplexStatusHandler>();
         services.AddScoped<ICreateCourtHandler, CreateCourtHandler>();
+        services.AddScoped<IUpdateCourtHandler, UpdateCourtHandler>();
         services.AddScoped<IAssignCourtSportsHandler, AssignCourtSportsHandler>();
         services.AddScoped<IUpdateCourtStatusHandler, UpdateCourtStatusHandler>();
+        services.AddScoped<IGetCourtByIdHandler, GetCourtByIdHandler>();
         services.AddScoped<IUpdateCourtAvailabilityRulesHandler, UpdateCourtAvailabilityRulesHandler>();
         services.AddScoped<IGetCourtAvailabilityRulesHandler, GetCourtAvailabilityRulesHandler>();
         services.AddScoped<IGetActiveCourtsByComplexHandler, GetActiveCourtsByComplexHandler>();

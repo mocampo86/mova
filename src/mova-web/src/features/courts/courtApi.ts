@@ -3,7 +3,7 @@ import { apiClient } from '../../services/apiClient';
 import { useAuth } from '../auth/useAuth';
 import type { PagedResult } from '../complexes/complexTypes';
 import type { Court } from '../complexes/complexTypes';
-import type { CourtListFilters, CreateCourtRequest, UpdateCourtStatusRequest } from './courtTypes';
+import type { CourtListFilters, CreateCourtRequest, UpdateCourtRequest, UpdateCourtStatusRequest } from './courtTypes';
 
 export function useCourts(complexId: string, filters: CourtListFilters) {
   const { accessToken } = useAuth();
@@ -26,6 +26,21 @@ export function useCourts(complexId: string, filters: CourtListFilters) {
         accessToken ?? undefined
       ),
     enabled: Boolean(complexId && accessToken)
+  });
+}
+
+export function useCourt(complexId: string, courtId: string) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['court', complexId, courtId],
+    queryFn: () =>
+      apiClient<Court>(
+        `/api/v1/complexes/${complexId}/courts/${courtId}`,
+        {},
+        accessToken ?? undefined
+      ),
+    enabled: Boolean(complexId && courtId && accessToken)
   });
 }
 
@@ -93,6 +108,43 @@ export function useCreateCourt(complexId: string) {
       return createCourt(complexId, request, accessToken);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courts', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['active-courts', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
+    }
+  });
+}
+
+export async function updateCourt(
+  complexId: string,
+  courtId: string,
+  request: UpdateCourtRequest,
+  accessToken: string
+): Promise<Court> {
+  return apiClient<Court>(
+    `/api/v1/complexes/${complexId}/courts/${courtId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useUpdateCourt(complexId: string, courtId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<Court, Error, UpdateCourtRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to update the court.');
+      }
+
+      return updateCourt(complexId, courtId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['court', complexId, courtId] });
       queryClient.invalidateQueries({ queryKey: ['courts', complexId] });
       queryClient.invalidateQueries({ queryKey: ['active-courts', complexId] });
       queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
