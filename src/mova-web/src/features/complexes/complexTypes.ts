@@ -40,7 +40,10 @@ export interface Court {
   description: string;
   surfaceType: string;
   indoor: boolean;
+  status: string;
   sportIds: string[];
+  createdAt?: string;
+  updatedAt?: string | null;
 }
 
 export interface Sport {

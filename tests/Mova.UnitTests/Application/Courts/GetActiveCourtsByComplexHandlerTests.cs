@@ -72,6 +72,36 @@ public sealed class GetActiveCourtsByComplexHandlerTests
             return Task.FromResult<(IReadOnlyList<Court> Items, int TotalItems)>((items, totalItems));
         }
 
+        public Task<(IReadOnlyList<Court> Items, int TotalItems)> GetCourtsByComplexIdAsync(
+            Guid sportsComplexId,
+            int page,
+            int pageSize,
+            Guid? sportId = null,
+            CourtStatus? status = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = _courts
+                .Where(c => c.SportsComplexId == sportsComplexId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToList();
+
+            if (status.HasValue)
+            {
+                query = query.Where(c => c.Status == status.Value).ToList();
+            }
+
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize < 1 ? 1 : pageSize;
+
+            var totalItems = query.Count;
+            var items = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return Task.FromResult<(IReadOnlyList<Court> Items, int TotalItems)>((items, totalItems));
+        }
+
         public Task<(int ActiveCount, int InactiveCount)> GetCourtStatusCountsByComplexIdAsync(
             Guid sportsComplexId,
             CancellationToken cancellationToken = default)

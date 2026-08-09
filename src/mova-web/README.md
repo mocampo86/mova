@@ -38,7 +38,7 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/admin/super` | Super admin dashboard. | `SuperAdmin` |
 | `/admin/complex/:complexId` | Complex admin dashboard overview with courts, reservations, and blocked users summaries. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/profile` | Edit the complex public profile. | `ComplexAdmin` of the requested complex |
-| `/admin/complex/:complexId/courts` | Complex admin court management. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/courts` | List and manage the courts of the complex. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/reservations` | Complex admin reservations. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/users` | Complex admin user management. | `ComplexAdmin` of the requested complex |
 
