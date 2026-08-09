@@ -19,4 +19,10 @@ public sealed class FakeBlockedUserRepository : IBlockedUserRepository
         var count = _blockedUsers.Count(b => b.SportsComplexId == sportsComplexId && b.Status == BlockedUserStatus.Active);
         return Task.FromResult(count);
     }
+
+    public Task<bool> IsUserBlockedAsync(Guid sportsComplexId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        var blocked = _blockedUsers.Any(b => b.SportsComplexId == sportsComplexId && b.UserId == userId && b.Status == BlockedUserStatus.Active);
+        return Task.FromResult(blocked);
+    }
 }

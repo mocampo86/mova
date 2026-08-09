@@ -18,6 +18,10 @@ public sealed class Reservation
     public DateTime? CancelledAt { get; private set; }
     public string? CancellationReason { get; private set; }
 
+    public Court? Court { get; private set; }
+
+    public User? User { get; private set; }
+
     private Reservation()
     {
     }
@@ -63,16 +67,38 @@ public sealed class Reservation
         Status = ReservationStatus.Confirmed;
     }
 
-    public void Cancel(string? reason = null)
+    public void Cancel(string? reason = null, bool cancelledByAdmin = false)
     {
         if (Status is ReservationStatus.CancelledByUser or ReservationStatus.CancelledByAdmin)
         {
             return;
         }
 
-        Status = DateTime.UtcNow > StartAt ? ReservationStatus.CancelledByAdmin : ReservationStatus.CancelledByUser;
+        Status = cancelledByAdmin || DateTime.UtcNow > StartAt
+            ? ReservationStatus.CancelledByAdmin
+            : ReservationStatus.CancelledByUser;
         CancellationReason = reason;
         CancelledAt = DateTime.UtcNow;
+    }
+
+    public void MarkCompleted()
+    {
+        if (Status is ReservationStatus.CancelledByUser or ReservationStatus.CancelledByAdmin)
+        {
+            throw new InvalidOperationException("Cannot mark a cancelled reservation as completed.");
+        }
+
+        Status = ReservationStatus.Completed;
+    }
+
+    public void MarkNoShow()
+    {
+        if (Status is ReservationStatus.CancelledByUser or ReservationStatus.CancelledByAdmin)
+        {
+            throw new InvalidOperationException("Cannot mark a cancelled reservation as no-show.");
+        }
+
+        Status = ReservationStatus.NoShow;
     }
 
     public bool IsActiveForAvailability()
