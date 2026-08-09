@@ -3,7 +3,15 @@ import { apiClient } from '../../services/apiClient';
 import { useAuth } from '../auth/useAuth';
 import type { PagedResult } from '../complexes/complexTypes';
 import type { Court } from '../complexes/complexTypes';
-import type { CourtListFilters, CreateCourtRequest, UpdateCourtRequest, UpdateCourtStatusRequest } from './courtTypes';
+import type {
+  AssignCourtSportsRequest,
+  CourtAvailabilityRule,
+  CourtListFilters,
+  CreateCourtRequest,
+  UpdateCourtAvailabilityRequest,
+  UpdateCourtRequest,
+  UpdateCourtStatusRequest
+} from './courtTypes';
 
 export function useCourts(complexId: string, filters: CourtListFilters) {
   const { accessToken } = useAuth();
@@ -148,6 +156,100 @@ export function useUpdateCourt(complexId: string, courtId: string) {
       queryClient.invalidateQueries({ queryKey: ['courts', complexId] });
       queryClient.invalidateQueries({ queryKey: ['active-courts', complexId] });
       queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
+    }
+  });
+}
+
+export async function assignCourtSports(
+  complexId: string,
+  courtId: string,
+  request: AssignCourtSportsRequest,
+  accessToken: string
+): Promise<Court> {
+  return apiClient<Court>(
+    `/api/v1/complexes/${complexId}/courts/${courtId}/sports`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useAssignCourtSports(complexId: string, courtId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<Court, Error, AssignCourtSportsRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to assign sports.');
+      }
+
+      return assignCourtSports(complexId, courtId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['court', complexId, courtId] });
+      queryClient.invalidateQueries({ queryKey: ['courts', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['active-courts', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
+    }
+  });
+}
+
+export async function getCourtAvailabilityRules(
+  complexId: string,
+  courtId: string,
+  accessToken: string
+): Promise<CourtAvailabilityRule[]> {
+  return apiClient<CourtAvailabilityRule[]>(
+    `/api/v1/complexes/${complexId}/courts/${courtId}/availability`,
+    {},
+    accessToken
+  );
+}
+
+export function useCourtAvailabilityRules(complexId: string, courtId: string) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['court-availability-rules', complexId, courtId],
+    queryFn: () => getCourtAvailabilityRules(complexId, courtId, accessToken ?? ''),
+    enabled: Boolean(complexId && courtId && accessToken)
+  });
+}
+
+export async function updateCourtAvailability(
+  complexId: string,
+  courtId: string,
+  request: UpdateCourtAvailabilityRequest,
+  accessToken: string
+): Promise<CourtAvailabilityRule[]> {
+  return apiClient<CourtAvailabilityRule[]>(
+    `/api/v1/complexes/${complexId}/courts/${courtId}/availability`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useUpdateCourtAvailability(complexId: string, courtId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<CourtAvailabilityRule[], Error, UpdateCourtAvailabilityRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to update availability.');
+      }
+
+      return updateCourtAvailability(complexId, courtId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['court-availability-rules', complexId, courtId] });
+      queryClient.invalidateQueries({ queryKey: ['court-availability', complexId, courtId] });
     }
   });
 }
