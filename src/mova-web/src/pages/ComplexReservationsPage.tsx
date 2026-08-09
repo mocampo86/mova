@@ -69,6 +69,14 @@ function formatDateTimeRange(startAt: string, endAt: string): string {
   return `${start.toLocaleString()} - ${end.toLocaleTimeString()}`;
 }
 
+function getTodayLocalDateString(): string {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function toLocalDateTimeInputValue(isoString: string): string {
   const date = new Date(isoString);
   const year = date.getFullYear();
@@ -105,7 +113,7 @@ export default function ComplexReservationsPage() {
     pageSize: 10,
     courtId: '',
     status: 'All',
-    date: ''
+    date: getTodayLocalDateString()
   });
 
   const courtFilters: CourtListFilters = {
