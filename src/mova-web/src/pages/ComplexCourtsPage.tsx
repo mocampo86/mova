@@ -73,24 +73,7 @@ export default function ComplexCourtsPage() {
     setFilters((prev) => ({ ...prev, pageSize: parseInt(event.target.value, 10), page: 0 }));
   };
 
-  if (isLoading) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Skeleton variant="text" width="40%" height={48} />
-        <Skeleton variant="rectangular" height={200} sx={{ mt: 2 }} />
-      </Container>
-    );
-  }
-
-  if (isError) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error">The courts could not be loaded. Please try again later.</Alert>
-      </Container>
-    );
-  }
-
-  const emptyState = !isLoading && data?.items.length === 0;
+  const emptyState = !isLoading && !isError && data?.items?.length === 0;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -173,7 +156,11 @@ export default function ComplexCourtsPage() {
           <Alert severity="error">{updateStatus.error.message}</Alert>
         )}
 
-        {emptyState ? (
+        {isLoading ? (
+          <Skeleton variant="rectangular" height={200} />
+        ) : isError ? (
+          <Alert severity="error">The courts could not be loaded. Please try again later.</Alert>
+        ) : emptyState ? (
           <Alert severity="info">No courts found for this complex.</Alert>
         ) : (
           <>

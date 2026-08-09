@@ -3,12 +3,12 @@ import { apiClient } from '../../services/apiClient';
 import { useAuth } from '../auth/useAuth';
 import type { PagedResult } from '../complexes/complexTypes';
 import type { Court } from '../complexes/complexTypes';
-import type { CourtListFilters, UpdateCourtStatusRequest } from './courtTypes';
+import type { CourtListFilters, CreateCourtRequest, UpdateCourtStatusRequest } from './courtTypes';
 
 export function useCourts(complexId: string, filters: CourtListFilters) {
   const { accessToken } = useAuth();
   const params = new URLSearchParams({
-    page: String(filters.page),
+    page: String(filters.page + 1),
     pageSize: String(filters.pageSize),
     status: filters.status
   });
@@ -56,6 +56,41 @@ export function useUpdateCourtStatus(complexId: string) {
       }
 
       return updateCourtStatus(complexId, courtId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courts', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['active-courts', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
+    }
+  });
+}
+
+export async function createCourt(
+  complexId: string,
+  request: CreateCourtRequest,
+  accessToken: string
+): Promise<Court> {
+  return apiClient<Court>(
+    `/api/v1/complexes/${complexId}/courts`,
+    {
+      method: 'POST',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useCreateCourt(complexId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<Court, Error, CreateCourtRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to create a court.');
+      }
+
+      return createCourt(complexId, request, accessToken);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courts', complexId] });
