@@ -8,7 +8,7 @@ import type { CourtListFilters, CreateCourtRequest, UpdateCourtStatusRequest } f
 export function useCourts(complexId: string, filters: CourtListFilters) {
   const { accessToken } = useAuth();
   const params = new URLSearchParams({
-    page: String(filters.page),
+    page: String(filters.page + 1),
     pageSize: String(filters.pageSize),
     status: filters.status
   });
