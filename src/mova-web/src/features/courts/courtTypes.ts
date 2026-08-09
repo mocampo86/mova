@@ -11,3 +11,11 @@ export interface CourtListFilters {
 export interface UpdateCourtStatusRequest {
   status: CourtStatus;
 }
+
+export interface CreateCourtRequest {
+  name: string;
+  description: string;
+  surfaceType: string;
+  indoor: boolean;
+  sportIds: string[];
+}
