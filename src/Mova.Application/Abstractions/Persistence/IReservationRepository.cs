@@ -16,6 +16,7 @@ public interface IReservationRepository
         ReservationStatus? status = null,
         DateTime? date = null,
         string? sort = null,
+        Guid? userId = null,
         CancellationToken cancellationToken = default);
     Task<bool> HasOverlappingActiveReservationAsync(
         Guid courtId,

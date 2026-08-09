@@ -42,6 +42,6 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/admin/complex/:complexId/courts/new` | Create a new court for the complex. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/courts/:courtId/edit` | Edit an existing court, including sports assignment and day-of-week availability rules. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/reservations` | Complex admin reservations. | `ComplexAdmin` of the requested complex |
-| `/admin/complex/:complexId/users` | Complex admin user management. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/users` | Complex admin user management: search users, block/unblock users, and view reservation history. | `ComplexAdmin` of the requested complex |
 
 There is currently no UI for creating a sports complex; creation is exposed through the backend API at `POST /api/v1/complexes`. Editing a complex profile is available in the admin panel at `/admin/complex/:complexId/profile` using `PUT /api/v1/complexes/{complexId}`.

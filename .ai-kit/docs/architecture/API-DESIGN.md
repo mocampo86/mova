@@ -48,6 +48,8 @@ POST   /api/v1/reservations
 GET    /api/v1/reservations/{id}
 GET    /api/v1/users/me/reservations
 GET    /api/v1/complexes/{complexId}/reservations
+GET    /api/v1/complexes/{complexId}/users
+GET    /api/v1/complexes/{complexId}/users/{userId}/reservations
 PATCH  /api/v1/reservations/{id}/cancel
 POST   /api/v1/recurring-reservations
 PATCH  /api/v1/recurring-reservations/{id}/cancel

@@ -28,6 +28,7 @@ public sealed class GetReservationsByComplexHandler(IReservationRepository reser
             statusFilter,
             query.Date,
             query.Sort,
+            query.UserId,
             cancellationToken);
 
         var mappedItems = items.Select(ReservationMapper.ToInfo).ToList();

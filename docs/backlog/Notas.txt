@@ -1,2 +1,3 @@
 -Coplex:
 -poder abrir google maps con la ubicación del complejo
+-Ver reservaciones por dia tipo calendario
