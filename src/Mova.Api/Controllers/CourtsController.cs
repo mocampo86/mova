@@ -22,7 +22,9 @@ public sealed class CourtsController(
     IUpdateCourtAvailabilityRulesHandler updateAvailabilityHandler,
     IGetCourtAvailabilityRulesHandler getAvailabilityHandler,
     IGetActiveCourtsByComplexHandler getActiveCourtsHandler,
+    IGetCourtsByComplexHandler getCourtsHandler,
     IGetActiveCourtByIdHandler getActiveCourtByIdHandler,
+    IAuthorizationService authorizationService,
     FluentValidation.IValidator<CreateCourtCommand> validator,
     FluentValidation.IValidator<AssignCourtSportsCommand> assignSportsValidator,
     FluentValidation.IValidator<UpdateCourtStatusCommand> updateStatusValidator,
@@ -35,6 +37,7 @@ public sealed class CourtsController(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         [FromQuery] Guid? sportId = null,
+        [FromQuery] string? status = null,
         CancellationToken cancellationToken = default)
     {
         if (page < 1 || pageSize is < 1 or > 100)
@@ -42,11 +45,58 @@ public sealed class CourtsController(
             return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Invalid pagination parameters." } });
         }
 
-        var result = await getActiveCourtsHandler.HandleAsync(
-            new GetActiveCourtsByComplexQuery(complexId, page, pageSize, sportId),
+        var statusFilter = ParseStatusFilter(status);
+
+        if (statusFilter != CourtStatus.Active)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Unauthorized();
+            }
+
+            var authorizationResult = await authorizationService.AuthorizeAsync(User, HttpContext, AuthorizationPolicies.ComplexAdmin);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+        }
+
+        if (statusFilter == CourtStatus.Active)
+        {
+            var activeResult = await getActiveCourtsHandler.HandleAsync(
+                new GetActiveCourtsByComplexQuery(complexId, page, pageSize, sportId),
+                cancellationToken);
+
+            return Ok(activeResult);
+        }
+
+        var courtStatus = statusFilter == CourtStatus.Inactive ? CourtStatus.Inactive : (CourtStatus?)null;
+
+        var result = await getCourtsHandler.HandleAsync(
+            new GetCourtsByComplexQuery(complexId, page, pageSize, sportId, courtStatus),
             cancellationToken);
 
         return Ok(result);
+    }
+
+    private static CourtStatus? ParseStatusFilter(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status) || string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase))
+        {
+            return CourtStatus.Active;
+        }
+
+        if (string.Equals(status, "Inactive", StringComparison.OrdinalIgnoreCase))
+        {
+            return CourtStatus.Inactive;
+        }
+
+        if (string.Equals(status, "All", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return CourtStatus.Active;
     }
 
     [HttpGet("~/api/v1/courts/{courtId:guid}")]
