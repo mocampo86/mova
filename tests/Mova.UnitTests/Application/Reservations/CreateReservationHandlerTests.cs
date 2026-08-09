@@ -160,6 +160,31 @@ public sealed class CreateReservationHandlerTests
     }
 
     [Fact]
+    public async Task HandleAsync_WithExpiredBlock_CreatesReservation()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        var blockedByUserId = Guid.NewGuid();
+        await _blockedUserRepository.AddAsync(BlockedUser.Create(
+            complex.Id,
+            user.Id,
+            blockedByUserId,
+            "Spam",
+            DateTime.UtcNow.AddDays(-1)));
+        var handler = CreateHandler();
+
+        var result = await handler.HandleAsync(new CreateReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            blockedByUserId,
+            DateTime.UtcNow,
+            DateTime.UtcNow.AddHours(1),
+            null));
+
+        Assert.NotNull(result);
+    }
+
+    [Fact]
     public async Task HandleAsync_WithOverlappingReservation_ThrowsConflictException()
     {
         var (complex, court, user) = await CreateScenarioAsync();
