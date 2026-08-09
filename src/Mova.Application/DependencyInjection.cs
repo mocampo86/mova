@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Mova.Application.Authentication.Handlers;
 using Mova.Application.Authentication.Validators;
 using Mova.Application.Complexes.Handlers;
+using Mova.Application.Reservations.Handlers;
+using Mova.Application.Reservations.Validators;
 using Mova.Application.Users.Handlers;
 using Mova.Application.Courts.Handlers;
 
@@ -37,6 +39,13 @@ public static class DependencyInjection
         services.AddScoped<IGetBusinessHoursHandler, GetBusinessHoursHandler>();
         services.AddScoped<IGetCourtAvailabilityHandler, GetCourtAvailabilityHandler>();
         services.AddScoped<IGetActiveSportsHandler, GetActiveSportsHandler>();
+
+        services.AddScoped<ICreateReservationHandler, CreateReservationHandler>();
+        services.AddScoped<IGetReservationByIdHandler, GetReservationByIdHandler>();
+        services.AddScoped<IGetReservationsByComplexHandler, GetReservationsByComplexHandler>();
+        services.AddScoped<ICancelReservationHandler, CancelReservationHandler>();
+        services.AddScoped<IUpdateReservationStatusHandler, UpdateReservationStatusHandler>();
+        services.AddValidatorsFromAssemblyContaining<CreateReservationCommandValidator>();
 
         return services;
     }
