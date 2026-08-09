@@ -218,7 +218,7 @@ export default function ComplexCourtsPage() {
                             </Button>
                             <Button
                               component={RouterLink}
-                              to={`/admin/complex/${complexId}/courts/${court.id}/availability`}
+                              to={`/admin/complex/${complexId}/courts/${court.id}/edit`}
                               size="small"
                             >
                               Configure

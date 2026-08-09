@@ -25,5 +25,23 @@ export interface UpdateCourtRequest {
   description: string;
   surfaceType: string;
   indoor: boolean;
+  sportIds?: string[];
+}
+
+export interface AssignCourtSportsRequest {
   sportIds: string[];
+}
+
+export interface CourtAvailabilityRule {
+  id?: string;
+  courtId?: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  slotDurationMinutes: number;
+  isActive: boolean;
+}
+
+export interface UpdateCourtAvailabilityRequest {
+  rules: CourtAvailabilityRule[];
 }
