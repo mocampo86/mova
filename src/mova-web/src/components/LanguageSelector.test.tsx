@@ -26,12 +26,12 @@ describe('LanguageSelector', () => {
   });
 
   it('renders a language selector on the public screen', () => {
-    renderWithI18n(<LanguageSelector />);
+    const { container } = renderWithI18n(<LanguageSelector />);
 
     const selector = screen.getByRole('combobox', { name: 'Language' });
     expect(selector).toBeTruthy();
     expect(screen.getByText('English')).toBeTruthy();
-    expect(screen.getByText('🇬🇧')).toBeTruthy();
+    expect(container.querySelector('img')).toBeTruthy();
   });
 
   it('lists supported languages with a flag icon', async () => {
@@ -42,11 +42,11 @@ describe('LanguageSelector', () => {
 
     const options = screen.getAllByRole('option');
     expect(options).toHaveLength(3);
-    expect(options[0].textContent).toContain('🇬🇧');
+    expect(options[0].querySelector('img')).toBeTruthy();
     expect(options[0].textContent).toContain('English');
-    expect(options[1].textContent).toContain('🇪🇸');
+    expect(options[1].querySelector('img')).toBeTruthy();
     expect(options[1].textContent).toContain('Español');
-    expect(options[2].textContent).toContain('🇵🇹');
+    expect(options[2].querySelector('img')).toBeTruthy();
     expect(options[2].textContent).toContain('Português');
   });
 
