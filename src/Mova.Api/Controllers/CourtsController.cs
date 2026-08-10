@@ -48,7 +48,10 @@ public sealed class CourtsController(
             return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Invalid pagination parameters." } });
         }
 
-        var statusFilter = ParseStatusFilter(status);
+        if (!TryParseStatusFilter(status, out var statusFilter))
+        {
+            return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Invalid status filter. Allowed values: Active, Inactive, All." } });
+        }
 
         if (statusFilter != CourtStatus.Active)
         {
@@ -73,33 +76,35 @@ public sealed class CourtsController(
             return Ok(activeResult);
         }
 
-        var courtStatus = statusFilter == CourtStatus.Inactive ? CourtStatus.Inactive : (CourtStatus?)null;
-
         var result = await getCourtsHandler.HandleAsync(
-            new GetCourtsByComplexQuery(complexId, page, pageSize, sportId, courtStatus),
+            new GetCourtsByComplexQuery(complexId, page, pageSize, sportId, statusFilter),
             cancellationToken);
 
         return Ok(result);
     }
 
-    private static CourtStatus? ParseStatusFilter(string? status)
+    private static bool TryParseStatusFilter(string? status, out CourtStatus? statusFilter)
     {
         if (string.IsNullOrWhiteSpace(status) || string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase))
         {
-            return CourtStatus.Active;
+            statusFilter = CourtStatus.Active;
+            return true;
         }
 
         if (string.Equals(status, "Inactive", StringComparison.OrdinalIgnoreCase))
         {
-            return CourtStatus.Inactive;
+            statusFilter = CourtStatus.Inactive;
+            return true;
         }
 
         if (string.Equals(status, "All", StringComparison.OrdinalIgnoreCase))
         {
-            return null;
+            statusFilter = null;
+            return true;
         }
 
-        return CourtStatus.Active;
+        statusFilter = null;
+        return false;
     }
 
     [HttpGet("~/api/v1/courts/{courtId:guid}")]

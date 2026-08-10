@@ -37,12 +37,13 @@ export default function ComplexDetailPage() {
   const { t } = useTranslation();
   const { complexId = '' } = useParams();
   const complex = useActiveComplex(complexId);
-  const courts = useActiveCourts(complexId);
-  const sports = useSports();
 
   const [selectedSportId, setSelectedSportId] = useState('');
   const [selectedCourtId, setSelectedCourtId] = useState('');
   const [selectedDate, setSelectedDate] = useState(todayIso);
+
+  const courts = useActiveCourts(complexId, selectedSportId || undefined);
+  const sports = useSports();
 
   const availability = useCourtAvailability(complexId, selectedCourtId, selectedDate);
 
