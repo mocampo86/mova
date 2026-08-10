@@ -12,12 +12,13 @@ import {
   Stack,
   Typography
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useComplexDashboard } from '../features/complexes/complexApi';
 
-function formatLastUpdated(isoString?: string | null) {
-  if (!isoString) return 'Not updated yet';
+function formatLastUpdated(t: (key: string, options?: Record<string, unknown>) => string, isoString?: string | null) {
+  if (!isoString) return t('common.notUpdatedYet');
   const date = new Date(isoString);
-  return `Last updated ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  return t('common.lastUpdated', { date: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}` });
 }
 
 function statusColor(status: string): 'success' | 'default' | 'warning' {
@@ -60,13 +61,14 @@ function DashboardCard({ title, value, to, isLoading }: DashboardCardProps) {
 }
 
 export default function ComplexAdminPage() {
+  const { t } = useTranslation();
   const { complexId = '' } = useParams();
   const { data, isLoading, isError } = useComplexDashboard(complexId);
 
   if (isError) {
     return (
       <Container sx={{ py: 4 }}>
-        <Alert severity="error">The dashboard could not be loaded. Please try again later.</Alert>
+        <Alert severity="error">{t('admin.dashboard.error')}</Alert>
       </Container>
     );
   }
@@ -91,7 +93,7 @@ export default function ComplexAdminPage() {
                 <Chip label={complex.status} color={statusColor(complex.status)} size="small" />
               </Stack>
               <Typography color="text.secondary" sx={{ mt: 1 }}>
-                {formatLastUpdated(complex.lastUpdatedAt)}
+                {formatLastUpdated(t, complex.lastUpdatedAt)}
               </Typography>
             </>
           )}
@@ -100,7 +102,7 @@ export default function ComplexAdminPage() {
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <DashboardCard
-              title="Active courts"
+              title={t('admin.dashboard.activeCourts')}
               value={data?.courts.active ?? 0}
               to={`/admin/complex/${complexId}/courts`}
               isLoading={isLoading}
@@ -108,7 +110,7 @@ export default function ComplexAdminPage() {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <DashboardCard
-              title="Inactive courts"
+              title={t('admin.dashboard.inactiveCourts')}
               value={data?.courts.inactive ?? 0}
               to={`/admin/complex/${complexId}/courts`}
               isLoading={isLoading}
@@ -116,7 +118,7 @@ export default function ComplexAdminPage() {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <DashboardCard
-              title="Confirmed today"
+              title={t('admin.dashboard.confirmedToday')}
               value={data?.reservationsToday.confirmed ?? 0}
               to={`/admin/complex/${complexId}/reservations`}
               isLoading={isLoading}
@@ -124,7 +126,7 @@ export default function ComplexAdminPage() {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <DashboardCard
-              title="Completed today"
+              title={t('admin.dashboard.completedToday')}
               value={data?.reservationsToday.completed ?? 0}
               to={`/admin/complex/${complexId}/reservations`}
               isLoading={isLoading}
@@ -132,7 +134,7 @@ export default function ComplexAdminPage() {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <DashboardCard
-              title="Cancelled today"
+              title={t('admin.dashboard.cancelledToday')}
               value={data?.reservationsToday.cancelled ?? 0}
               to={`/admin/complex/${complexId}/reservations`}
               isLoading={isLoading}
@@ -140,7 +142,7 @@ export default function ComplexAdminPage() {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <DashboardCard
-              title="Blocked users"
+              title={t('admin.dashboard.blockedUsers')}
               value={data?.blockedUsers ?? 0}
               to={`/admin/complex/${complexId}/users`}
               isLoading={isLoading}

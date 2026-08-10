@@ -17,6 +17,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useCreateCourt } from '../features/courts/courtApi';
 import { useSports } from '../features/complexes/complexApi';
 
@@ -37,6 +38,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function CreateCourtPage() {
+  const { t } = useTranslation();
   const { complexId = '' } = useParams();
   const navigate = useNavigate();
   const { mutate, isPending, error } = useCreateCourt(complexId);
@@ -69,7 +71,7 @@ export default function CreateCourtPage() {
   if (!complexId) {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="error">The complex identifier is missing.</Alert>
+        <Alert severity="error">{t('admin.createCourt.missingId')}</Alert>
       </Container>
     );
   }
@@ -77,10 +79,10 @@ export default function CreateCourtPage() {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Create court
+        {t('admin.createCourt.title')}
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
-        Add a new court to your sports complex.
+        {t('admin.createCourt.subtitle')}
       </Typography>
 
       {error && (
@@ -91,7 +93,7 @@ export default function CreateCourtPage() {
 
       {sports.isError && (
         <Alert severity="warning" sx={{ mb: 3 }}>
-          Available sports could not be loaded. You can still create the court without sports.
+          {t('admin.createCourt.sportsError')}
         </Alert>
       )}
 
@@ -102,7 +104,7 @@ export default function CreateCourtPage() {
       >
         <TextField
           {...register('name')}
-          label="Court name"
+          label={t('admin.createCourt.name')}
           fullWidth
           error={Boolean(errors.name)}
           helperText={errors.name?.message}
@@ -110,7 +112,7 @@ export default function CreateCourtPage() {
 
         <TextField
           {...register('description')}
-          label="Description"
+          label={t('common.description')}
           multiline
           rows={3}
           fullWidth
@@ -120,8 +122,8 @@ export default function CreateCourtPage() {
 
         <TextField
           {...register('surfaceType')}
-          label="Surface type"
-          placeholder="e.g., Synthetic, Grass, Concrete"
+          label={t('admin.createCourt.surfaceType')}
+          placeholder={t('admin.createCourt.surfacePlaceholder')}
           fullWidth
           error={Boolean(errors.surfaceType)}
           helperText={errors.surfaceType?.message}
@@ -139,7 +141,7 @@ export default function CreateCourtPage() {
                     onChange={(event) => field.onChange(event.target.checked)}
                   />
                 }
-                label="Indoor court"
+                label={t('admin.createCourt.indoor')}
               />
               {errors.indoor && <FormHelperText>{errors.indoor.message}</FormHelperText>}
             </FormControl>
@@ -152,7 +154,7 @@ export default function CreateCourtPage() {
           disabled={sports.isLoading || sports.isError}
         >
           <Typography component="legend" variant="subtitle2" sx={{ mb: 1 }}>
-            Sports (optional)
+            {t('admin.createCourt.sports')}
           </Typography>
 
           {sports.isLoading ? (
@@ -194,7 +196,7 @@ export default function CreateCourtPage() {
           disabled={isPending || sports.isLoading}
           sx={{ alignSelf: 'flex-start' }}
         >
-          Create court
+          {t('admin.createCourt.create')}
         </Button>
       </Box>
     </Container>

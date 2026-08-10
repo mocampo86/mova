@@ -14,6 +14,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useActiveComplex, useUpdateComplex } from '../features/complexes/complexApi';
 
 const phoneNumberPattern = /^\+[0-9](?:\s*[0-9]){6,14}$/;
@@ -28,15 +29,11 @@ const nullableCoordinate = <T extends number>(min: T, max: T, message: string) =
       const parsed = Number(value);
       return Number.isNaN(parsed) ? null : parsed;
     },
-    z.number({ invalid_type_error: 'Value must be a valid number.' })
-      .min(min, message)
-      .max(max, message)
-      .nullable()
-      .optional()
+    z.number({ invalid_type_error: 'Value must be a valid number.' }).min(min, message).max(max, message).nullable().optional()
   );
 
 const schema = z.object({
-  name: z.string().min(1, 'Name is required.').max(255, 'Name must not exceed 255 characters.'),
+  name: z.string().min(1, 'Complex name is required.').max(255, 'Complex name must not exceed 255 characters.'),
   description: z
     .string()
     .min(1, 'Description is required.')
@@ -62,13 +59,14 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-function formatUpdatedAt(isoString?: string | null) {
-  if (!isoString) return 'Not updated yet';
+function formatUpdatedAt(t: (key: string, options?: Record<string, unknown>) => string, isoString?: string | null) {
+  if (!isoString) return t('common.notUpdatedYet');
   const date = new Date(isoString);
-  return `Last updated ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  return t('common.lastUpdated', { date: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}` });
 }
 
 export default function ComplexProfilePage() {
+  const { t } = useTranslation();
   const { complexId = '' } = useParams();
   const { data, isLoading, isError } = useActiveComplex(complexId);
   const { mutate, isPending, error, isSuccess } = useUpdateComplex(complexId);
@@ -133,7 +131,7 @@ export default function ComplexProfilePage() {
   if (isError || !data) {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="error">The complex profile could not be loaded. Please try again later.</Alert>
+        <Alert severity="error">{t('admin.profile.loadError')}</Alert>
       </Container>
     );
   }
@@ -141,15 +139,15 @@ export default function ComplexProfilePage() {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Edit complex profile
+        {t('admin.profile.title')}
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
-        {formatUpdatedAt(data.updatedAt)}
+        {formatUpdatedAt(t, data.updatedAt)}
       </Typography>
 
       {isSuccess && (
         <Alert severity="success" sx={{ mb: 3 }}>
-          The complex profile has been updated successfully.
+          {t('admin.profile.success')}
         </Alert>
       )}
       {error && (
@@ -165,7 +163,7 @@ export default function ComplexProfilePage() {
       >
         <TextField
           {...register('name')}
-          label="Complex name"
+          label={t('admin.profile.name')}
           fullWidth
           error={Boolean(errors.name)}
           helperText={errors.name?.message}
@@ -173,7 +171,7 @@ export default function ComplexProfilePage() {
 
         <TextField
           {...register('description')}
-          label="Description"
+          label={t('common.description')}
           multiline
           rows={3}
           fullWidth
@@ -183,7 +181,7 @@ export default function ComplexProfilePage() {
 
         <TextField
           {...register('address')}
-          label="Address"
+          label={t('common.address')}
           fullWidth
           error={Boolean(errors.address)}
           helperText={errors.address?.message}
@@ -191,7 +189,7 @@ export default function ComplexProfilePage() {
 
         <TextField
           {...register('city')}
-          label="City"
+          label={t('common.city')}
           fullWidth
           error={Boolean(errors.city)}
           helperText={errors.city?.message}
@@ -205,7 +203,7 @@ export default function ComplexProfilePage() {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Latitude (optional)"
+                  label={t('admin.profile.latitude')}
                   type="number"
                   fullWidth
                   value={field.value ?? ''}
@@ -225,7 +223,7 @@ export default function ComplexProfilePage() {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Longitude (optional)"
+                  label={t('admin.profile.longitude')}
                   type="number"
                   fullWidth
                   value={field.value ?? ''}
@@ -242,8 +240,8 @@ export default function ComplexProfilePage() {
 
         <TextField
           {...register('phoneNumber')}
-          label="Phone number"
-          placeholder="+54 11 1234 5678"
+          label={t('admin.profile.phone')}
+          placeholder={t('completeProfile.phonePlaceholder')}
           fullWidth
           error={Boolean(errors.phoneNumber)}
           helperText={errors.phoneNumber?.message}
@@ -251,7 +249,7 @@ export default function ComplexProfilePage() {
 
         <TextField
           {...register('email')}
-          label="Email"
+          label={t('common.email')}
           type="email"
           fullWidth
           error={Boolean(errors.email)}
@@ -260,7 +258,7 @@ export default function ComplexProfilePage() {
 
         <TextField
           {...register('status')}
-          label="Status"
+          label={t('common.status')}
           fullWidth
           inputProps={{ readOnly: true }}
           error={Boolean(errors.status)}
@@ -268,7 +266,7 @@ export default function ComplexProfilePage() {
         />
 
         <Button type="submit" variant="contained" disabled={isPending} sx={{ alignSelf: 'flex-start' }}>
-          Save changes
+          {t('admin.profile.save')}
         </Button>
       </Box>
     </Container>

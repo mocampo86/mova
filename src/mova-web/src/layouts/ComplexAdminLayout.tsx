@@ -16,6 +16,7 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useComplexDashboard } from '../features/complexes/complexApi';
 
 function isActivePath(pathname: string, to: string, exact = false): boolean {
@@ -26,6 +27,7 @@ function isActivePath(pathname: string, to: string, exact = false): boolean {
 }
 
 export default function ComplexAdminLayout() {
+  const { t } = useTranslation();
   const { complexId = '' } = useParams<{ complexId: string }>();
   const { pathname } = useLocation();
   const theme = useTheme();
@@ -36,24 +38,24 @@ export default function ComplexAdminLayout() {
   const handleDrawerToggle = () => setMobileOpen((open) => !open);
 
   const navItems = [
-    { label: 'Dashboard', to: `/admin/complex/${complexId}` },
-    { label: 'Profile', to: `/admin/complex/${complexId}/profile` },
-    { label: 'Courts', to: `/admin/complex/${complexId}/courts` },
-    { label: 'Reservations', to: `/admin/complex/${complexId}/reservations` },
-    { label: 'Users', to: `/admin/complex/${complexId}/users` }
+    { label: t('nav.dashboard'), to: `/admin/complex/${complexId}`, exact: true },
+    { label: t('nav.profile'), to: `/admin/complex/${complexId}/profile` },
+    { label: t('nav.courts'), to: `/admin/complex/${complexId}/courts` },
+    { label: t('nav.reservations'), to: `/admin/complex/${complexId}/reservations` },
+    { label: t('nav.users'), to: `/admin/complex/${complexId}/users` }
   ];
 
   const drawerContent = (
     <>
       <Toolbar>
         <Typography variant="h6" noWrap component="div">
-          Mova
+          {t('common.appName')}
         </Typography>
       </Toolbar>
       <Divider />
       <List>
         {navItems.map((item) => {
-          const active = isActivePath(pathname, item.to, item.label === 'Dashboard');
+          const active = isActivePath(pathname, item.to, item.exact === true);
           return (
             <ListItem key={item.label} disablePadding>
               <ListItemButton
@@ -75,7 +77,7 @@ export default function ComplexAdminLayout() {
   const headerTitle = isLoading ? (
     <Skeleton variant="text" width={160} />
   ) : (
-    data?.complex.name ?? 'Complex Admin'
+    data?.complex.name ?? t('nav.complexAdmin')
   );
 
   return (
@@ -88,7 +90,7 @@ export default function ComplexAdminLayout() {
           {isMobile && (
             <IconButton
               color="inherit"
-              aria-label="open menu"
+              aria-label={t('nav.openMenu')}
               edge="start"
               onClick={handleDrawerToggle}
               sx={{ mr: 2 }}

@@ -22,15 +22,10 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useSports } from '../features/complexes/complexApi';
 import { useCourts, useUpdateCourtStatus } from '../features/courts/courtApi';
 import type { CourtListFilters, CourtStatus } from '../features/courts/courtTypes';
-
-const statusOptions: { value: CourtStatus | 'All'; label: string }[] = [
-  { value: 'All', label: 'All' },
-  { value: 'Active', label: 'Active' },
-  { value: 'Inactive', label: 'Inactive' }
-];
 
 function statusColor(status: string): 'success' | 'default' | 'warning' {
   if (status === 'Active') return 'success';
@@ -39,6 +34,7 @@ function statusColor(status: string): 'success' | 'default' | 'warning' {
 }
 
 export default function ComplexCourtsPage() {
+  const { t } = useTranslation();
   const { complexId = '' } = useParams();
   const [filters, setFilters] = useState<CourtListFilters>({
     page: 0,
@@ -51,6 +47,12 @@ export default function ComplexCourtsPage() {
   const { data, isLoading, isError } = useCourts(complexId, filters);
   const sports = useSports();
   const updateStatus = useUpdateCourtStatus(complexId);
+
+  const statusOptions: { value: CourtStatus | 'All'; label: string }[] = [
+    { value: 'All', label: t('status.all') },
+    { value: 'Active', label: t('status.active') },
+    { value: 'Inactive', label: t('status.inactive') }
+  ];
 
   const filteredItems = useMemo(() => {
     if (!data?.items) return [];
@@ -85,21 +87,21 @@ export default function ComplexCourtsPage() {
           justifyContent="space-between"
         >
           <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>
-            Courts
+            {t('admin.courts.title')}
           </Typography>
           <Button
             component={RouterLink}
             to={`/admin/complex/${complexId}/courts/new`}
             variant="contained"
           >
-            Create court
+            {t('admin.courts.create')}
           </Button>
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <TextField
-            label="Search courts"
-            placeholder="Search by name or surface"
+            label={t('admin.courts.searchPlaceholder')}
+            placeholder={t('admin.courts.searchBy')}
             value={filters.search}
             onChange={(event) =>
               setFilters((prev) => ({ ...prev, search: event.target.value, page: 0 }))
@@ -107,11 +109,11 @@ export default function ComplexCourtsPage() {
             fullWidth
           />
           <FormControl sx={{ minWidth: 160 }}>
-            <InputLabel id="court-status-filter-label">Status</InputLabel>
+            <InputLabel id="court-status-filter-label">{t('admin.courts.statusFilter')}</InputLabel>
             <Select
               labelId="court-status-filter-label"
               value={filters.status}
-              label="Status"
+              label={t('admin.courts.statusFilter')}
               onChange={(event) =>
                 setFilters((prev) => ({
                   ...prev,
@@ -128,17 +130,17 @@ export default function ComplexCourtsPage() {
             </Select>
           </FormControl>
           <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="court-sport-filter-label">Sport</InputLabel>
+            <InputLabel id="court-sport-filter-label">{t('admin.courts.sportFilter')}</InputLabel>
             <Select
               labelId="court-sport-filter-label"
               value={filters.sportId}
-              label="Sport"
+              label={t('admin.courts.sportFilter')}
               onChange={(event) =>
                 setFilters((prev) => ({ ...prev, sportId: event.target.value, page: 0 }))
               }
               disabled={sports.isLoading || sports.isError}
             >
-              <MenuItem value="">All sports</MenuItem>
+              <MenuItem value="">{t('admin.courts.allSports')}</MenuItem>
               {sports.data?.map((sport) => (
                 <MenuItem key={sport.id} value={sport.id}>
                   {sport.name}
@@ -149,7 +151,7 @@ export default function ComplexCourtsPage() {
         </Stack>
 
         {sports.isError && (
-          <Alert severity="warning">Sports could not be loaded. Court sports will not be shown.</Alert>
+          <Alert severity="warning">{t('admin.courts.sportsError')}</Alert>
         )}
 
         {updateStatus.error && (
@@ -159,9 +161,9 @@ export default function ComplexCourtsPage() {
         {isLoading ? (
           <Skeleton variant="rectangular" height={200} />
         ) : isError ? (
-          <Alert severity="error">The courts could not be loaded. Please try again later.</Alert>
+          <Alert severity="error">{t('admin.courts.error')}</Alert>
         ) : emptyState ? (
-          <Alert severity="info">No courts found for this complex.</Alert>
+          <Alert severity="info">{t('admin.courts.empty')}</Alert>
         ) : (
           <>
             <TableContainer
@@ -171,12 +173,12 @@ export default function ComplexCourtsPage() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Surface</TableCell>
-                    <TableCell>Indoor / Outdoor</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Sports</TableCell>
-                    <TableCell align="right">Actions</TableCell>
+                    <TableCell>{t('admin.courts.nameHeader')}</TableCell>
+                    <TableCell>{t('admin.courts.surfaceHeader')}</TableCell>
+                    <TableCell>{t('admin.courts.indoorOutdoorHeader')}</TableCell>
+                    <TableCell>{t('admin.courts.statusHeader')}</TableCell>
+                    <TableCell>{t('admin.courts.sportsHeader')}</TableCell>
+                    <TableCell align="right">{t('admin.courts.actionsHeader')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -198,10 +200,10 @@ export default function ComplexCourtsPage() {
                           )}
                         </TableCell>
                         <TableCell>{court.surfaceType}</TableCell>
-                        <TableCell>{court.indoor ? 'Indoor' : 'Outdoor'}</TableCell>
+                        <TableCell>{court.indoor ? t('common.indoor') : t('common.outdoor')}</TableCell>
                         <TableCell>
                           <Chip
-                            label={court.status}
+                            label={court.status === 'Active' ? t('status.active') : t('status.inactive')}
                             color={statusColor(court.status)}
                             size="small"
                           />
@@ -214,30 +216,28 @@ export default function ComplexCourtsPage() {
                               to={`/admin/complex/${complexId}/courts/${court.id}/edit`}
                               size="small"
                             >
-                              Edit
+                              {t('common.edit')}
                             </Button>
                             <Button
                               component={RouterLink}
                               to={`/admin/complex/${complexId}/courts/${court.id}/edit`}
                               size="small"
                             >
-                              Configure
+                              {t('admin.courts.configure')}
                             </Button>
                             <Button
                               size="small"
                               variant={court.status === 'Active' ? 'outlined' : 'contained'}
-                              color={court.status === 'Active' ? 'warning' : 'success'}
+                              color={court.status === 'Active' ? 'error' : 'success'}
                               onClick={() =>
                                 updateStatus.mutate({
                                   courtId: court.id,
-                                  request: {
-                                    status: court.status === 'Active' ? 'Inactive' : 'Active'
-                                  }
+                                  request: { status: court.status === 'Active' ? 'Inactive' : 'Active' }
                                 })
                               }
                               disabled={updateStatus.isPending}
                             >
-                              {court.status === 'Active' ? 'Deactivate' : 'Activate'}
+                              {court.status === 'Active' ? t('admin.courts.deactivate') : t('admin.courts.activate')}
                             </Button>
                           </Stack>
                         </TableCell>

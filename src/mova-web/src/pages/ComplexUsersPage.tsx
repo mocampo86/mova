@@ -22,6 +22,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
   useBlockUser,
   useComplexUsers,
@@ -34,19 +35,13 @@ import type {
   UserReservationFilters
 } from '../features/users/userAdminTypes';
 
-const sortOptions: { value: string; label: string }[] = [
-  { value: 'fullName:asc', label: 'Name (A-Z)' },
-  { value: 'fullName:desc', label: 'Name (Z-A)' },
-  { value: 'email:asc', label: 'Email (A-Z)' },
-  { value: 'createdAt:desc', label: 'Newest users' }
-];
-
 function formatDateTime(isoString?: string | null): string {
   if (!isoString) return '—';
   return new Date(isoString).toLocaleString();
 }
 
 export default function ComplexUsersPage() {
+  const { t } = useTranslation();
   const { complexId = '' } = useParams();
   const [filters, setFilters] = useState<UserListFilters>({
     page: 0,
@@ -75,6 +70,13 @@ export default function ComplexUsersPage() {
     pageSize: 10,
     sort: 'startAt:desc'
   });
+
+  const sortOptions: { value: string; label: string }[] = [
+    { value: 'fullName:asc', label: t('admin.users.nameAsc') },
+    { value: 'fullName:desc', label: t('admin.users.nameDesc') },
+    { value: 'email:asc', label: t('admin.users.emailAsc') },
+    { value: 'createdAt:desc', label: t('admin.users.newest') }
+  ];
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setFilters((prev) => ({ ...prev, page: newPage }));
@@ -122,7 +124,7 @@ export default function ComplexUsersPage() {
       });
       closeBlockDialog();
     } catch {
-      setBlockFormError('Failed to block the user. Please try again.');
+      setBlockFormError(t('admin.users.blockError'));
     }
   };
 
@@ -147,13 +149,13 @@ export default function ComplexUsersPage() {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Stack spacing={3}>
         <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>
-          Users
+          {t('admin.users.title')}
         </Typography>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <TextField
-            label="Search users"
-            placeholder="Search by name, email or phone"
+            label={t('admin.users.searchPlaceholder')}
+            placeholder={t('admin.users.searchBy')}
             value={filters.search}
             onChange={(event) =>
               setFilters((prev) => ({ ...prev, search: event.target.value, page: 0 }))
@@ -162,7 +164,7 @@ export default function ComplexUsersPage() {
           />
           <TextField
             select
-            label="Sort"
+            label={t('admin.users.sort')}
             value={filters.sort}
             onChange={(event) =>
               setFilters((prev) => ({ ...prev, sort: event.target.value, page: 0 }))
@@ -187,9 +189,9 @@ export default function ComplexUsersPage() {
         {isLoading ? (
           <Skeleton variant="rectangular" height={200} />
         ) : isError ? (
-          <Alert severity="error">The users could not be loaded. Please try again later.</Alert>
+          <Alert severity="error">{t('admin.users.error')}</Alert>
         ) : emptyState ? (
-          <Alert severity="info">No users found for this complex.</Alert>
+          <Alert severity="info">{t('admin.users.empty')}</Alert>
         ) : (
           <>
             <TableContainer
@@ -199,10 +201,10 @@ export default function ComplexUsersPage() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Contact</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell align="right">Actions</TableCell>
+                    <TableCell>{t('admin.users.nameHeader')}</TableCell>
+                    <TableCell>{t('admin.users.contactHeader')}</TableCell>
+                    <TableCell>{t('admin.users.statusHeader')}</TableCell>
+                    <TableCell align="right">{t('admin.users.actionsHeader')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -215,12 +217,12 @@ export default function ComplexUsersPage() {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">{user.phoneNumber || '—'}</Typography>
+                        <Typography variant="body2">{user.phoneNumber || t('common.emptyValue')}</Typography>
                       </TableCell>
                       <TableCell>
                         {user.isBlocked ? (
                           <Stack spacing={0.5} alignItems="flex-start">
-                            <Chip label="Blocked" color="error" size="small" />
+                            <Chip label={t('common.blocked')} color="error" size="small" />
                             {user.blockReason && (
                               <Typography variant="caption" color="text.secondary">
                                 {user.blockReason}
@@ -228,12 +230,12 @@ export default function ComplexUsersPage() {
                             )}
                             {user.blockedUntil && (
                               <Typography variant="caption" color="text.secondary">
-                                Until {formatDateTime(user.blockedUntil)}
+                                {t('common.until', { value: formatDateTime(user.blockedUntil) })}
                               </Typography>
                             )}
                           </Stack>
                         ) : (
-                          <Chip label="Active" color="success" size="small" />
+                          <Chip label={t('common.active')} color="success" size="small" />
                         )}
                       </TableCell>
                       <TableCell align="right">
@@ -243,7 +245,7 @@ export default function ComplexUsersPage() {
                             variant="outlined"
                             onClick={() => openReservationsDialog(user)}
                           >
-                            History
+                            {t('admin.users.history')}
                           </Button>
                           {user.isBlocked ? (
                             <Button
@@ -253,7 +255,7 @@ export default function ComplexUsersPage() {
                               onClick={() => handleUnblock(user)}
                               disabled={unblockUser.isPending}
                             >
-                              Unblock
+                              {t('admin.users.unblock')}
                             </Button>
                           ) : (
                             <Button
@@ -262,7 +264,7 @@ export default function ComplexUsersPage() {
                               color="error"
                               onClick={() => openBlockDialog(user)}
                             >
-                              Block
+                              {t('admin.users.block')}
                             </Button>
                           )}
                         </Stack>
@@ -287,14 +289,14 @@ export default function ComplexUsersPage() {
 
       <Dialog open={blockDialog.open} onClose={closeBlockDialog} fullWidth maxWidth="sm">
         <DialogTitle>
-          Block {blockDialog.user?.fullName ?? 'user'}
+          {blockDialog.user ? t('admin.users.blockTitle', { name: blockDialog.user.fullName }) : t('admin.users.block')}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             {blockFormError && <Alert severity="error">{blockFormError}</Alert>}
             <TextField
-              label="Reason"
-              placeholder="Reason for blocking"
+              label={t('admin.users.reasonLabel')}
+              placeholder={t('admin.users.reasonPlaceholder')}
               value={blockForm.reason}
               onChange={(event) =>
                 setBlockForm((prev) => ({ ...prev, reason: event.target.value }))
@@ -304,7 +306,7 @@ export default function ComplexUsersPage() {
               rows={2}
             />
             <TextField
-              label="Expiration (optional)"
+              label={t('admin.users.expiration')}
               type="datetime-local"
               value={blockForm.blockedUntil}
               onChange={(event) =>
@@ -312,19 +314,19 @@ export default function ComplexUsersPage() {
               }
               fullWidth
               InputLabelProps={{ shrink: true }}
-              helperText="Leave empty to block indefinitely"
+              helperText={t('admin.users.expirationHelper')}
             />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeBlockDialog}>Cancel</Button>
+          <Button onClick={closeBlockDialog}>{t('common.cancel')}</Button>
           <Button
             variant="contained"
             color="error"
             onClick={handleBlockSubmit}
             disabled={blockUser.isPending}
           >
-            Block
+            {t('admin.users.block')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -363,29 +365,30 @@ function UserReservationsDialog({
   onPageChange,
   onRowsPerPageChange
 }: UserReservationsDialogProps) {
+  const { t } = useTranslation();
   const { data, isLoading, isError } = useUserReservations(complexId, user.id, filters);
   const emptyState = !isLoading && !isError && data?.items?.length === 0;
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
-      <DialogTitle>Reservation history: {user.fullName}</DialogTitle>
+      <DialogTitle>{t('admin.users.historyTitle', { name: user.fullName })}</DialogTitle>
       <DialogContent>
         {isLoading ? (
           <Skeleton variant="rectangular" height={200} />
         ) : isError ? (
-          <Alert severity="error">The reservation history could not be loaded.</Alert>
+          <Alert severity="error">{t('admin.users.historyError')}</Alert>
         ) : emptyState ? (
-          <Alert severity="info">No reservations found for this user.</Alert>
+          <Alert severity="info">{t('admin.users.historyEmpty')}</Alert>
         ) : (
           <>
             <TableContainer component={Box} sx={{ border: 1, borderColor: 'divider', borderRadius: 2 }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Court</TableCell>
-                    <TableCell>Start</TableCell>
-                    <TableCell>End</TableCell>
-                    <TableCell>Status</TableCell>
+                    <TableCell>{t('admin.users.courtHeader')}</TableCell>
+                    <TableCell>{t('admin.users.startHeader')}</TableCell>
+                    <TableCell>{t('admin.users.endHeader')}</TableCell>
+                    <TableCell>{t('admin.users.statusHeader')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -415,7 +418,7 @@ function UserReservationsDialog({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{t('common.close')}</Button>
       </DialogActions>
     </Dialog>
   );

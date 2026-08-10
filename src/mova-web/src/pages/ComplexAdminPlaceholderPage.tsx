@@ -1,13 +1,16 @@
 import { Container, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 export default function ComplexAdminPlaceholderPage() {
+  const { t } = useTranslation();
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h5" component="h2" gutterBottom>
-        Section under construction
+        {t('admin.placeholder.title')}
       </Typography>
       <Typography color="text.secondary">
-        This admin section is not yet available.
+        {t('admin.placeholder.subtitle')}
       </Typography>
     </Container>
   );

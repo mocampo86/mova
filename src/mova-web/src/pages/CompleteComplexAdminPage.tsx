@@ -2,6 +2,7 @@ import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { useCompleteComplexAdminProfile } from '../features/users/useCompleteComplexAdminProfile';
 
 const phoneNumberPattern = /^\+[0-9](?:\s*[0-9]){6,14}$/;
@@ -72,6 +73,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function CompleteComplexAdminPage() {
+  const { t } = useTranslation();
   const { mutate, isPending, error } = useCompleteComplexAdminProfile();
   const {
     register,
@@ -97,9 +99,9 @@ export default function CompleteComplexAdminPage() {
         px: 2
       }}
     >
-      <Typography variant="h4">Complete your complex profile</Typography>
+      <Typography variant="h4">{t('completeComplexAdmin.title')}</Typography>
       <Typography variant="body1" textAlign="center" sx={{ maxWidth: 500 }}>
-        We need a few details about you and your sports complex. Your request will be reviewed before the complex goes live.
+        {t('completeComplexAdmin.subtitle')}
       </Typography>
 
       <Box
@@ -107,29 +109,29 @@ export default function CompleteComplexAdminPage() {
         onSubmit={handleSubmit(onSubmit)}
         sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%', maxWidth: 600 }}
       >
-        <Typography variant="h6">Your contact information</Typography>
+        <Typography variant="h6">{t('completeComplexAdmin.contactInfo')}</Typography>
         <TextField
           {...register('phoneNumber')}
-          label="Your phone number"
-          placeholder="+54 11 1234 5678"
+          label={t('completeComplexAdmin.yourPhone')}
+          placeholder={t('completeProfile.phonePlaceholder')}
           fullWidth
           error={Boolean(errors.phoneNumber)}
           helperText={errors.phoneNumber?.message}
         />
 
         <Typography variant="h6" sx={{ mt: 2 }}>
-          Complex information
+          {t('completeComplexAdmin.complexInfo')}
         </Typography>
         <TextField
           {...register('name')}
-          label="Complex name"
+          label={t('completeComplexAdmin.complexName')}
           fullWidth
           error={Boolean(errors.name)}
           helperText={errors.name?.message}
         />
         <TextField
           {...register('description')}
-          label="Description"
+          label={t('common.description')}
           multiline
           rows={3}
           fullWidth
@@ -138,14 +140,14 @@ export default function CompleteComplexAdminPage() {
         />
         <TextField
           {...register('address')}
-          label="Address"
+          label={t('common.address')}
           fullWidth
           error={Boolean(errors.address)}
           helperText={errors.address?.message}
         />
         <TextField
           {...register('city')}
-          label="City"
+          label={t('common.city')}
           fullWidth
           error={Boolean(errors.city)}
           helperText={errors.city?.message}
@@ -153,7 +155,7 @@ export default function CompleteComplexAdminPage() {
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <TextField
             {...register('latitude')}
-            label="Latitude (optional)"
+            label={t('completeComplexAdmin.latitude')}
             type="number"
             fullWidth
             error={Boolean(errors.latitude)}
@@ -161,7 +163,7 @@ export default function CompleteComplexAdminPage() {
           />
           <TextField
             {...register('longitude')}
-            label="Longitude (optional)"
+            label={t('completeComplexAdmin.longitude')}
             type="number"
             fullWidth
             error={Boolean(errors.longitude)}
@@ -170,15 +172,15 @@ export default function CompleteComplexAdminPage() {
         </Stack>
         <TextField
           {...register('complexPhoneNumber')}
-          label="Complex phone number"
-          placeholder="+54 11 1234 5678"
+          label={t('completeComplexAdmin.complexPhone')}
+          placeholder={t('completeProfile.phonePlaceholder')}
           fullWidth
           error={Boolean(errors.complexPhoneNumber)}
           helperText={errors.complexPhoneNumber?.message}
         />
         <TextField
           {...register('complexEmail')}
-          label="Complex email"
+          label={t('completeComplexAdmin.complexEmail')}
           type="email"
           fullWidth
           error={Boolean(errors.complexEmail)}
@@ -186,7 +188,7 @@ export default function CompleteComplexAdminPage() {
         />
 
         <Button type="submit" variant="contained" disabled={isPending}>
-          Submit for review
+          {t('completeComplexAdmin.submit')}
         </Button>
 
         {error && (
