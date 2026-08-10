@@ -5,6 +5,7 @@ import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 import i18n from '../i18n';
+import { STORAGE_KEY } from '../i18n/languageStorage';
 import HomePage from '../pages/HomePage';
 import LanguageSelector from './LanguageSelector';
 
@@ -94,5 +95,19 @@ describe('LanguageSelector', () => {
 
     const selectedOption = screen.getByRole('option', { name: 'English' });
     expect(selectedOption.getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('persists the selected language to localStorage', async () => {
+    const user = userEvent.setup();
+    window.localStorage.removeItem(STORAGE_KEY);
+
+    renderWithI18n(<LanguageSelector />);
+
+    await user.click(screen.getByRole('combobox', { name: 'Language' }));
+    await user.click(screen.getByRole('option', { name: 'Español' }));
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(STORAGE_KEY)).toBe('es');
+    });
   });
 });
