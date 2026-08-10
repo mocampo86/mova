@@ -1,0 +1,409 @@
+{
+  "common": {
+    "appName": "Mova",
+    "loading": "Cargando…",
+    "search": "Buscar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "continue": "Continuar",
+    "submit": "Enviar",
+    "create": "Crear",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "update": "Actualizar",
+    "all": "Todas",
+    "back": "← Todos los complejos",
+    "view": "Ver canchas",
+    "name": "Nombre",
+    "description": "Descripción",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "phone": "Teléfono",
+    "email": "Correo electrónico",
+    "status": "Estado",
+    "sport": "Deporte",
+    "court": "Cancha",
+    "user": "Usuario",
+    "date": "Fecha",
+    "start": "Inicio",
+    "end": "Fin",
+    "notes": "Notas",
+    "reason": "Motivo",
+    "actions": "Acciones",
+    "contact": "Contacto",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "blocked": "Bloqueado",
+    "pending": "Pendiente",
+    "confirmed": "Confirmada",
+    "completed": "Completada",
+    "noShow": "No se presentó",
+    "indoor": "Interior",
+    "outdoor": "Exterior",
+    "emptyValue": "—",
+    "formatSeparator": " · ",
+    "noDescription": "Explora las canchas y disponibilidad de este complejo.",
+    "until": "Hasta {{value}}",
+    "lastUpdated": "Última actualización {{date}}",
+    "notUpdatedYet": "Aún no actualizado",
+    "validation": {
+      "value": {
+        "validNumber": "El valor debe ser un número válido."
+      },
+      "name": {
+        "required": "El nombre es obligatorio.",
+        "max": "El nombre no debe superar los 255 caracteres."
+      },
+      "complexName": {
+        "required": "El nombre del complejo es obligatorio.",
+        "max": "El nombre del complejo no debe superar los 255 caracteres."
+      },
+      "description": {
+        "required": "La descripción es obligatoria.",
+        "max": "La descripción no debe superar los 2000 caracteres."
+      },
+      "address": {
+        "required": "La dirección es obligatoria.",
+        "max": "La dirección no debe superar los 255 caracteres."
+      },
+      "city": {
+        "required": "La ciudad es obligatoria.",
+        "max": "La ciudad no debe superar los 255 caracteres."
+      },
+      "surfaceType": {
+        "required": "El tipo de superficie es obligatorio.",
+        "max": "El tipo de superficie no debe superar los 100 caracteres."
+      },
+      "latitude": {
+        "range": "La latitud debe estar entre -90 y 90."
+      },
+      "longitude": {
+        "range": "La longitud debe estar entre -180 y 180."
+      },
+      "phoneNumber": {
+        "min": "El número de teléfono debe tener al menos 8 caracteres.",
+        "max": "El número de teléfono no debe superar los 50 caracteres.",
+        "format": "El número de teléfono debe tener formato internacional, comenzando con '+' seguido de dígitos."
+      },
+      "email": {
+        "required": "El correo electrónico es obligatorio.",
+        "invalid": "El correo electrónico no es válido.",
+        "max": "El correo electrónico no debe superar los 255 caracteres."
+      },
+      "status": {
+        "required": "El estado es obligatorio."
+      },
+      "startTime": {
+        "required": "La hora de inicio es obligatoria."
+      },
+      "endTime": {
+        "required": "La hora de fin es obligatoria.",
+        "afterStart": "La hora de fin debe ser posterior a la hora de inicio."
+      },
+      "slotDuration": {
+        "min": "La duración del turno debe ser de al menos 1 minuto.",
+        "divisible": "El rango de tiempo debe ser divisible de manera uniforme por la duración del turno."
+      },
+      "sportIds": {
+        "min": "Debe asignarse al menos un deporte a la cancha."
+      }
+    },
+    "error": {
+      "title": "Algo salió mal",
+      "message": "Ocurrió un error inesperado. Inténtalo de nuevo más tarde."
+    }
+  },
+  "language": {
+    "label": "Idioma",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português"
+  },
+  "home": {
+    "hero": {
+      "overline": "Deporte, simplificado",
+      "title": "Encuentra tu próximo juego.",
+      "subtitle": "Descubre complejos deportivos cercanos, consulta la disponibilidad de canchas y reserva el horario que más te convenga.",
+      "play": "Jugar / Reservar una cancha",
+      "manage": "Administrar tu complejo",
+      "browse": "Explorar complejos"
+    },
+    "benefits": {
+      "title": "Todo lo que necesitas para jugar",
+      "subtitle": "Mova hace que encontrar y reservar instalaciones deportivas sea sencillo, para que pases menos tiempo coordinando y más tiempo en la cancha.",
+      "discoverTitle": "Descubrir",
+      "discoverDescription": "Explora complejos deportivos activos y encuentra una instalación que se adapte a tu juego.",
+      "chooseTitle": "Elegir",
+      "chooseDescription": "Consulta las canchas y deportes disponibles en cada complejo antes de decidirte.",
+      "playTitle": "Jugar",
+      "playDescription": "Elige un horario conveniente y mantén tus reservas organizadas en un solo lugar."
+    },
+    "cta": {
+      "title": "¿Listo para empezar a moverte?",
+      "subtitle": "Únete a Mova como jugador o lleva tu complejo en línea.",
+      "signIn": "Iniciar sesión para jugar",
+      "register": "Registrar tu complejo"
+    }
+  },
+  "login": {
+    "userTitle": "Bienvenido a Mova",
+    "complexTitle": "Administra tu complejo",
+    "userSubtitle": "Inicia sesión con tu cuenta de Google para continuar.",
+    "complexSubtitle": "Inicia sesión con tu cuenta de Google para registrar y administrar tu complejo deportivo.",
+    "switchToUser": "¿Quieres reservar una cancha?",
+    "switchToUserLink": "Inicia sesión como jugador",
+    "switchToComplex": "¿Tienes un complejo?",
+    "switchToComplexLink": "Inicia sesión como propietario"
+  },
+  "complexes": {
+    "title": "Buscar un complejo deportivo",
+    "subtitle": "Busca complejos activos por nombre, ciudad o dirección.",
+    "searchPlaceholder": "Buscar complejos",
+    "searchButton": "Buscar",
+    "loading": "Cargando complejos…",
+    "error": "No se pudieron cargar los complejos. Inténtalo de nuevo.",
+    "empty": "No hay complejos activos que coincidan con tu búsqueda."
+  },
+  "complexDetail": {
+    "loading": "Cargando complejo…",
+    "notFound": "No se pudo encontrar este complejo activo.",
+    "activeCourts": "Canchas activas",
+    "filterBySport": "Filtrar por deporte",
+    "allSports": "Todos los deportes",
+    "sportsError": "No se pudieron cargar los deportes.",
+    "courtsError": "No se pudieron cargar las canchas.",
+    "noCourts": "Ninguna cancha activa coincide con el filtro seleccionado.",
+    "checkAvailability": "Consultar disponibilidad",
+    "courtLabel": "Cancha",
+    "selectCourt": "Selecciona una cancha",
+    "dateLabel": "Fecha",
+    "selectPrompt": "Selecciona una cancha y una fecha para ver los horarios disponibles.",
+    "loadingAvailability": "Cargando disponibilidad…",
+    "availabilityError": "No se pudo cargar la disponibilidad.",
+    "noAvailability": "No hay horarios disponibles para la fecha seleccionada.",
+    "phoneWithValue": "Teléfono: {{value}}",
+    "emailWithValue": "Correo: {{value}}",
+    "availability": {
+      "to": "a las {{time}}"
+    }
+  },
+  "userHome": {
+    "message": "Bienvenido al portal de usuario. Has iniciado sesión como usuario de Mova."
+  },
+  "completeProfile": {
+    "title": "Completa tu perfil",
+    "subtitle": "Ingresa tu número de teléfono para continuar.",
+    "phoneLabel": "Número de teléfono",
+    "phonePlaceholder": "+54 11 1234 5678",
+    "continue": "Continuar"
+  },
+  "completeComplexAdmin": {
+    "title": "Completa el perfil de tu complejo",
+    "subtitle": "Necesitamos algunos datos sobre ti y tu complejo deportivo. Tu solicitud será revisada antes de que el complejo esté en línea.",
+    "contactInfo": "Tu información de contacto",
+    "complexInfo": "Información del complejo",
+    "yourPhone": "Tu número de teléfono",
+    "yourPhonePlaceholder": "+54 11 1234 5678",
+    "complexName": "Nombre del complejo",
+    "description": "Descripción",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "latitude": "Latitud (opcional)",
+    "longitude": "Longitud (opcional)",
+    "complexPhone": "Teléfono del complejo",
+    "complexPhonePlaceholder": "+54 11 1234 5678",
+    "complexEmail": "Correo del complejo",
+    "submit": "Enviar para revisión"
+  },
+  "admin": {
+    "dashboard": {
+      "error": "No se pudo cargar el panel. Inténtalo de nuevo más tarde.",
+      "activeCourts": "Canchas activas",
+      "inactiveCourts": "Canchas inactivas",
+      "confirmedToday": "Confirmadas hoy",
+      "completedToday": "Completadas hoy",
+      "cancelledToday": "Canceladas hoy",
+      "blockedUsers": "Usuarios bloqueados"
+    },
+    "courts": {
+      "title": "Canchas",
+      "create": "Crear cancha",
+      "searchPlaceholder": "Buscar canchas",
+      "searchBy": "Buscar por nombre o superficie",
+      "statusFilter": "Estado",
+      "sportFilter": "Deporte",
+      "allSports": "Todos los deportes",
+      "sportsError": "No se pudieron cargar los deportes. No se mostrarán los deportes de las canchas.",
+      "error": "No se pudieron cargar las canchas. Inténtalo de nuevo más tarde.",
+      "empty": "No se encontraron canchas para este complejo.",
+      "nameHeader": "Nombre",
+      "surfaceHeader": "Superficie",
+      "indoorOutdoorHeader": "Interior / Exterior",
+      "statusHeader": "Estado",
+      "sportsHeader": "Deportes",
+      "actionsHeader": "Acciones",
+      "configure": "Configurar",
+      "deactivate": "Desactivar",
+      "activate": "Activar",
+      "edit": "Editar"
+    },
+    "createCourt": {
+      "title": "Crear cancha",
+      "subtitle": "Agrega una nueva cancha a tu complejo deportivo.",
+      "name": "Nombre de la cancha",
+      "surfaceType": "Tipo de superficie",
+      "surfacePlaceholder": "p. ej., Sintética, Césped, Hormigón",
+      "indoor": "Cancha interior",
+      "sports": "Deportes (opcional)",
+      "missingId": "Falta el identificador del complejo.",
+      "sportsError": "No se pudieron cargar los deportes disponibles. Aún puedes crear la cancha sin deportes.",
+      "create": "Crear cancha"
+    },
+    "editCourt": {
+      "title": "Configurar cancha",
+      "subtitle": "Actualiza la información de la cancha, los deportes y las reglas de disponibilidad de tu complejo deportivo.",
+      "missingId": "Falta el identificador del complejo o de la cancha.",
+      "loadError": "No se pudo cargar la cancha. Inténtalo de nuevo más tarde.",
+      "details": "Detalles de la cancha",
+      "name": "Nombre de la cancha",
+      "surfaceType": "Tipo de superficie",
+      "surfacePlaceholder": "p. ej., Sintética, Césped, Hormigón",
+      "indoor": "Cancha interior",
+      "sports": "Deportes",
+      "sportsError": "No se pudieron cargar los deportes disponibles. Las asignaciones existentes se mantendrán, pero no podrás cambiarlas hasta que se carguen los deportes.",
+      "availability": "Reglas de disponibilidad",
+      "availabilityError": "No se pudieron cargar las reglas de disponibilidad. Aún puedes actualizar los detalles y deportes de la cancha, pero la disponibilidad no se guardará.",
+      "dayHeader": "Día",
+      "activeHeader": "Activo",
+      "startTimeHeader": "Hora de inicio",
+      "endTimeHeader": "Hora de fin",
+      "slotDurationHeader": "Duración del turno (minutos)",
+      "slotDurationLabel": "Duración del turno",
+      "update": "Actualizar cancha"
+    },
+    "reservations": {
+      "title": "Reservas",
+      "create": "Crear reserva",
+      "courtFilter": "Cancha",
+      "allCourts": "Todas las canchas",
+      "courtsError": "No se pudieron cargar las canchas. El filtro de canchas no estará disponible.",
+      "statusFilter": "Estado",
+      "dateFilter": "Fecha",
+      "error": "No se pudieron cargar las reservas. Inténtalo de nuevo más tarde.",
+      "empty": "No se encontraron reservas para este complejo.",
+      "dateTimeHeader": "Fecha y hora",
+      "courtHeader": "Cancha",
+      "userHeader": "Usuario",
+      "statusHeader": "Estado",
+      "actionsHeader": "Acciones",
+      "cancel": "Cancelar",
+      "markStatus": "Cambiar estado",
+      "createDialogTitle": "Crear reserva manual",
+      "userIdLabel": "ID de usuario",
+      "startLabel": "Inicio",
+      "endLabel": "Fin",
+      "createButton": "Crear",
+      "cancelDialogTitle": "Cancelar reserva",
+      "cancelConfirm": "¿Estás seguro de que quieres cancelar esta reserva?",
+      "reasonLabel": "Motivo",
+      "reasonPlaceholder": "Motivo del bloqueo",
+      "confirm": "Confirmar",
+      "updateDialogTitle": "Actualizar estado de la reserva",
+      "updateButton": "Actualizar",
+      "endTimeError": "La hora de fin debe ser posterior a la hora de inicio.",
+      "notesLabel": "Notas"
+    },
+    "profile": {
+      "title": "Editar perfil del complejo",
+      "loadError": "No se pudo cargar el perfil del complejo. Inténtalo de nuevo más tarde.",
+      "name": "Nombre del complejo",
+      "description": "Descripción",
+      "address": "Dirección",
+      "city": "Ciudad",
+      "latitude": "Latitud (opcional)",
+      "longitude": "Longitud (opcional)",
+      "phone": "Número de teléfono",
+      "phonePlaceholder": "+54 11 1234 5678",
+      "email": "Correo electrónico",
+      "status": "Estado",
+      "success": "El perfil del complejo se actualizó correctamente.",
+      "save": "Guardar cambios"
+    },
+    "users": {
+      "title": "Usuarios",
+      "searchPlaceholder": "Buscar usuarios",
+      "searchBy": "Buscar por nombre, correo o teléfono",
+      "sort": "Ordenar",
+      "nameAsc": "Nombre (A-Z)",
+      "nameDesc": "Nombre (Z-A)",
+      "emailAsc": "Correo (A-Z)",
+      "newest": "Usuarios más recientes",
+      "error": "No se pudieron cargar los usuarios. Inténtalo de nuevo más tarde.",
+      "empty": "No se encontraron usuarios para este complejo.",
+      "nameHeader": "Nombre",
+      "contactHeader": "Contacto",
+      "statusHeader": "Estado",
+      "actionsHeader": "Acciones",
+      "history": "Historial",
+      "unblock": "Desbloquear",
+      "block": "Bloquear",
+      "blockTitle": "Bloquear a {{name}}",
+      "reasonLabel": "Motivo",
+      "reasonPlaceholder": "Motivo del bloqueo",
+      "expiration": "Expiración (opcional)",
+      "expirationHelper": "Déjalo vacío para bloquear indefinidamente",
+      "historyTitle": "Historial de reservas: {{name}}",
+      "historyError": "No se pudo cargar el historial de reservas.",
+      "historyEmpty": "No se encontraron reservas para este usuario.",
+      "courtHeader": "Cancha",
+      "startHeader": "Inicio",
+      "endHeader": "Fin",
+      "blockError": "No se pudo bloquear al usuario. Inténtalo de nuevo."
+    },
+    "placeholder": {
+      "title": "Sección en construcción",
+      "subtitle": "Esta sección de administración aún no está disponible."
+    }
+  },
+  "days": {
+    "0": "Domingo",
+    "1": "Lunes",
+    "2": "Martes",
+    "3": "Miércoles",
+    "4": "Jueves",
+    "5": "Viernes",
+    "6": "Sábado"
+  },
+  "status": {
+    "all": "Todas",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "confirmed": "Confirmada",
+    "completed": "Completada",
+    "cancelledByUser": "Cancelada por usuario",
+    "cancelledByAdmin": "Cancelada por admin",
+    "noShow": "No se presentó",
+    "blocked": "Bloqueado"
+  },
+  "notFound": {
+    "title": "404 - Página no encontrada"
+  },
+  "unauthorized": {
+    "title": "No autorizado"
+  },
+  "superAdmin": {
+    "title": "Panel de superadministrador"
+  },
+  "nav": {
+    "brand": "Mova",
+    "dashboard": "Panel",
+    "profile": "Perfil",
+    "courts": "Canchas",
+    "reservations": "Reservas",
+    "users": "Usuarios",
+    "complexAdmin": "Administrador del complejo",
+    "openMenu": "abrir menú"
+  }
+}

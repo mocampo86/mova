@@ -26,6 +26,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useCourts } from '../features/courts/courtApi';
 import type { CourtListFilters } from '../features/courts/courtTypes';
 import {
@@ -39,21 +40,6 @@ import type {
   ReservationListFilters,
   ReservationStatus
 } from '../features/reservations/reservationTypes';
-
-const statusOptions: { value: ReservationStatus | 'All'; label: string }[] = [
-  { value: 'All', label: 'All' },
-  { value: 'Pending', label: 'Pending' },
-  { value: 'Confirmed', label: 'Confirmed' },
-  { value: 'CancelledByUser', label: 'Cancelled by user' },
-  { value: 'CancelledByAdmin', label: 'Cancelled by admin' },
-  { value: 'Completed', label: 'Completed' },
-  { value: 'NoShow', label: 'No-show' }
-];
-
-const updateStatusOptions: { value: 'Completed' | 'NoShow'; label: string }[] = [
-  { value: 'Completed', label: 'Completed' },
-  { value: 'NoShow', label: 'No-show' }
-];
 
 function statusColor(status: ReservationStatus): 'success' | 'info' | 'warning' | 'error' | 'default' {
   if (status === 'Confirmed') return 'success';
@@ -107,6 +93,7 @@ function initialCreateForm(): {
 }
 
 export default function ComplexReservationsPage() {
+  const { t } = useTranslation();
   const { complexId = '' } = useParams();
   const [filters, setFilters] = useState<ReservationListFilters>({
     page: 0,
@@ -146,6 +133,21 @@ export default function ComplexReservationsPage() {
   });
   const [selectedStatus, setSelectedStatus] = useState<'Completed' | 'NoShow'>('Completed');
 
+  const statusOptions: { value: ReservationStatus | 'All'; label: string }[] = [
+    { value: 'All', label: t('status.all') },
+    { value: 'Pending', label: t('status.pending') },
+    { value: 'Confirmed', label: t('status.confirmed') },
+    { value: 'CancelledByUser', label: t('status.cancelledByUser') },
+    { value: 'CancelledByAdmin', label: t('status.cancelledByAdmin') },
+    { value: 'Completed', label: t('status.completed') },
+    { value: 'NoShow', label: t('status.noShow') }
+  ];
+
+  const updateStatusOptions: { value: 'Completed' | 'NoShow'; label: string }[] = [
+    { value: 'Completed', label: t('status.completed') },
+    { value: 'NoShow', label: t('status.noShow') }
+  ];
+
   const handleChangePage = (_event: unknown, newPage: number) => {
     setFilters((prev) => ({ ...prev, page: newPage }));
   };
@@ -160,7 +162,7 @@ export default function ComplexReservationsPage() {
     const endAt = new Date(createForm.endAt).toISOString();
 
     if (new Date(endAt) <= new Date(startAt)) {
-      setCreateFormError('End time must be after start time.');
+      setCreateFormError(t('admin.reservations.endTimeError'));
       return;
     }
 
@@ -217,16 +219,16 @@ export default function ComplexReservationsPage() {
           justifyContent="space-between"
         >
           <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>
-            Reservations
+            {t('admin.reservations.title')}
           </Typography>
           <Button variant="contained" onClick={() => setCreateOpen(true)}>
-            Create reservation
+            {t('admin.reservations.create')}
           </Button>
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <TextField
-            label="Date"
+            label={t('admin.reservations.dateFilter')}
             type="date"
             value={filters.date}
             onChange={(event) =>
@@ -236,17 +238,17 @@ export default function ComplexReservationsPage() {
             InputLabelProps={{ shrink: true }}
           />
           <FormControl sx={{ minWidth: 180 }}>
-            <InputLabel id="reservation-court-filter-label">Court</InputLabel>
+            <InputLabel id="reservation-court-filter-label">{t('admin.reservations.courtFilter')}</InputLabel>
             <Select
               labelId="reservation-court-filter-label"
               value={filters.courtId}
-              label="Court"
+              label={t('admin.reservations.courtFilter')}
               onChange={(event) =>
                 setFilters((prev) => ({ ...prev, courtId: event.target.value, page: 0 }))
               }
               disabled={courts.isLoading || courts.isError}
             >
-              <MenuItem value="">All courts</MenuItem>
+              <MenuItem value="">{t('admin.reservations.allCourts')}</MenuItem>
               {courts.data?.items.map((court) => (
                 <MenuItem key={court.id} value={court.id}>
                   {court.name}
@@ -255,11 +257,11 @@ export default function ComplexReservationsPage() {
             </Select>
           </FormControl>
           <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="reservation-status-filter-label">Status</InputLabel>
+            <InputLabel id="reservation-status-filter-label">{t('admin.reservations.statusFilter')}</InputLabel>
             <Select
               labelId="reservation-status-filter-label"
               value={filters.status}
-              label="Status"
+              label={t('admin.reservations.statusFilter')}
               onChange={(event) =>
                 setFilters((prev) => ({
                   ...prev,
@@ -278,25 +280,15 @@ export default function ComplexReservationsPage() {
         </Stack>
 
         {courts.isError && (
-          <Alert severity="warning">Courts could not be loaded. Court filter will not be available.</Alert>
-        )}
-
-        {createReservation.error && (
-          <Alert severity="error">{createReservation.error.message}</Alert>
-        )}
-        {cancelReservation.error && (
-          <Alert severity="error">{cancelReservation.error.message}</Alert>
-        )}
-        {updateStatus.error && (
-          <Alert severity="error">{updateStatus.error.message}</Alert>
+          <Alert severity="warning">{t('admin.reservations.courtsError')}</Alert>
         )}
 
         {isLoading ? (
           <Skeleton variant="rectangular" height={200} />
         ) : isError ? (
-          <Alert severity="error">The reservations could not be loaded. Please try again later.</Alert>
+          <Alert severity="error">{t('admin.reservations.error')}</Alert>
         ) : emptyState ? (
-          <Alert severity="info">No reservations found for this complex.</Alert>
+          <Alert severity="info">{t('admin.reservations.empty')}</Alert>
         ) : (
           <>
             <TableContainer
@@ -306,11 +298,11 @@ export default function ComplexReservationsPage() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Date & time</TableCell>
-                    <TableCell>Court</TableCell>
-                    <TableCell>User</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell align="right">Actions</TableCell>
+                    <TableCell>{t('admin.reservations.dateTimeHeader')}</TableCell>
+                    <TableCell>{t('admin.reservations.courtHeader')}</TableCell>
+                    <TableCell>{t('admin.reservations.userHeader')}</TableCell>
+                    <TableCell>{t('admin.reservations.statusHeader')}</TableCell>
+                    <TableCell align="right">{t('admin.reservations.actionsHeader')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -341,7 +333,7 @@ export default function ComplexReservationsPage() {
                             disabled={isActionsDisabled(reservation.status) || cancelReservation.isPending}
                             onClick={() => setCancelDialog({ open: true, reservation })}
                           >
-                            Cancel
+                            {t('admin.reservations.cancel')}
                           </Button>
                           <Button
                             size="small"
@@ -352,7 +344,7 @@ export default function ComplexReservationsPage() {
                               setSelectedStatus('Completed');
                             }}
                           >
-                            Mark status
+                            {t('admin.reservations.markStatus')}
                           </Button>
                         </Stack>
                       </TableCell>
@@ -375,16 +367,16 @@ export default function ComplexReservationsPage() {
       </Stack>
 
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Create manual reservation</DialogTitle>
+        <DialogTitle>{t('admin.reservations.createDialogTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             {createFormError && <Alert severity="error">{createFormError}</Alert>}
             <FormControl fullWidth>
-              <InputLabel id="create-court-label">Court</InputLabel>
+              <InputLabel id="create-court-label">{t('admin.reservations.courtFilter')}</InputLabel>
               <Select
                 labelId="create-court-label"
                 value={createForm.courtId}
-                label="Court"
+                label={t('admin.reservations.courtFilter')}
                 onChange={(event) =>
                   setCreateForm((prev) => ({ ...prev, courtId: event.target.value }))
                 }
@@ -398,7 +390,7 @@ export default function ComplexReservationsPage() {
               </Select>
             </FormControl>
             <TextField
-              label="User ID"
+              label={t('admin.reservations.userIdLabel')}
               value={createForm.userId}
               onChange={(event) =>
                 setCreateForm((prev) => ({ ...prev, userId: event.target.value }))
@@ -406,7 +398,7 @@ export default function ComplexReservationsPage() {
               fullWidth
             />
             <TextField
-              label="Start"
+              label={t('admin.reservations.startLabel')}
               type="datetime-local"
               value={createForm.startAt}
               onChange={(event) =>
@@ -416,7 +408,7 @@ export default function ComplexReservationsPage() {
               InputLabelProps={{ shrink: true }}
             />
             <TextField
-              label="End"
+              label={t('admin.reservations.endLabel')}
               type="datetime-local"
               value={createForm.endAt}
               onChange={(event) =>
@@ -426,7 +418,7 @@ export default function ComplexReservationsPage() {
               InputLabelProps={{ shrink: true }}
             />
             <TextField
-              label="Notes"
+              label={t('common.notes')}
               value={createForm.notes}
               onChange={(event) =>
                 setCreateForm((prev) => ({ ...prev, notes: event.target.value }))
@@ -438,7 +430,7 @@ export default function ComplexReservationsPage() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
+          <Button onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
           <Button
             variant="contained"
             onClick={handleCreateSubmit}
@@ -450,20 +442,21 @@ export default function ComplexReservationsPage() {
               !createForm.endAt
             }
           >
-            Create
+            {t('admin.reservations.createButton')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={cancelDialog.open} onClose={() => setCancelDialog({ open: false, reservation: null })} fullWidth maxWidth="sm">
-        <DialogTitle>Cancel reservation</DialogTitle>
+        <DialogTitle>{t('admin.reservations.cancelDialogTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Typography variant="body1">
-              Are you sure you want to cancel this reservation?
+              {t('admin.reservations.cancelConfirm')}
             </Typography>
             <TextField
-              label="Reason"
+              label={t('admin.reservations.reasonLabel')}
+              placeholder={t('admin.reservations.reasonPlaceholder')}
               value={cancelReason}
               onChange={(event) => setCancelReason(event.target.value)}
               fullWidth
@@ -473,23 +466,23 @@ export default function ComplexReservationsPage() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCancelDialog({ open: false, reservation: null })}>Cancel</Button>
+          <Button onClick={() => setCancelDialog({ open: false, reservation: null })}>{t('common.cancel')}</Button>
           <Button variant="contained" color="error" onClick={handleCancelSubmit} disabled={cancelReservation.isPending}>
-            Confirm
+            {t('common.confirm')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={statusDialog.open} onClose={() => setStatusDialog({ open: false, reservation: null })} fullWidth maxWidth="sm">
-        <DialogTitle>Update reservation status</DialogTitle>
+        <DialogTitle>{t('admin.reservations.updateDialogTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <FormControl fullWidth>
-              <InputLabel id="update-status-label">Status</InputLabel>
+              <InputLabel id="update-status-label">{t('admin.reservations.statusFilter')}</InputLabel>
               <Select
                 labelId="update-status-label"
                 value={selectedStatus}
-                label="Status"
+                label={t('admin.reservations.statusFilter')}
                 onChange={(event) =>
                   setSelectedStatus(event.target.value as 'Completed' | 'NoShow')
                 }
@@ -504,9 +497,9 @@ export default function ComplexReservationsPage() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setStatusDialog({ open: false, reservation: null })}>Cancel</Button>
+          <Button onClick={() => setStatusDialog({ open: false, reservation: null })}>{t('common.cancel')}</Button>
           <Button variant="contained" onClick={handleStatusSubmit} disabled={updateStatus.isPending}>
-            Update
+            {t('admin.reservations.updateButton')}
           </Button>
         </DialogActions>
       </Dialog>

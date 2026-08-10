@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
+import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { AuthContext } from './features/auth/AuthContext';
 import type { AuthState } from './features/auth/authTypes';
+import i18n from './i18n';
 
 export function createMockAuthState(overrides: Partial<AuthState> = {}): AuthState {
   return {
@@ -44,10 +46,12 @@ export function renderWithAuth(
   window.history.pushState({}, 'Test page', initialRoute);
 
   return render(
-    <QueryClientProvider client={createTestQueryClient()}>
-      <BrowserRouter>
-        <AuthContext.Provider value={createMockAuthState(authState)}>{ui}</AuthContext.Provider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <I18nextProvider i18n={i18n}>
+      <QueryClientProvider client={createTestQueryClient()}>
+        <BrowserRouter>
+          <AuthContext.Provider value={createMockAuthState(authState)}>{ui}</AuthContext.Provider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </I18nextProvider>
   );
 }

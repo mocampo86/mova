@@ -1,9 +1,12 @@
 import { Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 export default function UserHomePage() {
+  const { t } = useTranslation();
+
   return (
     <Typography variant="body1">
-      Welcome to the user portal. You are signed in as a Mova user.
+      {t('userHome.message')}
     </Typography>
   );
 }

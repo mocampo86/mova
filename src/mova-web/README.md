@@ -21,6 +21,15 @@ npm run test
 npm run build
 ```
 
+## Internationalization
+
+Mova Web supports English (`en`), Spanish (`es`), and Portuguese (`pt`).
+
+- Translation resources live in `src/i18n/locales/{lang}.json`.
+- The active language is detected from `localStorage`, the browser language, or the `?lng=` query string, and falls back to English.
+- A `LanguageSelector` component is available for users to switch languages from the public layout.
+- The `I18nextProvider` is configured in `src/app/providers.tsx` and test utilities reset the language to English before each test.
+
 ## Authentication
 
 The application uses Google Sign-In to obtain an ID token, which is exchanged with the Mova API for a JWT access token. The access token is parsed to extract roles and complex associations used by the protected route guards.

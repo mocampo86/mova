@@ -1,5 +1,8 @@
 import { Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 export default function SuperAdminPage() {
-  return <Typography variant="h4">Super Admin Dashboard</Typography>;
+  const { t } = useTranslation();
+
+  return <Typography variant="h4">{t('superAdmin.title')}</Typography>;
 }

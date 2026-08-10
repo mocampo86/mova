@@ -25,6 +25,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
   useAssignCourtSports,
   useCourt,
@@ -34,16 +35,6 @@ import {
 } from '../features/courts/courtApi';
 import { useSports } from '../features/complexes/complexApi';
 import type { CourtAvailabilityRule } from '../features/courts/courtTypes';
-
-const DAY_LABELS: Record<number, string> = {
-  0: 'Sunday',
-  1: 'Monday',
-  2: 'Tuesday',
-  3: 'Wednesday',
-  4: 'Thursday',
-  5: 'Friday',
-  6: 'Saturday'
-};
 
 const DEFAULT_AVAILABILITY: AvailabilityFormRule[] = [
   { dayOfWeek: 1, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: false },
@@ -130,7 +121,12 @@ function formatTimeForApi(time: string): string {
   return `${time}:00`;
 }
 
+function getDayLabel(t: (key: string) => string, dayOfWeek: number): string {
+  return t(`days.${dayOfWeek}`);
+}
+
 export default function EditCourtPage() {
+  const { t } = useTranslation();
   const { complexId = '', courtId = '' } = useParams();
   const navigate = useNavigate();
   const {
@@ -210,7 +206,7 @@ export default function EditCourtPage() {
   if (!complexId || !courtId) {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="error">The complex or court identifier is missing.</Alert>
+        <Alert severity="error">{t('admin.editCourt.missingId')}</Alert>
       </Container>
     );
   }
@@ -218,15 +214,15 @@ export default function EditCourtPage() {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Configure court
+        {t('admin.editCourt.title')}
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
-        Update the court information, sports, and availability rules for your sports complex.
+        {t('admin.editCourt.subtitle')}
       </Typography>
 
       {isCourtError && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {courtError?.message ?? 'The court could not be loaded. Please try again later.'}
+          {courtError?.message ?? t('admin.editCourt.loadError')}
         </Alert>
       )}
 
@@ -258,12 +254,12 @@ export default function EditCourtPage() {
         >
           <Paper variant="outlined" sx={{ p: 3 }}>
             <Typography variant="h6" component="h2" gutterBottom>
-              Court details
+              {t('admin.editCourt.details')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <TextField
                 {...register('name')}
-                label="Court name"
+                label={t('admin.editCourt.name')}
                 fullWidth
                 error={Boolean(errors.name)}
                 helperText={errors.name?.message}
@@ -271,7 +267,7 @@ export default function EditCourtPage() {
 
               <TextField
                 {...register('description')}
-                label="Description"
+                label={t('common.description')}
                 multiline
                 rows={3}
                 fullWidth
@@ -281,8 +277,8 @@ export default function EditCourtPage() {
 
               <TextField
                 {...register('surfaceType')}
-                label="Surface type"
-                placeholder="e.g., Synthetic, Grass, Concrete"
+                label={t('admin.editCourt.surfaceType')}
+                placeholder={t('admin.editCourt.surfacePlaceholder')}
                 fullWidth
                 error={Boolean(errors.surfaceType)}
                 helperText={errors.surfaceType?.message}
@@ -300,7 +296,7 @@ export default function EditCourtPage() {
                           onChange={(event) => field.onChange(event.target.checked)}
                         />
                       }
-                      label="Indoor court"
+                      label={t('admin.editCourt.indoor')}
                     />
                     {errors.indoor && <FormHelperText>{errors.indoor.message}</FormHelperText>}
                   </FormControl>
@@ -311,13 +307,12 @@ export default function EditCourtPage() {
 
           <Paper variant="outlined" sx={{ p: 3 }}>
             <Typography variant="h6" component="h2" gutterBottom>
-              Sports
+              {t('admin.editCourt.sports')}
             </Typography>
 
             {sports.isError && (
               <Alert severity="warning" sx={{ mb: 2 }}>
-                Available sports could not be loaded. Existing assignments will be kept, but you
-                cannot change them until sports are loaded.
+                {t('admin.editCourt.sportsError')}
               </Alert>
             )}
 
@@ -362,13 +357,12 @@ export default function EditCourtPage() {
 
           <Paper variant="outlined" sx={{ p: 3 }}>
             <Typography variant="h6" component="h2" gutterBottom>
-              Availability rules
+              {t('admin.editCourt.availability')}
             </Typography>
 
             {availabilityRules.isError && (
               <Alert severity="warning" sx={{ mb: 2 }}>
-                Availability rules could not be loaded. Court details and sports can still be
-                updated, but availability will not be saved.
+                {t('admin.editCourt.availabilityError')}
               </Alert>
             )}
 
@@ -376,17 +370,17 @@ export default function EditCourtPage() {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Day</TableCell>
-                    <TableCell>Active</TableCell>
-                    <TableCell>Start time</TableCell>
-                    <TableCell>End time</TableCell>
-                    <TableCell>Slot duration (minutes)</TableCell>
+                    <TableCell>{t('admin.editCourt.dayHeader')}</TableCell>
+                    <TableCell>{t('admin.editCourt.activeHeader')}</TableCell>
+                    <TableCell>{t('admin.editCourt.startTimeHeader')}</TableCell>
+                    <TableCell>{t('admin.editCourt.endTimeHeader')}</TableCell>
+                    <TableCell>{t('admin.editCourt.slotDurationHeader')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {fields.map((field, index) => (
                     <TableRow key={field.fieldId}>
-                      <TableCell>{DAY_LABELS[field.dayOfWeek]}</TableCell>
+                      <TableCell>{getDayLabel(t, field.dayOfWeek)}</TableCell>
                       <TableCell>
                         <input
                           type="hidden"
@@ -401,7 +395,7 @@ export default function EditCourtPage() {
                               onChange={(_, checked) => controllerField.onChange(checked)}
                               disabled={availabilityRules.isError}
                               slotProps={{
-                                input: { 'aria-label': `${DAY_LABELS[field.dayOfWeek]} active` }
+                                input: { 'aria-label': `${getDayLabel(t, field.dayOfWeek)} active` }
                               }}
                             />
                           )}
@@ -415,7 +409,7 @@ export default function EditCourtPage() {
                             <TextField
                               {...controllerField}
                               type="time"
-                              label="Start time"
+                              label={t('admin.editCourt.startTimeHeader')}
                               InputLabelProps={{ shrink: true }}
                               size="small"
                               fullWidth
@@ -434,7 +428,7 @@ export default function EditCourtPage() {
                             <TextField
                               {...controllerField}
                               type="time"
-                              label="End time"
+                              label={t('admin.editCourt.endTimeHeader')}
                               InputLabelProps={{ shrink: true }}
                               size="small"
                               fullWidth
@@ -453,7 +447,7 @@ export default function EditCourtPage() {
                             <TextField
                               {...controllerField}
                               type="number"
-                              label="Slot duration"
+                              label={t('admin.editCourt.slotDurationLabel')}
                               inputProps={{ min: 1 }}
                               size="small"
                               fullWidth
@@ -481,7 +475,7 @@ export default function EditCourtPage() {
             disabled={isSaving || sports.isLoading}
             sx={{ alignSelf: 'flex-start' }}
           >
-            Update court
+            {t('admin.editCourt.update')}
           </Button>
         </Box>
       )}
