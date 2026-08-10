@@ -26,22 +26,28 @@ describe('LanguageSelector', () => {
   });
 
   it('renders a language selector on the public screen', () => {
-    renderWithI18n(<LanguageSelector />);
+    const { container } = renderWithI18n(<LanguageSelector />);
 
     const selector = screen.getByRole('combobox', { name: 'Language' });
     expect(selector).toBeTruthy();
     expect(screen.getByText('English')).toBeTruthy();
+    expect(container.querySelector('img')).toBeTruthy();
   });
 
-  it('lists supported languages', async () => {
+  it('lists supported languages with a flag icon', async () => {
     const user = userEvent.setup();
     renderWithI18n(<LanguageSelector />);
 
     await user.click(screen.getByRole('combobox', { name: 'Language' }));
 
-    expect(screen.getByRole('option', { name: 'English' })).toBeTruthy();
-    expect(screen.getByRole('option', { name: 'Español' })).toBeTruthy();
-    expect(screen.getByRole('option', { name: 'Português' })).toBeTruthy();
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(3);
+    expect(options[0].querySelector('img')).toBeTruthy();
+    expect(options[0].textContent).toContain('English');
+    expect(options[1].querySelector('img')).toBeTruthy();
+    expect(options[1].textContent).toContain('Español');
+    expect(options[2].querySelector('img')).toBeTruthy();
+    expect(options[2].textContent).toContain('Português');
   });
 
   it('calls i18n.changeLanguage when a new language is selected', async () => {
@@ -78,5 +84,15 @@ describe('LanguageSelector', () => {
     await waitFor(() => {
       expect(screen.getByText('Encuentra tu próximo juego.')).toBeTruthy();
     });
+  });
+
+  it('highlights the selected language in the dropdown', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(<LanguageSelector />);
+
+    await user.click(screen.getByRole('combobox', { name: 'Language' }));
+
+    const selectedOption = screen.getByRole('option', { name: 'English' });
+    expect(selectedOption.getAttribute('aria-selected')).toBe('true');
   });
 });
