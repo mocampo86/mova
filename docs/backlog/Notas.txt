@@ -1,3 +1,5 @@
 -Coplex:
 -poder abrir google maps con la ubicación del complejo
 -Ver reservaciones por dia tipo calendario
+-Agregar servicios del local
+-mostrar solo horarios posteriores a la hora actual
