@@ -26,7 +26,15 @@ npm run build
 Mova Web supports English (`en`), Spanish (`es`), and Portuguese (`pt`).
 
 - Translation resources live in `src/i18n/locales/{lang}.json`.
-- The active language is detected from `localStorage`, the browser language, or the `?lng=` query string, and falls back to English.
+- The active language is detected in the following order, falling back to English:
+  1. `localStorage` key `mova-language`
+  2. Browser language (`navigator.language`)
+  3. `?lng=` query string parameter
+  4. `<html lang="...">` attribute
+- Regional language codes (for example `es-ES`, `pt-BR`) are normalized to the supported base locale.
+- Invalid or unsupported persisted values are ignored and reset to English.
+- The selected language is persisted to `localStorage` immediately when the user changes it.
+- Shared language utilities (validation, sanitization, storage helpers) live in `src/i18n/languageStorage.ts`.
 - A `LanguageSelector` component is available for users to switch languages from the public layout; it renders a flag/language icon for each option and falls back to the locale code if an asset is missing.
 - The `I18nextProvider` is configured in `src/app/providers.tsx` and test utilities reset the language to English before each test.
 
