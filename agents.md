@@ -149,3 +149,21 @@ For a full command reference see `agents/AGENT-COMMANDS.md`.
 - Add new agents or commands when team structure changes.
 - Update responsibilities when the architecture or workflow evolves.
 - Review this file during retrospectives or major releases.
+
+## Local validation notes
+
+### Running `npm` scripts on Windows
+
+PowerShell execution policy may block `npm` and `npx` in this environment. Use `cmd /c` to run commands, for example:
+
+```cmd
+cmd /c "cd /d C:\Endava\EndevLocal\source\mova\src\mova-web && npm run test"
+```
+
+### Vitest on Windows and drive-letter casing
+
+Vitest v4.1.10 can fail with `Vitest failed to find the runner` when the working directory's drive letter casing does not match the canonical on-disk casing. Run commands from the canonical path (e.g., `C:\...` rather than `c:\...`).
+
+### `localStorage` in the jsdom test environment
+
+`window.localStorage` is not provided by the jsdom environment used by Vitest. A `LocalStorageMock` is configured in `src/mova-web/src/setupStorage.ts` and loaded before `src/mova-web/src/setupTests.ts` so storage code can be exercised in tests.

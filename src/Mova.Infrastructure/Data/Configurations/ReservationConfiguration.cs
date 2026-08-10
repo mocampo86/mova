@@ -21,8 +21,8 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.HasIndex(x => x.SportsComplexId);
         builder.HasIndex(x => new { x.CourtId, x.StartAt, x.EndAt, x.Status });
-        builder.HasOne<User>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<Court>().WithMany().HasForeignKey(x => x.CourtId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.Court).WithMany().HasForeignKey(x => x.CourtId).OnDelete(DeleteBehavior.Cascade);
         builder.ToTable(t => t.HasCheckConstraint("chk_reservation_time", "\"StartAt\" < \"EndAt\""));
     }
 }

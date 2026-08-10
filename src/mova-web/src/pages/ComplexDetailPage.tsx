@@ -16,6 +16,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
   useActiveComplex,
   useActiveCourts,
@@ -33,6 +34,7 @@ function todayIso() {
 }
 
 export default function ComplexDetailPage() {
+  const { t } = useTranslation();
   const { complexId = '' } = useParams();
   const complex = useActiveComplex(complexId);
   const courts = useActiveCourts(complexId);
@@ -53,7 +55,7 @@ export default function ComplexDetailPage() {
   if (complex.isLoading || courts.isLoading) {
     return (
       <Container sx={{ py: 6 }}>
-        <Typography>Loading complex…</Typography>
+        <Typography>{t('complexDetail.loading')}</Typography>
       </Container>
     );
   }
@@ -61,7 +63,7 @@ export default function ComplexDetailPage() {
   if (complex.isError || !complex.data) {
     return (
       <Container sx={{ py: 6 }}>
-        <Alert severity="error">This active complex could not be found.</Alert>
+        <Alert severity="error">{t('complexDetail.notFound')}</Alert>
       </Container>
     );
   }
@@ -70,7 +72,7 @@ export default function ComplexDetailPage() {
     <Container component="main" maxWidth="lg" sx={{ py: 6 }}>
       <Stack spacing={4}>
         <Button component={RouterLink} to="/complexes" sx={{ alignSelf: 'flex-start' }}>
-          ← All complexes
+          {t('common.back')}
         </Button>
 
         <Box>
@@ -78,14 +80,14 @@ export default function ComplexDetailPage() {
             {complex.data.name}
           </Typography>
           <Typography color="text.secondary">
-            {complex.data.city} · {complex.data.address}
+            {complex.data.city}{t('common.formatSeparator')}{complex.data.address}
           </Typography>
           <Typography sx={{ mt: 2 }}>{complex.data.description}</Typography>
           {(complex.data.phoneNumber || complex.data.email) && (
             <Typography color="text.secondary" sx={{ mt: 1 }}>
-              {complex.data.phoneNumber && <>Phone: {complex.data.phoneNumber}</>}
-              {complex.data.phoneNumber && complex.data.email && ' · '}
-              {complex.data.email && <>Email: {complex.data.email}</>}
+              {complex.data.phoneNumber && <>{t('complexDetail.phoneWithValue', { value: complex.data.phoneNumber })}</>}
+              {complex.data.phoneNumber && complex.data.email && t('common.formatSeparator')}
+              {complex.data.email && <>{t('complexDetail.emailWithValue', { value: complex.data.email })}</>}
             </Typography>
           )}
         </Box>
@@ -93,18 +95,18 @@ export default function ComplexDetailPage() {
         <Box>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between">
             <Typography component="h2" variant="h5" sx={{ fontWeight: 700 }}>
-              Active courts
+              {t('complexDetail.activeCourts')}
             </Typography>
             <FormControl sx={{ minWidth: 200 }}>
-              <InputLabel id="sport-filter-label">Filter by sport</InputLabel>
+              <InputLabel id="sport-filter-label">{t('complexDetail.filterBySport')}</InputLabel>
               <Select
                 labelId="sport-filter-label"
                 value={selectedSportId}
-                label="Filter by sport"
+                label={t('complexDetail.filterBySport')}
                 onChange={(event) => setSelectedSportId(event.target.value)}
                 disabled={sports.isLoading || sports.isError}
               >
-                <MenuItem value="">All sports</MenuItem>
+                <MenuItem value="">{t('complexDetail.allSports')}</MenuItem>
                 {sports.data?.map((sport) => (
                   <MenuItem key={sport.id} value={sport.id}>
                     {sport.name}
@@ -114,11 +116,11 @@ export default function ComplexDetailPage() {
             </FormControl>
           </Stack>
 
-          {sports.isError && <Alert severity="warning" sx={{ mt: 2 }}>Sports could not be loaded.</Alert>}
-          {courts.isError && <Alert severity="error" sx={{ mt: 2 }}>Courts could not be loaded.</Alert>}
+          {sports.isError && <Alert severity="warning" sx={{ mt: 2 }}>{t('complexDetail.sportsError')}</Alert>}
+          {courts.isError && <Alert severity="error" sx={{ mt: 2 }}>{t('complexDetail.courtsError')}</Alert>}
           {!courts.isError && filteredCourts.length === 0 && (
             <Alert severity="info" sx={{ mt: 2 }}>
-              No active courts match the selected filter.
+              {t('complexDetail.noCourts')}
             </Alert>
           )}
 
@@ -140,8 +142,8 @@ export default function ComplexDetailPage() {
                       {court.name}
                     </Typography>
                     <Typography color="text.secondary">
-                      {court.indoor ? 'Indoor' : 'Outdoor'}
-                      {court.surfaceType ? ` · ${court.surfaceType}` : ''}
+                      {court.indoor ? t('common.indoor') : t('common.outdoor')}
+                      {court.surfaceType ? `${t('common.formatSeparator')}${court.surfaceType}` : ''}
                     </Typography>
                     {court.description && <Typography sx={{ mt: 1 }}>{court.description}</Typography>}
                   </CardContent>
@@ -153,19 +155,19 @@ export default function ComplexDetailPage() {
 
         <Box>
           <Typography component="h2" variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-            Check availability
+            {t('complexDetail.checkAvailability')}
           </Typography>
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 3 }}>
             <FormControl sx={{ minWidth: 240 }}>
-              <InputLabel id="court-select-label">Court</InputLabel>
+              <InputLabel id="court-select-label">{t('complexDetail.courtLabel')}</InputLabel>
               <Select
                 labelId="court-select-label"
                 value={selectedCourtId}
-                label="Court"
+                label={t('complexDetail.courtLabel')}
                 onChange={(event) => setSelectedCourtId(event.target.value)}
               >
-                <MenuItem value="">Select a court</MenuItem>
+                <MenuItem value="">{t('complexDetail.selectCourt')}</MenuItem>
                 {filteredCourts.map((court) => (
                   <MenuItem key={court.id} value={court.id}>
                     {court.name}
@@ -174,7 +176,7 @@ export default function ComplexDetailPage() {
               </Select>
             </FormControl>
             <TextField
-              label="Date"
+              label={t('complexDetail.dateLabel')}
               type="date"
               value={selectedDate}
               onChange={(event) => setSelectedDate(event.target.value)}
@@ -184,15 +186,15 @@ export default function ComplexDetailPage() {
           </Stack>
 
           {!selectedCourtId && (
-            <Alert severity="info">Select a court and date to view available slots.</Alert>
+            <Alert severity="info">{t('complexDetail.selectPrompt')}</Alert>
           )}
 
-          {selectedCourtId && availability.isLoading && <Typography>Loading availability…</Typography>}
+          {selectedCourtId && availability.isLoading && <Typography>{t('complexDetail.loadingAvailability')}</Typography>}
           {selectedCourtId && availability.isError && (
-            <Alert severity="error">Availability could not be loaded.</Alert>
+            <Alert severity="error">{t('complexDetail.availabilityError')}</Alert>
           )}
           {selectedCourtId && availability.data && availability.data.length === 0 && (
-            <Alert severity="info">No available slots for the selected date.</Alert>
+            <Alert severity="info">{t('complexDetail.noAvailability')}</Alert>
           )}
 
           {availability.data && availability.data.length > 0 && (
@@ -205,7 +207,7 @@ export default function ComplexDetailPage() {
                         {formatLocalDateTime(slot.startAt)}
                       </Typography>
                       <Typography color="text.secondary">
-                        to {formatLocalDateTime(slot.endAt)}
+                        {t('complexDetail.availability.to', { time: formatLocalDateTime(slot.endAt) })}
                       </Typography>
                     </CardContent>
                   </Card>

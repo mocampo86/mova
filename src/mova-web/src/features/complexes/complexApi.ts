@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../services/apiClient';
-import type { Court, CourtAvailabilitySlot, PagedResult, Sport, SportsComplex } from './complexTypes';
+import { useAuth } from '../auth/useAuth';
+import type { ComplexDashboard, Court, CourtAvailabilitySlot, PagedResult, Sport, SportsComplex, UpdateComplexRequest } from './complexTypes';
 
 export function useActiveComplexes(search: string, page = 1) {
   const params = new URLSearchParams({ page: String(page), pageSize: '12' });
@@ -45,5 +46,51 @@ export function useCourtAvailability(complexId: string, courtId: string, date: s
     queryKey: ['court-availability', complexId, courtId, date],
     queryFn: () => apiClient<CourtAvailabilitySlot[]>(`/api/v1/complexes/${complexId}/availability?${params}`),
     enabled: Boolean(complexId && courtId && date)
+  });
+}
+
+export function useComplexDashboard(complexId: string) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['complex-dashboard', complexId],
+    queryFn: () =>
+      apiClient<ComplexDashboard>(`/api/v1/complexes/${complexId}/dashboard`, {}, accessToken ?? undefined),
+    enabled: Boolean(complexId && accessToken)
+  });
+}
+
+export async function updateComplex(
+  complexId: string,
+  request: UpdateComplexRequest,
+  accessToken: string
+): Promise<SportsComplex> {
+  return apiClient<SportsComplex>(
+    `/api/v1/complexes/${complexId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useUpdateComplex(complexId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<SportsComplex, Error, UpdateComplexRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to update the complex.');
+      }
+
+      return updateComplex(complexId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['active-complex', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['active-complexes'] });
+    }
   });
 }

@@ -31,7 +31,8 @@ public sealed class SportsComplex
         decimal? latitude,
         decimal? longitude,
         string phoneNumber,
-        string email)
+        string email,
+        ComplexStatus status = ComplexStatus.Active)
     {
         ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email);
 
@@ -46,7 +47,7 @@ public sealed class SportsComplex
             Longitude = longitude,
             PhoneNumber = phoneNumber.Trim(),
             Email = email.Trim(),
-            Status = ComplexStatus.Active,
+            Status = status,
             CreatedAt = DateTime.UtcNow
         };
     }

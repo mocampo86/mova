@@ -27,6 +27,7 @@ public class ComplexesController : ControllerBase
     private readonly IGetActiveComplexByIdHandler _getActiveComplexByIdHandler;
     private readonly IUpdateComplexStatusHandler _updateComplexStatusHandler;
     private readonly IGetCourtAvailabilityHandler _getCourtAvailabilityHandler;
+    private readonly IGetComplexDashboardHandler _getComplexDashboardHandler;
     private readonly IValidator<CreateComplexCommand> _createValidator;
     private readonly IValidator<UpdateComplexCommand> _updateValidator;
     private readonly IValidator<UpdateComplexStatusCommand> _updateComplexStatusValidator;
@@ -39,6 +40,7 @@ public class ComplexesController : ControllerBase
         IGetActiveComplexByIdHandler getActiveComplexByIdHandler,
         IUpdateComplexStatusHandler updateComplexStatusHandler,
         IGetCourtAvailabilityHandler getCourtAvailabilityHandler,
+        IGetComplexDashboardHandler getComplexDashboardHandler,
         IValidator<CreateComplexCommand> createValidator,
         IValidator<UpdateComplexCommand> updateValidator,
         IValidator<UpdateComplexStatusCommand> updateComplexStatusValidator,
@@ -50,6 +52,7 @@ public class ComplexesController : ControllerBase
         _getActiveComplexByIdHandler = getActiveComplexByIdHandler;
         _updateComplexStatusHandler = updateComplexStatusHandler;
         _getCourtAvailabilityHandler = getCourtAvailabilityHandler;
+        _getComplexDashboardHandler = getComplexDashboardHandler;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _updateComplexStatusValidator = updateComplexStatusValidator;
@@ -198,6 +201,22 @@ public class ComplexesController : ControllerBase
         await _updateComplexStatusValidator.ValidateAndThrowAsync(command, cancellationToken);
 
         var result = await _updateComplexStatusHandler.HandleAsync(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{complexId:guid}/dashboard")]
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
+    public async Task<ActionResult<ComplexDashboardInfo>> GetDashboard(Guid complexId, CancellationToken cancellationToken = default)
+    {
+        var result = await _getComplexDashboardHandler.HandleAsync(
+            new GetComplexDashboardQuery(complexId),
+            cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+
         return Ok(result);
     }
 

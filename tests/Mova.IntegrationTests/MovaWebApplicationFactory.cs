@@ -21,8 +21,10 @@ public sealed class MovaWebApplicationFactory : WebApplicationFactory<Program>, 
             .AddUserSecrets<Program>()
             .Build();
 
-        var connectionString = tempConfig["Database:ConnectionString"]
-            ?? throw new InvalidOperationException("Database:ConnectionString is not configured in user secrets.");
+        var connectionString = Environment.GetEnvironmentVariable("Database__ConnectionString")
+            ?? tempConfig["Database:ConnectionString"]
+            ?? throw new InvalidOperationException(
+                "Database:ConnectionString is not configured. Set the 'Database__ConnectionString' environment variable or add it to user secrets.");
 
         var connectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString)
         {

@@ -32,7 +32,8 @@ GET    /api/v1/admin/complexes
 GET    /api/v1/complexes/{complexId}/courts
 POST   /api/v1/complexes/{complexId}/courts
 GET    /api/v1/courts/{id}
-PUT    /api/v1/courts/{id}
+GET    /api/v1/complexes/{complexId}/courts/{courtId}
+PUT    /api/v1/complexes/{complexId}/courts/{courtId}
 PATCH  /api/v1/complexes/{complexId}/courts/{courtId}/status
 
 GET    /api/v1/complexes/{complexId}/availability?courtId=&date=
@@ -47,6 +48,8 @@ POST   /api/v1/reservations
 GET    /api/v1/reservations/{id}
 GET    /api/v1/users/me/reservations
 GET    /api/v1/complexes/{complexId}/reservations
+GET    /api/v1/complexes/{complexId}/users
+GET    /api/v1/complexes/{complexId}/users/{userId}/reservations
 PATCH  /api/v1/reservations/{id}/cancel
 POST   /api/v1/recurring-reservations
 PATCH  /api/v1/recurring-reservations/{id}/cancel

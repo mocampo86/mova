@@ -54,4 +54,58 @@ public sealed class CourtRepository(MovaDbContext context) : ICourtRepository
 
     public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
         context.Courts.AnyAsync(x => x.SportsComplexId == sportsComplexId && x.Name.ToLower() == name.Trim().ToLower(), cancellationToken);
+
+    public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, Guid excludeCourtId, CancellationToken cancellationToken = default) =>
+        context.Courts.AnyAsync(x => x.SportsComplexId == sportsComplexId && x.Id != excludeCourtId && x.Name.ToLower() == name.Trim().ToLower(), cancellationToken);
+
+    public async Task<(IReadOnlyList<Court> Items, int TotalItems)> GetCourtsByComplexIdAsync(
+        Guid sportsComplexId,
+        int page,
+        int pageSize,
+        Guid? sportId = null,
+        CourtStatus? status = null,
+        CancellationToken cancellationToken = default)
+    {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 1 : pageSize;
+        pageSize = pageSize > MaxPageSize ? MaxPageSize : pageSize;
+
+        IQueryable<Court> query = context.Courts
+            .Include(x => x.CourtSports)
+            .ThenInclude(x => x.Sport)
+            .Where(x => x.SportsComplexId == sportsComplexId)
+            .OrderByDescending(x => x.CreatedAt);
+
+        if (status.HasValue)
+        {
+            query = query.Where(x => x.Status == status.Value);
+        }
+
+        if (sportId.HasValue)
+        {
+            query = query.Where(x => x.CourtSports.Any(cs => cs.SportId == sportId.Value && cs.Sport.Status == SportStatus.Active));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
+    }
+
+    public async Task<(int ActiveCount, int InactiveCount)> GetCourtStatusCountsByComplexIdAsync(Guid sportsComplexId, CancellationToken cancellationToken = default)
+    {
+        var counts = await context.Courts
+            .Where(x => x.SportsComplexId == sportsComplexId)
+            .GroupBy(x => x.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        var activeCount = counts.FirstOrDefault(c => c.Status == CourtStatus.Active)?.Count ?? 0;
+        var inactiveCount = counts.FirstOrDefault(c => c.Status == CourtStatus.Inactive)?.Count ?? 0;
+
+        return (activeCount, inactiveCount);
+    }
 }

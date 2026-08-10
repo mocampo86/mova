@@ -21,6 +21,23 @@ npm run test
 npm run build
 ```
 
+## Internationalization
+
+Mova Web supports English (`en`), Spanish (`es`), and Portuguese (`pt`).
+
+- Translation resources live in `src/i18n/locales/{lang}.json`.
+- The active language is detected in the following order, falling back to English:
+  1. `localStorage` key `mova-language`
+  2. Browser language (`navigator.language`)
+  3. `?lng=` query string parameter
+  4. `<html lang="...">` attribute
+- Regional language codes (for example `es-ES`, `pt-BR`) are normalized to the supported base locale.
+- Invalid or unsupported persisted values are ignored and reset to English.
+- The selected language is persisted to `localStorage` immediately when the user changes it.
+- Shared language utilities (validation, sanitization, storage helpers) live in `src/i18n/languageStorage.ts`.
+- A `LanguageSelector` component is available for users to switch languages from the public layout; it renders a flag/language icon for each option and falls back to the locale code if an asset is missing.
+- The `I18nextProvider` is configured in `src/app/providers.tsx` and test utilities reset the language to English before each test.
+
 ## Authentication
 
 The application uses Google Sign-In to obtain an ID token, which is exchanged with the Mova API for a JWT access token. The access token is parsed to extract roles and complex associations used by the protected route guards.
@@ -36,6 +53,12 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/complete-profile` | Complete the user profile (phone number). | Authenticated users |
 | `/user` | User portal home. | Authenticated users |
 | `/admin/super` | Super admin dashboard. | `SuperAdmin` |
-| `/admin/complex/:complexId` | Complex admin dashboard placeholder. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId` | Complex admin dashboard overview with courts, reservations, and blocked users summaries. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/profile` | Edit the complex public profile. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/courts` | List and manage the courts of the complex. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/courts/new` | Create a new court for the complex. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/courts/:courtId/edit` | Edit an existing court, including sports assignment and day-of-week availability rules. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/reservations` | Complex admin reservations. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/users` | Complex admin user management: search users, block/unblock users, and view reservation history. | `ComplexAdmin` of the requested complex |
 
-There is currently no UI for creating or editing a sports complex; those operations are exposed through the backend API at `POST /api/v1/complexes` and `PUT /api/v1/complexes/{complexId}`.
+There is currently no UI for creating a sports complex; creation is exposed through the backend API at `POST /api/v1/complexes`. Editing a complex profile is available in the admin panel at `/admin/complex/:complexId/profile` using `PUT /api/v1/complexes/{complexId}`.

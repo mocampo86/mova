@@ -2,6 +2,7 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { useCompleteProfile } from '../features/users/useCompleteProfile';
 
 const phoneNumberPattern = /^\+[0-9](?:\s*[0-9]){6,14}$/;
@@ -20,6 +21,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function CompleteProfilePage() {
+  const { t } = useTranslation();
   const { mutate, isPending, error } = useCompleteProfile();
   const {
     register,
@@ -35,8 +37,8 @@ export default function CompleteProfilePage() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, mt: 8 }}>
-      <Typography variant="h4">Complete your profile</Typography>
-      <Typography variant="body1">Please enter your phone number to continue.</Typography>
+      <Typography variant="h4">{t('completeProfile.title')}</Typography>
+      <Typography variant="body1">{t('completeProfile.subtitle')}</Typography>
 
       <Box
         component="form"
@@ -45,15 +47,15 @@ export default function CompleteProfilePage() {
       >
         <TextField
           {...register('phoneNumber')}
-          label="Phone number"
-          placeholder="+54 11 1234 5678"
+          label={t('completeProfile.phoneLabel')}
+          placeholder={t('completeProfile.phonePlaceholder')}
           fullWidth
           error={Boolean(errors.phoneNumber)}
           helperText={errors.phoneNumber?.message}
         />
 
         <Button type="submit" variant="contained" disabled={isPending}>
-          Continue
+          {t('completeProfile.continue')}
         </Button>
 
         {error && (

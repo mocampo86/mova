@@ -1,8 +1,15 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Mova.Contracts.Auth;
+using Mova.Contracts.Common;
+using Mova.Contracts.Courts;
+using Mova.Contracts.Reservations;
 using Mova.Contracts.Users;
+using Mova.Domain.Entities;
+using Mova.Domain.Enums;
+using Mova.Infrastructure.Data;
 using Mova.IntegrationTests.Authentication;
 using Xunit;
 
@@ -60,9 +67,134 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task ComplexUsers_List_ReturnsUsersWithReservations()
+    {
+        var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complexId}/users");
+
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ComplexUserInfo>>();
+
+        Assert.NotNull(result);
+        Assert.Single(result!.Items);
+        Assert.Equal(customerId, result.Items[0].Id);
+        Assert.False(result.Items[0].IsBlocked);
+    }
+
+    [Fact]
+    public async Task ComplexUsers_GetReservations_ReturnsUserHistory()
+    {
+        var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complexId}/users/{customerId}/reservations");
+
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+
+        Assert.NotNull(result);
+        Assert.Single(result!.Items);
+    }
+
+    [Fact]
+    public async Task BlockedUsers_BlockAndUnblock_Flow_Succeeds()
+    {
+        var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var blockResponse = await client.PostAsJsonAsync(
+            $"/api/v1/complexes/{complexId}/blocked-users",
+            new BlockUserRequest { UserId = customerId, Reason = "No-show" });
+
+        Assert.Equal(HttpStatusCode.Created, blockResponse.StatusCode);
+        var block = await blockResponse.Content.ReadFromJsonAsync<BlockedUserInfo>();
+        Assert.NotNull(block);
+
+        var listResponse = await client.GetAsync($"/api/v1/complexes/{complexId}/users");
+        listResponse.EnsureSuccessStatusCode();
+        var list = await listResponse.Content.ReadFromJsonAsync<PagedResult<ComplexUserInfo>>();
+        Assert.Contains(list!.Items, u => u.Id == customerId && u.IsBlocked);
+
+        var unblockResponse = await client.DeleteAsync($"/api/v1/complexes/{complexId}/blocked-users/{block!.Id}");
+        unblockResponse.EnsureSuccessStatusCode();
+
+        listResponse = await client.GetAsync($"/api/v1/complexes/{complexId}/users");
+        list = await listResponse.Content.ReadFromJsonAsync<PagedResult<ComplexUserInfo>>();
+        Assert.Contains(list!.Items, u => u.Id == customerId && !u.IsBlocked);
+    }
+
+    private async Task<(string AdminSuffix, Guid ComplexId, Guid CustomerId, Guid CourtId)> SeedScenarioAsync()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+
+        var adminSuffix = $"users-admin-{Guid.NewGuid()}";
+        var adminUser = User.CreateFromGoogle(
+            Guid.NewGuid(),
+            $"sub-{adminSuffix}",
+            $"user-{adminSuffix}@test.com",
+            $"Admin {adminSuffix}");
+        adminUser.AddRole(Role.User);
+        adminUser.AddRole(Role.ComplexAdmin);
+
+        var customerUser = User.CreateFromGoogle(
+            Guid.NewGuid(),
+            $"sub-customer-{Guid.NewGuid()}",
+            $"user-customer-{Guid.NewGuid()}@test.com",
+            "Customer User");
+        customerUser.AddRole(Role.User);
+
+        var complex = SportsComplex.Create(
+            $"Complex {Guid.NewGuid()}",
+            "Description",
+            "Address",
+            "Montevideo",
+            null,
+            null,
+            "+598 99 123 456",
+            $"complex-{Guid.NewGuid()}@test.com");
+
+        var sport = Sport.Create($"Sport {Guid.NewGuid()}");
+        var court = Court.Create(complex.Id, $"Court {Guid.NewGuid()}", "Court", "Synthetic", true, [sport.Id]);
+
+        var startAt = new DateTime(2026, 8, 10, 14, 0, 0, DateTimeKind.Utc);
+        var endAt = startAt.AddHours(1);
+        var reservation = Reservation.Create(complex.Id, court.Id, customerUser.Id, startAt, endAt, ReservationSource.Web);
+        reservation.Confirm();
+
+        var administrator = ComplexAdministrator.Create(complex.Id, adminUser.Id, Role.ComplexAdmin);
+
+        await context.Sports.AddAsync(sport);
+        await context.Users.AddRangeAsync(adminUser, customerUser);
+        await context.SportsComplexes.AddAsync(complex);
+        await context.Courts.AddAsync(court);
+        await context.Reservations.AddAsync(reservation);
+        await context.ComplexAdministrators.AddAsync(administrator);
+        await context.SaveChangesAsync();
+
+        return (adminSuffix, complex.Id, customerUser.Id, court.Id);
+    }
+
     private static async Task<string> LoginAsync(HttpClient client)
     {
-        var idToken = $"valid-token-{Guid.NewGuid()}";
+        return await LoginAsync(client, Guid.NewGuid().ToString());
+    }
+
+    private static async Task<string> LoginAsync(HttpClient client, string suffix)
+    {
+        var idToken = $"valid-token-{suffix}";
         var loginRequest = new GoogleLoginRequest { IdToken = idToken };
         var response = await client.PostAsJsonAsync("/api/v1/auth/google", loginRequest);
         response.EnsureSuccessStatusCode();

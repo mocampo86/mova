@@ -1,5 +1,6 @@
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import { useTranslation } from 'react-i18next';
 
 export interface ErrorStateProps {
   title?: string;
@@ -7,13 +8,15 @@ export interface ErrorStateProps {
 }
 
 export default function ErrorState({
-  title = 'Something went wrong',
-  message = 'An unexpected error occurred. Please try again later.'
+  title,
+  message
 }: ErrorStateProps) {
+  const { t } = useTranslation();
+
   return (
     <Alert severity="error" sx={{ mt: 2 }}>
-      <AlertTitle>{title}</AlertTitle>
-      {message}
+      <AlertTitle>{title ?? t('common.error.title')}</AlertTitle>
+      {message ?? t('common.error.message')}
     </Alert>
   );
 }

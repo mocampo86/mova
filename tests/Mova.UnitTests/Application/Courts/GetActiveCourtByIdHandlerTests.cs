@@ -63,7 +63,28 @@ public sealed class GetActiveCourtByIdHandlerTests
             CancellationToken cancellationToken = default) =>
             Task.FromResult<(IReadOnlyList<Court> Items, int TotalItems)>(([], 0));
 
+        public Task<(IReadOnlyList<Court> Items, int TotalItems)> GetCourtsByComplexIdAsync(
+            Guid sportsComplexId,
+            int page,
+            int pageSize,
+            Guid? sportId = null,
+            CourtStatus? status = null,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<(IReadOnlyList<Court> Items, int TotalItems)>(([], 0));
+
+        public Task<(int ActiveCount, int InactiveCount)> GetCourtStatusCountsByComplexIdAsync(
+            Guid sportsComplexId,
+            CancellationToken cancellationToken = default)
+        {
+            var activeCount = _courts.Count(c => c.SportsComplexId == sportsComplexId && c.Status == CourtStatus.Active);
+            var inactiveCount = _courts.Count(c => c.SportsComplexId == sportsComplexId && c.Status == CourtStatus.Inactive);
+            return Task.FromResult((activeCount, inactiveCount));
+        }
+
         public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, CancellationToken cancellationToken = default) =>
+            Task.FromResult(false);
+
+        public Task<bool> ExistsByNameAsync(Guid sportsComplexId, string name, Guid excludeCourtId, CancellationToken cancellationToken = default) =>
             Task.FromResult(false);
     }
 }
