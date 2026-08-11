@@ -1,4 +1,4 @@
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { AppBar, Box, Button, IconButton, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
@@ -12,10 +12,12 @@ interface AppHeaderProps {
 
 export default function AppHeader({ greetingName, showMenuToggle, onMenuToggle }: AppHeaderProps) {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const displayName = greetingName || user?.fullName || user?.email || '';
+  const showDashboardLink = isAuthenticated && pathname !== '/user';
 
   return (
     <AppBar
@@ -49,6 +51,17 @@ export default function AppHeader({ greetingName, showMenuToggle, onMenuToggle }
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {isAuthenticated && user && (
             <>
+              {showDashboardLink && (
+                <Button
+                  color="inherit"
+                  component={RouterLink}
+                  to="/user"
+                  size="small"
+                  sx={{ mr: 1 }}
+                >
+                  {t('nav.dashboard')}
+                </Button>
+              )}
               {!isMobile && displayName && (
                 <Typography sx={{ mr: 1 }}>
                   {t('dashboard.welcome', { name: displayName })}
