@@ -11,14 +11,15 @@ public static class AvailabilitySlotGenerator
         CourtAvailabilityRule rule,
         BusinessHours businessHours,
         IEnumerable<Reservation> reservations,
-        IEnumerable<CourtBlock> blocks)
+        IEnumerable<CourtBlock> blocks,
+        int utcOffsetMinutes = 0)
     {
         if (rule.DayOfWeek != date.DayOfWeek || businessHours.DayOfWeek != date.DayOfWeek || businessHours.IsClosed)
         {
             return [];
         }
 
-        var dayStart = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        var dayStart = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc).AddMinutes(utcOffsetMinutes);
         var ruleStart = dayStart.Add(rule.StartTime);
         var ruleEnd = dayStart.Add(rule.EndTime);
         var businessStart = dayStart.Add(businessHours.OpeningTime);

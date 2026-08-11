@@ -40,10 +40,15 @@ export function useSports() {
 }
 
 export function useCourtAvailability(complexId: string, courtId: string, date: string) {
-  const params = new URLSearchParams({ courtId, date });
+  const utcOffsetMinutes = new Date(`${date}T00:00`).getTimezoneOffset();
+  const params = new URLSearchParams({
+    courtId,
+    date,
+    utcOffsetMinutes: utcOffsetMinutes.toString()
+  });
 
   return useQuery({
-    queryKey: ['court-availability', complexId, courtId, date],
+    queryKey: ['court-availability', complexId, courtId, date, utcOffsetMinutes],
     queryFn: () => apiClient<CourtAvailabilitySlot[]>(`/api/v1/complexes/${complexId}/availability?${params}`),
     enabled: Boolean(complexId && courtId && date)
   });

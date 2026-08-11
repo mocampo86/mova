@@ -181,7 +181,7 @@
     "selectPrompt": "Select a court and date to view available slots.",
     "loadingAvailability": "Loading availability…",
     "availabilityError": "Availability could not be loaded.",
-    "noAvailability": "No available slots for the selected date. The complex may not have business hours configured or the court may not have availability rules for that day.",
+    "noAvailability": "No available slots for the selected date. The complex may not have business hours configured, the day may be closed, or the court may not have availability rules for that day.",
     "phoneWithValue": "Phone: {{value}}",
     "emailWithValue": "Email: {{value}}",
     "availability": {
@@ -290,7 +290,7 @@
       "success": "Business hours updated successfully.",
       "save": "Save hours",
       "dayHeader": "Day",
-      "closedHeader": "Closed",
+      "openHeader": "Open",
       "openingTimeHeader": "Opening time",
       "closingTimeHeader": "Closing time"
     },

@@ -103,9 +103,10 @@ public class ComplexesController : ControllerBase
         Guid complexId,
         [FromQuery] Guid courtId,
         [FromQuery] DateOnly date,
+        [FromQuery] int utcOffsetMinutes = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetCourtAvailabilityQuery(complexId, courtId, date);
+        var query = new GetCourtAvailabilityQuery(complexId, courtId, date, utcOffsetMinutes);
         await _getCourtAvailabilityValidator.ValidateAndThrowAsync(query, cancellationToken);
 
         var result = await _getCourtAvailabilityHandler.HandleAsync(query, cancellationToken);

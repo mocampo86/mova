@@ -171,7 +171,7 @@ export default function BusinessHoursPage() {
               <TableHead>
                 <TableRow>
                   <TableCell>{t('admin.businessHours.dayHeader')}</TableCell>
-                  <TableCell>{t('admin.businessHours.closedHeader')}</TableCell>
+                  <TableCell>{t('admin.businessHours.openHeader')}</TableCell>
                   <TableCell>{t('admin.businessHours.openingTimeHeader')}</TableCell>
                   <TableCell>{t('admin.businessHours.closingTimeHeader')}</TableCell>
                 </TableRow>
@@ -187,10 +187,10 @@ export default function BusinessHoursPage() {
                         control={control}
                         render={({ field: controllerField }) => (
                           <Switch
-                            checked={controllerField.value}
-                            onChange={(_, checked) => controllerField.onChange(checked)}
+                            checked={!controllerField.value}
+                            onChange={(_, checked) => controllerField.onChange(!checked)}
                             slotProps={{
-                              input: { 'aria-label': `${getDayLabel(t, field.dayOfWeek)} closed` }
+                              input: { 'aria-label': `${getDayLabel(t, field.dayOfWeek)} open` }
                             }}
                           />
                         )}

@@ -41,12 +41,12 @@ public sealed class GetCourtAvailabilityHandler(
             return [];
         }
 
-        var dayStart = query.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        var dayStart = query.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc).AddMinutes(query.UtcOffsetMinutes);
         var queryEnd = dayStart.AddDays(2);
 
         var courtReservations = await reservations.GetActiveForCourtAsync(query.CourtId, dayStart, queryEnd, cancellationToken);
         var courtBlocks = await blocks.GetForCourtAsync(query.CourtId, dayStart, queryEnd, cancellationToken);
 
-        return AvailabilitySlotGenerator.GenerateSlots(query.CourtId, query.Date, rule, businessHour, courtReservations, courtBlocks);
+        return AvailabilitySlotGenerator.GenerateSlots(query.CourtId, query.Date, rule, businessHour, courtReservations, courtBlocks, query.UtcOffsetMinutes);
     }
 }
