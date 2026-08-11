@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useMyReservationHistory } from '../features/reservations/reservationApi';
+import { getReservationStatusKey } from '../features/reservations/reservationStatus';
 import type { UserReservationsFilters } from '../features/reservations/reservationTypes';
 
 function formatLocalDateTime(isoString: string): string {
@@ -85,7 +86,7 @@ export default function UserHistoryPage() {
                     <TableCell>{reservation.courtName}</TableCell>
                     <TableCell>{formatLocalDateTime(reservation.startAt)}</TableCell>
                     <TableCell>{formatLocalDateTime(reservation.endAt)}</TableCell>
-                    <TableCell>{t(`common.${reservation.status.toLowerCase()}`)}</TableCell>
+                    <TableCell>{t(`status.${getReservationStatusKey(reservation.status)}`)}</TableCell>
                   </TableRow>
                 ))}
             </TableBody>
