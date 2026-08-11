@@ -164,6 +164,14 @@ cmd /c "cd /d C:\Endava\EndevLocal\source\mova\src\mova-web && npm run test"
 
 Vitest v4.1.10 can fail with `Vitest failed to find the runner` when the working directory's drive letter casing does not match the canonical on-disk casing. Run commands from the canonical path (e.g., `C:\...` rather than `c:\...`).
 
+### Vitest forks pool on Windows
+
+Vitest's default `forks` pool can time out waiting for workers to start in this Windows environment (`[vitest-pool]: Failed to start forks worker`). When this happens, run the suite with the `threads` pool:
+
+```cmd
+cmd /c "cd /d C:\Endava\EndevLocal\source\mova\src\mova-web && npx vitest run --pool=threads"
+```
+
 ### `localStorage` in the jsdom test environment
 
 `window.localStorage` is not provided by the jsdom environment used by Vitest. A `LocalStorageMock` is configured in `src/mova-web/src/setupStorage.ts` and loaded before `src/mova-web/src/setupTests.ts` so storage code can be exercised in tests.
