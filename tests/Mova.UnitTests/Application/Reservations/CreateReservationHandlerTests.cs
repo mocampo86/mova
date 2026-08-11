@@ -76,6 +76,7 @@ public sealed class CreateReservationHandlerTests
         Assert.Equal(user.Id, result.UserId);
         Assert.Equal("Confirmed", result.Status);
         Assert.Equal("Admin", result.Source);
+        Assert.NotNull(result.UpdatedAt);
     }
 
     [Fact]
@@ -86,6 +87,23 @@ public sealed class CreateReservationHandlerTests
 
         await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(new CreateReservationCommand(
             Guid.NewGuid(),
+            court.Id,
+            user.Id,
+            Guid.NewGuid(),
+            DateTime.UtcNow,
+            DateTime.UtcNow.AddHours(1),
+            null)));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithInactiveComplex_ThrowsConflictException()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        complex.Deactivate();
+        var handler = CreateHandler();
+
+        await Assert.ThrowsAsync<ConflictException>(() => handler.HandleAsync(new CreateReservationCommand(
+            complex.Id,
             court.Id,
             user.Id,
             Guid.NewGuid(),

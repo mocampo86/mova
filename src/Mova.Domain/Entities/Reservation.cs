@@ -15,6 +15,7 @@ public sealed class Reservation
     public Guid? RecurringReservationId { get; private set; }
     public string? Notes { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
     public DateTime? CancelledAt { get; private set; }
     public string? CancellationReason { get; private set; }
 
@@ -53,7 +54,8 @@ public sealed class Reservation
             Source = source,
             RecurringReservationId = recurringReservationId,
             Notes = notes,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
     }
 
@@ -65,6 +67,7 @@ public sealed class Reservation
         }
 
         Status = ReservationStatus.Confirmed;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void Cancel(string? reason = null, bool cancelledByAdmin = false)
@@ -79,6 +82,7 @@ public sealed class Reservation
             : ReservationStatus.CancelledByUser;
         CancellationReason = reason;
         CancelledAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void MarkCompleted()
@@ -89,6 +93,7 @@ public sealed class Reservation
         }
 
         Status = ReservationStatus.Completed;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void MarkNoShow()
@@ -99,6 +104,7 @@ public sealed class Reservation
         }
 
         Status = ReservationStatus.NoShow;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public bool IsActiveForAvailability()

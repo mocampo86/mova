@@ -19,6 +19,7 @@ public static class ReservationMapper
         Source = reservation.Source.ToString(),
         Notes = reservation.Notes,
         CreatedAt = reservation.CreatedAt,
+        UpdatedAt = reservation.UpdatedAt,
         CancelledAt = reservation.CancelledAt,
         CancellationReason = reservation.CancellationReason
     };
