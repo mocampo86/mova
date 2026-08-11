@@ -62,10 +62,10 @@ const availabilityRuleSchema = z
       const [endHour, endMinute] = rule.endTime.split(':').map(Number);
       const startMinutes = startHour * 60 + startMinute;
       const endMinutes = endHour * 60 + endMinute;
-      return endMinutes > startMinutes;
+      return startMinutes !== endMinutes;
     },
     {
-      message: 'End time must be after start time.',
+      message: 'Start and end times must be different.',
       path: ['endTime']
     }
   )
@@ -75,7 +75,8 @@ const availabilityRuleSchema = z
       const [endHour, endMinute] = rule.endTime.split(':').map(Number);
       const startMinutes = startHour * 60 + startMinute;
       const endMinutes = endHour * 60 + endMinute;
-      return (endMinutes - startMinutes) % rule.slotDurationMinutes === 0;
+      const duration = endMinutes - startMinutes + (endMinutes < startMinutes ? 24 * 60 : 0);
+      return duration % rule.slotDurationMinutes === 0;
     },
     {
       message: 'The time range must be evenly divisible by the slot duration.',

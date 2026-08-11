@@ -16,8 +16,8 @@ public sealed class CourtAvailabilityRule
     public static CourtAvailabilityRule Create(Guid courtId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime, int slotDurationMinutes, bool isActive)
     {
         if (courtId == Guid.Empty) throw new ArgumentException("CourtId cannot be empty.", nameof(courtId));
-        if (startTime >= endTime)
-            throw new ArgumentException("Start time must be earlier than end time.", nameof(startTime));
+        if (startTime == endTime)
+            throw new ArgumentException("Start and end times cannot be the same.", nameof(startTime));
         if (slotDurationMinutes <= 0)
             throw new ArgumentException("Slot duration must be greater than zero.", nameof(slotDurationMinutes));
         if (!FitsSlotDuration(startTime, endTime, slotDurationMinutes))
@@ -37,8 +37,8 @@ public sealed class CourtAvailabilityRule
 
     public void Update(TimeSpan startTime, TimeSpan endTime, int slotDurationMinutes, bool isActive)
     {
-        if (startTime >= endTime)
-            throw new ArgumentException("Start time must be earlier than end time.", nameof(startTime));
+        if (startTime == endTime)
+            throw new ArgumentException("Start and end times cannot be the same.", nameof(startTime));
         if (slotDurationMinutes <= 0)
             throw new ArgumentException("Slot duration must be greater than zero.", nameof(slotDurationMinutes));
         if (!FitsSlotDuration(startTime, endTime, slotDurationMinutes))
@@ -53,6 +53,9 @@ public sealed class CourtAvailabilityRule
     private static bool FitsSlotDuration(TimeSpan startTime, TimeSpan endTime, int slotDurationMinutes)
     {
         var duration = endTime - startTime;
+        if (duration <= TimeSpan.Zero)
+            duration += TimeSpan.FromHours(24);
+
         return duration.TotalMinutes % slotDurationMinutes == 0;
     }
 }

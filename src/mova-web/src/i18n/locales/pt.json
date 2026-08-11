@@ -186,6 +186,13 @@
     "emailWithValue": "E-mail: {{value}}",
     "availability": {
       "to": "às {{time}}"
+    },
+    "booking": {
+      "title": "Reservar horário",
+      "message": "Confirmar reserva para {{court}} em {{date}} das {{start}} às {{end}}?",
+      "notesLabel": "Observações (opcional)",
+      "confirm": "Confirmar reserva",
+      "loginPrompt": "Faça login para reservar este horário."
     }
   },
   "userHome": {

@@ -200,13 +200,13 @@ describe('EditCourtPage', () => {
     const slotDurationInputs = screen.getAllByLabelText('Slot duration');
 
     fireEvent.change(startTimeInputs[0], { target: { value: '10:00' } });
-    fireEvent.change(endTimeInputs[0], { target: { value: '09:00' } });
+    fireEvent.change(endTimeInputs[0], { target: { value: '10:00' } });
     fireEvent.change(slotDurationInputs[0], { target: { value: '60' } });
 
     fireEvent.click(screen.getByRole('button', { name: 'Update court' }));
 
     await waitFor(() => {
-      expect(screen.getByText(/End time must be after start time/i)).toBeTruthy();
+      expect(screen.getByText(/Start and end times must be different/i)).toBeTruthy();
     });
   });
 

@@ -20,10 +20,10 @@ public sealed class CourtAvailabilityRuleTests
     }
 
     [Fact]
-    public void Create_WithInvalidTimeRange_Throws()
+    public void Create_WithStartTimeEqualToEndTime_Throws()
     {
         var courtId = Guid.NewGuid();
-        Assert.Throws<ArgumentException>(() => CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(12), TimeSpan.FromHours(8), 60, true));
+        Assert.Throws<ArgumentException>(() => CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(12), TimeSpan.FromHours(12), 60, true));
     }
 
     [Fact]

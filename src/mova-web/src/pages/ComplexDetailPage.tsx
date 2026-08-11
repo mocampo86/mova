@@ -7,6 +7,10 @@ import {
   Card,
   CardContent,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   Grid,
   InputLabel,
@@ -23,14 +27,90 @@ import {
   useCourtAvailability,
   useSports
 } from '../features/complexes/complexApi';
+import type { CourtAvailabilitySlot } from '../features/complexes/complexTypes';
+import { useAuth } from '../features/auth/useAuth';
+import { useCreateMyReservation } from '../features/reservations/reservationApi';
 
-function formatLocalDateTime(isoString: string) {
+function formatLocalTime(isoString: string) {
   const date = new Date(isoString);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+function formatLocalDate(isoString: string) {
+  const date = new Date(isoString);
+  return date.toLocaleDateString();
+}
+
 function todayIso() {
   return new Date().toISOString().split('T')[0];
+}
+
+interface BookingDialogProps {
+  slot: CourtAvailabilitySlot;
+  courtName: string;
+  notes: string;
+  onNotesChange: (notes: string) => void;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: Error | null;
+  onConfirm: () => Promise<void>;
+  onCancel: () => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}
+
+function BookingDialog({
+  slot,
+  courtName,
+  notes,
+  onNotesChange,
+  isAuthenticated,
+  isLoading,
+  error,
+  onConfirm,
+  onCancel,
+  t
+}: BookingDialogProps) {
+  return (
+    <Dialog open onClose={onCancel} maxWidth="sm" fullWidth>
+      <DialogTitle>{t('complexDetail.booking.title')}</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2}>
+          {!isAuthenticated && (
+            <Alert severity="info">{t('complexDetail.booking.loginPrompt')}</Alert>
+          )}
+          {error && <Alert severity="error">{error.message}</Alert>}
+          <Typography>
+            {t('complexDetail.booking.message', {
+              court: courtName,
+              date: formatLocalDate(slot.startAt),
+              start: formatLocalTime(slot.startAt),
+              end: formatLocalTime(slot.endAt)
+            })}
+          </Typography>
+          {isAuthenticated && (
+            <TextField
+              label={t('complexDetail.booking.notesLabel')}
+              value={notes}
+              onChange={(event) => onNotesChange(event.target.value)}
+              multiline
+              rows={2}
+              fullWidth
+            />
+          )}
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onCancel} disabled={isLoading}>
+          {t('common.cancel')}
+        </Button>
+        {isAuthenticated && (
+          <Button onClick={onConfirm} variant="contained" disabled={isLoading}>
+            {t('complexDetail.booking.confirm')}
+          </Button>
+        )}
+      </DialogActions>
+    </Dialog>
+  );
 }
 
 export default function ComplexDetailPage() {
@@ -41,9 +121,13 @@ export default function ComplexDetailPage() {
   const [selectedSportId, setSelectedSportId] = useState('');
   const [selectedCourtId, setSelectedCourtId] = useState('');
   const [selectedDate, setSelectedDate] = useState(todayIso);
+  const [selectedSlot, setSelectedSlot] = useState<CourtAvailabilitySlot | null>(null);
+  const [bookingNotes, setBookingNotes] = useState('');
 
+  const { isAuthenticated } = useAuth();
   const courts = useActiveCourts(complexId, selectedSportId || undefined);
   const sports = useSports();
+  const createMyReservation = useCreateMyReservation(complexId);
 
   const availability = useCourtAvailability(complexId, selectedCourtId, selectedDate);
 
@@ -202,19 +286,55 @@ export default function ComplexDetailPage() {
             <Grid container spacing={2}>
               {availability.data.map((slot, index) => (
                 <Grid key={index} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
-                  <Card variant="outlined" sx={{ textAlign: 'center', borderRadius: 2 }}>
+                  <Card
+                    variant="outlined"
+                    onClick={() => setSelectedSlot(slot)}
+                    sx={{
+                      textAlign: 'center',
+                      borderRadius: 2,
+                      cursor: 'pointer',
+                      '&:hover': { borderColor: 'primary.main' }
+                    }}
+                  >
                     <CardContent>
                       <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                        {formatLocalDateTime(slot.startAt)}
+                        {formatLocalTime(slot.startAt)}
                       </Typography>
                       <Typography color="text.secondary">
-                        {t('complexDetail.availability.to', { time: formatLocalDateTime(slot.endAt) })}
+                        {t('complexDetail.availability.to', { time: formatLocalTime(slot.endAt) })}
                       </Typography>
                     </CardContent>
                   </Card>
                 </Grid>
               ))}
             </Grid>
+          )}
+
+          {selectedSlot && (
+            <BookingDialog
+              slot={selectedSlot}
+              courtName={filteredCourts.find((court) => court.id === selectedCourtId)?.name ?? ''}
+              notes={bookingNotes}
+              onNotesChange={setBookingNotes}
+              isAuthenticated={isAuthenticated}
+              isLoading={createMyReservation.isPending}
+              error={createMyReservation.error}
+              onConfirm={async () => {
+                await createMyReservation.mutateAsync({
+                  courtId: selectedSlot.courtId,
+                  startAt: selectedSlot.startAt,
+                  endAt: selectedSlot.endAt,
+                  notes: bookingNotes.trim() || undefined
+                });
+                setSelectedSlot(null);
+                setBookingNotes('');
+              }}
+              onCancel={() => {
+                setSelectedSlot(null);
+                setBookingNotes('');
+              }}
+              t={t}
+            />
           )}
         </Box>
       </Stack>

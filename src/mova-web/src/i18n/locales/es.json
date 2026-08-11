@@ -186,6 +186,13 @@
     "emailWithValue": "Correo: {{value}}",
     "availability": {
       "to": "a las {{time}}"
+    },
+    "booking": {
+      "title": "Reservar turno",
+      "message": "¿Confirmar reserva para {{court}} el {{date}} de {{start}} a {{end}}?",
+      "notesLabel": "Notas (opcional)",
+      "confirm": "Confirmar reserva",
+      "loginPrompt": "Inicia sesión para reservar este turno."
     }
   },
   "userHome": {

@@ -76,6 +76,32 @@ public sealed class ReservationsController(
         return Created($"/api/v1/complexes/{complexId}/reservations/{result.Id}", result);
     }
 
+    [HttpPost("me")]
+    [Authorize(Policy = AuthorizationPolicies.User)]
+    public async Task<ActionResult<ReservationInfo>> CreateMyReservation(Guid complexId, CreateMyReservationRequest request, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var command = new CreateReservationCommand(
+            complexId,
+            request.CourtId,
+            userId,
+            userId,
+            request.StartAt,
+            request.EndAt,
+            request.Notes,
+            ReservationSource.Web);
+
+        await createValidator.ValidateAndThrowAsync(command, cancellationToken);
+
+        var result = await createHandler.HandleAsync(command, cancellationToken);
+        return Created($"/api/v1/complexes/{complexId}/reservations/{result.Id}", result);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ReservationInfo>> GetById(Guid complexId, Guid id, CancellationToken cancellationToken)
     {

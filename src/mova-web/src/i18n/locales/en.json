@@ -186,6 +186,13 @@
     "emailWithValue": "Email: {{value}}",
     "availability": {
       "to": "to {{time}}"
+    },
+    "booking": {
+      "title": "Book slot",
+      "message": "Confirm reservation for {{court}} on {{date}} from {{start}} to {{end}}?",
+      "notesLabel": "Notes (optional)",
+      "confirm": "Confirm booking",
+      "loginPrompt": "Log in to book this slot."
     }
   },
   "userHome": {

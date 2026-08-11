@@ -38,10 +38,12 @@ const businessHoursItemSchema = z
       if (data.isClosed) return true;
       const [startHour, startMinute] = data.openingTime.split(':').map(Number);
       const [endHour, endMinute] = data.closingTime.split(':').map(Number);
-      return startHour * 60 + startMinute < endHour * 60 + endMinute;
+      const startMinutes = startHour * 60 + startMinute;
+      const endMinutes = endHour * 60 + endMinute;
+      return startMinutes !== endMinutes;
     },
     {
-      message: 'Closing time must be after opening time.',
+      message: 'Opening and closing times must be different.',
       path: ['closingTime']
     }
   );

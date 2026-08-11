@@ -21,9 +21,9 @@ public static class AvailabilitySlotGenerator
 
         var dayStart = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc).AddMinutes(utcOffsetMinutes);
         var ruleStart = dayStart.Add(rule.StartTime);
-        var ruleEnd = dayStart.Add(rule.EndTime);
+        var ruleEnd = dayStart.AddDays(rule.StartTime > rule.EndTime ? 1 : 0).Add(rule.EndTime);
         var businessStart = dayStart.Add(businessHours.OpeningTime);
-        var businessEnd = dayStart.Add(businessHours.ClosingTime);
+        var businessEnd = dayStart.AddDays(businessHours.OpeningTime > businessHours.ClosingTime ? 1 : 0).Add(businessHours.ClosingTime);
 
         var intervalStart = ruleStart > businessStart ? ruleStart : businessStart;
         var intervalEnd = ruleEnd < businessEnd ? ruleEnd : businessEnd;

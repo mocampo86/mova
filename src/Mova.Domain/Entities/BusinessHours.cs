@@ -15,8 +15,8 @@ public sealed class BusinessHours
     public static BusinessHours Create(Guid sportsComplexId, DayOfWeek dayOfWeek, TimeSpan openingTime, TimeSpan closingTime, bool isClosed)
     {
         if (sportsComplexId == Guid.Empty) throw new ArgumentException("SportsComplexId cannot be empty.", nameof(sportsComplexId));
-        if (!isClosed && openingTime >= closingTime)
-            throw new ArgumentException("Opening time must be earlier than closing time.", nameof(openingTime));
+        if (!isClosed && openingTime == closingTime)
+            throw new ArgumentException("Opening and closing times cannot be the same.", nameof(openingTime));
 
         return new BusinessHours
         {
@@ -31,8 +31,8 @@ public sealed class BusinessHours
 
     public void Update(TimeSpan openingTime, TimeSpan closingTime, bool isClosed)
     {
-        if (!isClosed && openingTime >= closingTime)
-            throw new ArgumentException("Opening time must be earlier than closing time.", nameof(openingTime));
+        if (!isClosed && openingTime == closingTime)
+            throw new ArgumentException("Opening and closing times cannot be the same.", nameof(openingTime));
 
         OpeningTime = openingTime;
         ClosingTime = closingTime;

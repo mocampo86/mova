@@ -83,7 +83,7 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
             command.UserId,
             command.StartAt,
             command.EndAt,
-            ReservationSource.Admin,
+            command.Source,
             command.Notes);
 
         reservation.Confirm();

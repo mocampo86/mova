@@ -28,10 +28,10 @@ public sealed class BusinessHoursTests
     }
 
     [Fact]
-    public void Create_WithOpeningTimeAfterClosingTime_Throws()
+    public void Create_WithOpeningTimeEqualToClosingTime_Throws()
     {
         var complexId = Guid.NewGuid();
-        Assert.Throws<ArgumentException>(() => BusinessHours.Create(complexId, DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(8), false));
+        Assert.Throws<ArgumentException>(() => BusinessHours.Create(complexId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(8), false));
     }
 
     [Fact]

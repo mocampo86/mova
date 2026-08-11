@@ -20,12 +20,12 @@ public sealed class UpdateBusinessHoursCommandValidatorTests
     }
 
     [Fact]
-    public async Task Validate_WithClosingBeforeOpening_IsInvalid()
+    public async Task Validate_WithOpeningEqualToClosing_IsInvalid()
     {
         var validator = new UpdateBusinessHoursCommandValidator();
         var command = new UpdateBusinessHoursCommand(Guid.NewGuid(),
         [
-            new BusinessHoursItem(DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(8), false)
+            new BusinessHoursItem(DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(8), false)
         ]);
 
         var result = await validator.ValidateAsync(command);
