@@ -17,11 +17,13 @@ namespace Mova.Api.Controllers;
 public sealed class ReservationsController(
     ICreateReservationHandler createHandler,
     IGetReservationsByComplexHandler getListHandler,
+    IGetMyUpcomingReservationsHandler getMyUpcomingHandler,
     IGetReservationByIdHandler getByIdHandler,
     ICancelReservationHandler cancelHandler,
     IUpdateReservationStatusHandler updateStatusHandler,
     FluentValidation.IValidator<CreateReservationCommand> createValidator,
     FluentValidation.IValidator<GetReservationsByComplexQuery> listValidator,
+    FluentValidation.IValidator<GetMyUpcomingReservationsQuery> myUpcomingValidator,
     FluentValidation.IValidator<CancelReservationCommand> cancelValidator,
     FluentValidation.IValidator<UpdateReservationStatusCommand> updateStatusValidator) : ControllerBase
 {
@@ -49,6 +51,26 @@ public sealed class ReservationsController(
         await listValidator.ValidateAndThrowAsync(query, cancellationToken);
 
         var result = await getListHandler.HandleAsync(query, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("~/api/v1/users/me/reservations")]
+    [Authorize(Policy = AuthorizationPolicies.User)]
+    public async Task<ActionResult<PagedResult<ReservationInfo>>> GetMyUpcoming(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var query = new GetMyUpcomingReservationsQuery(userId, DateTime.UtcNow, page, pageSize);
+        await myUpcomingValidator.ValidateAndThrowAsync(query, cancellationToken);
+
+        var result = await getMyUpcomingHandler.HandleAsync(query, cancellationToken);
         return Ok(result);
     }
 
