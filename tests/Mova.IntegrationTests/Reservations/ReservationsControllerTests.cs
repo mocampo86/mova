@@ -1,10 +1,15 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Mova.Contracts.Auth;
 using Mova.Contracts.Complexes;
 using Mova.Contracts.Courts;
+using Mova.Contracts.Common;
 using Mova.Contracts.Reservations;
+using Mova.Domain.Entities;
+using Mova.Domain.Enums;
+using Mova.Infrastructure.Data;
 
 namespace Mova.IntegrationTests.Reservations;
 
@@ -148,11 +153,68 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         Assert.Equal("Admin", result.Source);
     }
 
+    [Fact]
+    public async Task GetMyUpcoming_ReturnsOnlyAuthenticatedUsersFutureActiveReservations()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"reservation-upcoming-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var now = DateTime.UtcNow;
+        var soonerStart = now.AddDays(1);
+        var laterStart = now.AddDays(2);
+        Guid soonerId;
+        Guid laterId;
+
+        var otherUserLogin = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-other-{Guid.NewGuid()}" });
+        otherUserLogin.EnsureSuccessStatusCode();
+        var otherUser = await otherUserLogin.Content.ReadFromJsonAsync<GoogleLoginResponse>();
+        Assert.NotNull(otherUser);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+
+            var past = Reservation.Create(complex.Id, court.Id, login.User.Id, now.AddDays(-1), now.AddDays(-1).AddHours(1), ReservationSource.Web);
+            past.Confirm();
+            var sooner = Reservation.Create(complex.Id, court.Id, login.User.Id, soonerStart, soonerStart.AddHours(1), ReservationSource.Web);
+            sooner.Confirm();
+            var later = Reservation.Create(complex.Id, court.Id, login.User.Id, laterStart, laterStart.AddHours(1), ReservationSource.Web);
+            later.Confirm();
+            soonerId = sooner.Id;
+            laterId = later.Id;
+            var otherUsers = Reservation.Create(complex.Id, court.Id, otherUser.User.Id, soonerStart.AddHours(2), soonerStart.AddHours(3), ReservationSource.Web);
+            otherUsers.Confirm();
+            var cancelled = Reservation.Create(complex.Id, court.Id, login.User.Id, soonerStart.AddHours(4), soonerStart.AddHours(5), ReservationSource.Web);
+            cancelled.Cancel("No longer needed");
+
+            await context.Reservations.AddRangeAsync(past, later, sooner, otherUsers, cancelled);
+            await context.SaveChangesAsync();
+        }
+
+        var response = await client.GetAsync("/api/v1/users/me/reservations?page=1&pageSize=10");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(result);
+        Assert.Equal(2, result.TotalItems);
+        Assert.Equal([soonerId, laterId], result.Items.Select(r => r.Id));
+        Assert.All(result.Items, reservation => Assert.Equal(login.User.Id, reservation.UserId));
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
+    {
+        return (await LoginWithUserAsync(client, suffix)).AccessToken;
+    }
+
+    private static async Task<GoogleLoginResponse> LoginWithUserAsync(HttpClient client, string suffix)
     {
         var response = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" });
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<GoogleLoginResponse>())!.AccessToken;
+        return (await response.Content.ReadFromJsonAsync<GoogleLoginResponse>())!;
     }
 
     private static async Task<SportsComplexInfo> CreateComplexAsync(HttpClient client)

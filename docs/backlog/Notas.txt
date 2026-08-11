@@ -7,3 +7,8 @@
 -Filtros por deporte, solo los que tengan al menos una cancha existente
 -Busqueda de complejo, agregar el filtro por deporte
 -Poder marcar complejos como favoritos
+-Imagen principal de complejos
+-Iconos en las tarjetas de las canchas
+-Cancelaciones: permitir/denegar cancelaciones desde los complejos
+-Cancelaciones: configurar tiempo mínimo para cancelar reservas
+-Check si el usuario puede ver reservaciones

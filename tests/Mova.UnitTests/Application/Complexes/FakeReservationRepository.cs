@@ -106,6 +106,33 @@ public sealed class FakeReservationRepository : IReservationRepository
         return Task.FromResult<(IReadOnlyList<Reservation> Items, int TotalItems)>((items, totalItems));
     }
 
+    public Task<(IReadOnlyList<Reservation> Items, int TotalItems)> GetUpcomingByUserIdAsync(
+        Guid userId,
+        DateTime from,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _reservations
+            .Where(r => r.UserId == userId)
+            .Where(r => r.StartAt >= from)
+            .Where(r => r.Status is ReservationStatus.Pending or ReservationStatus.Confirmed)
+            .OrderBy(r => r.StartAt);
+
+        var list = query.ToList();
+        var totalItems = list.Count;
+
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 1 : pageSize;
+
+        var items = list
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return Task.FromResult<(IReadOnlyList<Reservation> Items, int TotalItems)>((items, totalItems));
+    }
+
     public Task<bool> HasOverlappingActiveReservationAsync(
         Guid courtId,
         DateTime start,
