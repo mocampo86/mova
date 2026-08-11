@@ -1,3 +1,4 @@
+using System.Data;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Reservations.Commands;
@@ -38,8 +39,13 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
 
     public async Task<ReservationInfo> HandleAsync(CreateReservationCommand command, CancellationToken cancellationToken = default)
     {
-        _ = await _sportsComplexes.GetByIdAsync(command.SportsComplexId, cancellationToken)
+        var complex = await _sportsComplexes.GetByIdAsync(command.SportsComplexId, cancellationToken)
             ?? throw new NotFoundException("Sports complex not found.");
+
+        if (complex.Status != ComplexStatus.Active)
+        {
+            throw new ConflictException("The selected complex is not active.");
+        }
 
         var court = await _courts.GetByIdAsync(command.CourtId, cancellationToken);
 
@@ -65,32 +71,38 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
             throw new UserBlockedException();
         }
 
-        if (await _reservations.HasOverlappingActiveReservationAsync(command.CourtId, command.StartAt, command.EndAt, cancellationToken: cancellationToken))
-        {
-            throw new ConflictException("The selected time is no longer available.");
-        }
+        return await _unitOfWork.ExecuteInTransactionAsync(
+            async token =>
+            {
+                if (await _reservations.HasOverlappingActiveReservationAsync(command.CourtId, command.StartAt, command.EndAt, cancellationToken: token))
+                {
+                    throw new ConflictException("The selected time is no longer available.");
+                }
 
-        var blocks = await _courtBlocks.GetForCourtAsync(command.CourtId, command.StartAt, command.EndAt, cancellationToken);
+                var blocks = await _courtBlocks.GetForCourtAsync(command.CourtId, command.StartAt, command.EndAt, token);
 
-        if (blocks.Count > 0)
-        {
-            throw new ConflictException("The selected time is blocked.");
-        }
+                if (blocks.Count > 0)
+                {
+                    throw new ConflictException("The selected time is blocked.");
+                }
 
-        var reservation = Reservation.Create(
-            command.SportsComplexId,
-            command.CourtId,
-            command.UserId,
-            command.StartAt,
-            command.EndAt,
-            command.Source,
-            command.Notes);
+                var reservation = Reservation.Create(
+                    command.SportsComplexId,
+                    command.CourtId,
+                    command.UserId,
+                    command.StartAt,
+                    command.EndAt,
+                    command.Source,
+                    command.Notes);
 
-        reservation.Confirm();
+                reservation.Confirm();
 
-        await _reservations.AddAsync(reservation, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _reservations.AddAsync(reservation, token);
+                await _unitOfWork.SaveChangesAsync(token);
 
-        return ReservationMapper.ToInfo(reservation);
+                return ReservationMapper.ToInfo(reservation);
+            },
+            IsolationLevel.Serializable,
+            cancellationToken);
     }
 }

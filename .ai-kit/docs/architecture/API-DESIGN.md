@@ -88,7 +88,8 @@ Idempotency-Key: <uuid>
   "endAt": "2026-08-10T21:00:00Z",
   "status": "Confirmed",
   "source": "Web",
-  "createdAt": "2026-08-01T12:00:00Z"
+  "createdAt": "2026-08-01T12:00:00Z",
+  "updatedAt": "2026-08-01T12:00:00Z"
 }
 ```
 

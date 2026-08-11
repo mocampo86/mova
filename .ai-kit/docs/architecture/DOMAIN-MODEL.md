@@ -142,6 +142,7 @@ A concrete booking of a court for a time range.
 | RecurringReservationId | Guid? | Nullable for series origin |
 | Notes | string? | |
 | CreatedAt | DateTime | UTC |
+| UpdatedAt | DateTime? | UTC |
 | CancelledAt | DateTime? | UTC |
 | CancellationReason | string? | |
 

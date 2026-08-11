@@ -143,6 +143,7 @@ CREATE TABLE Reservations (
     RecurringReservationId UUID,
     Notes TEXT,
     CreatedAt TIMESTAMPTZ NOT NULL,
+    UpdatedAt TIMESTAMPTZ,
     CancelledAt TIMESTAMPTZ,
     CancellationReason TEXT,
     CONSTRAINT chk_reservation_time CHECK (StartAt < EndAt)
