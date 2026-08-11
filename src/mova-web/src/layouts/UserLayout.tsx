@@ -89,10 +89,6 @@ export default function UserLayout() {
           );
         })}
       </List>
-      <Divider />
-      <Box sx={{ p: 2 }}>
-        <LanguageSelector />
-      </Box>
     </>
   );
 
@@ -125,16 +121,16 @@ export default function UserLayout() {
               t('dashboard.welcome', { name: greetingName })
             )}
           </Typography>
-          {!isMobile && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <LanguageSelector />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <LanguageSelector />
+            {!isMobile && (
               <IconButton color="inherit" onClick={logout} aria-label={t('dashboard.logout')}>
                 <Typography component="span" sx={{ fontSize: '0.875rem' }}>
                   {t('dashboard.logout')}
                 </Typography>
               </IconButton>
-            </Box>
-          )}
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
       <Box
