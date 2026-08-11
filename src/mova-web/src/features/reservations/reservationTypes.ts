@@ -41,6 +41,13 @@ export interface CreateReservationRequest {
   notes?: string;
 }
 
+export interface CreateMyReservationRequest {
+  courtId: string;
+  startAt: string;
+  endAt: string;
+  notes?: string;
+}
+
 export interface CancelReservationRequest {
   reason?: string;
 }

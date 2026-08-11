@@ -14,7 +14,6 @@ namespace Mova.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/complexes/{complexId:guid}/reservations")]
-[Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
 public sealed class ReservationsController(
     ICreateReservationHandler createHandler,
     IGetReservationsByComplexHandler getListHandler,
@@ -26,6 +25,7 @@ public sealed class ReservationsController(
     FluentValidation.IValidator<CancelReservationCommand> cancelValidator,
     FluentValidation.IValidator<UpdateReservationStatusCommand> updateStatusValidator) : ControllerBase
 {
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
     [HttpGet]
     public async Task<ActionResult<PagedResult<ReservationInfo>>> GetList(
         Guid complexId,
@@ -52,6 +52,7 @@ public sealed class ReservationsController(
         return Ok(result);
     }
 
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
     [HttpPost]
     public async Task<ActionResult<ReservationInfo>> Create(Guid complexId, CreateReservationRequest request, CancellationToken cancellationToken)
     {
@@ -76,6 +77,33 @@ public sealed class ReservationsController(
         return Created($"/api/v1/complexes/{complexId}/reservations/{result.Id}", result);
     }
 
+    [HttpPost("me")]
+    [Authorize(Policy = AuthorizationPolicies.User)]
+    public async Task<ActionResult<ReservationInfo>> CreateMyReservation(Guid complexId, CreateMyReservationRequest request, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var command = new CreateReservationCommand(
+            complexId,
+            request.CourtId,
+            userId,
+            userId,
+            request.StartAt,
+            request.EndAt,
+            request.Notes,
+            ReservationSource.Web);
+
+        await createValidator.ValidateAndThrowAsync(command, cancellationToken);
+
+        var result = await createHandler.HandleAsync(command, cancellationToken);
+        return Created($"/api/v1/complexes/{complexId}/reservations/{result.Id}", result);
+    }
+
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ReservationInfo>> GetById(Guid complexId, Guid id, CancellationToken cancellationToken)
     {
@@ -89,6 +117,7 @@ public sealed class ReservationsController(
         return Ok(result);
     }
 
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
     [HttpPatch("{id:guid}/cancel")]
     public async Task<ActionResult<ReservationInfo>> Cancel(Guid complexId, Guid id, [FromBody] CancelReservationRequest request, CancellationToken cancellationToken)
     {
@@ -111,6 +140,7 @@ public sealed class ReservationsController(
         return Ok(result);
     }
 
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
     [HttpPatch("{id:guid}/status")]
     public async Task<ActionResult<ReservationInfo>> UpdateStatus(
         Guid complexId,

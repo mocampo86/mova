@@ -1,10 +1,13 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Mova.Contracts.Auth;
 using Mova.Contracts.Common;
 using Mova.Contracts.Complexes;
 using Mova.Contracts.Courts;
+using Mova.Domain.Entities;
+using Mova.Infrastructure.Data;
 
 namespace Mova.IntegrationTests.Courts;
 
@@ -122,6 +125,90 @@ public sealed class CourtsControllerTests : IClassFixture<MovaWebApplicationFact
         Assert.All(result.Items, item => Assert.Equal("Active", item.Status));
         Assert.Contains(result.Items, item => item.Id == activeCourt.Id);
         Assert.DoesNotContain(result.Items, item => item.Id == inactiveCourt.Id);
+    }
+
+    [Fact]
+    public async Task GetActiveList_FiltersBySport()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"list-sport-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+
+        Guid footballId;
+        Guid tennisId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+            var football = Sport.Create($"Football-{Guid.NewGuid()}");
+            var tennis = Sport.Create($"Tennis-{Guid.NewGuid()}");
+            context.Sports.AddRange(football, tennis);
+            await context.SaveChangesAsync();
+            footballId = football.Id;
+            tennisId = tennis.Id;
+        }
+
+        var footballCourt = await CreateCourtAsync(client, complex.Id, [footballId]);
+        var tennisCourt = await CreateCourtAsync(client, complex.Id, [tennisId]);
+
+        client.DefaultRequestHeaders.Authorization = null;
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/courts?sportId={tennisId}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<CourtInfo>>();
+        Assert.NotNull(result);
+        Assert.Single(result.Items);
+        Assert.Equal(tennisCourt.Id, result.Items[0].Id);
+    }
+
+    [Fact]
+    public async Task GetActiveList_PaginatesResults()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"list-page-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+
+        await CreateCourtAsync(client, complex.Id, []);
+        await CreateCourtAsync(client, complex.Id, []);
+        await CreateCourtAsync(client, complex.Id, []);
+
+        client.DefaultRequestHeaders.Authorization = null;
+
+        var firstPageResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/courts?page=1&pageSize=2");
+        Assert.Equal(HttpStatusCode.OK, firstPageResponse.StatusCode);
+        var firstPage = await firstPageResponse.Content.ReadFromJsonAsync<PagedResult<CourtInfo>>();
+        Assert.NotNull(firstPage);
+        Assert.Equal(2, firstPage.Items.Count);
+        Assert.Equal(3, firstPage.TotalItems);
+        Assert.Equal(2, firstPage.TotalPages);
+
+        var secondPageResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/courts?page=2&pageSize=2");
+        Assert.Equal(HttpStatusCode.OK, secondPageResponse.StatusCode);
+        var secondPage = await secondPageResponse.Content.ReadFromJsonAsync<PagedResult<CourtInfo>>();
+        Assert.NotNull(secondPage);
+        Assert.Single(secondPage.Items);
+        Assert.Equal(3, secondPage.TotalItems);
+    }
+
+    [Fact]
+    public async Task GetActiveList_WithInvalidStatus_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync($"/api/v1/complexes/{Guid.NewGuid()}/courts?status=Invalid");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetActiveList_WithInvalidPageSize_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync($"/api/v1/complexes/{Guid.NewGuid()}/courts?pageSize=101");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
@@ -354,14 +441,15 @@ public sealed class CourtsControllerTests : IClassFixture<MovaWebApplicationFact
         return (await response.Content.ReadFromJsonAsync<SportsComplexInfo>())!;
     }
 
-    private static async Task<CourtInfo> CreateCourtAsync(HttpClient client, Guid complexId)
+    private static async Task<CourtInfo> CreateCourtAsync(HttpClient client, Guid complexId, IReadOnlyCollection<Guid>? sportIds = null)
     {
         var response = await client.PostAsJsonAsync($"/api/v1/complexes/{complexId}/courts", new CreateCourtRequest
         {
             Name = $"Court {Guid.NewGuid()}",
             Description = "Court",
             SurfaceType = "Synthetic",
-            Indoor = true
+            Indoor = true,
+            SportIds = sportIds
         });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CourtInfo>())!;

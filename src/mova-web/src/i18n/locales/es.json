@@ -181,11 +181,18 @@
     "selectPrompt": "Selecciona una cancha y una fecha para ver los horarios disponibles.",
     "loadingAvailability": "Cargando disponibilidad…",
     "availabilityError": "No se pudo cargar la disponibilidad.",
-    "noAvailability": "No hay horarios disponibles para la fecha seleccionada.",
+    "noAvailability": "No hay horarios disponibles para la fecha seleccionada. El complejo podría no tener configurados los horarios de apertura, el día podría estar cerrado o la cancha no tener reglas de disponibilidad para ese día.",
     "phoneWithValue": "Teléfono: {{value}}",
     "emailWithValue": "Correo: {{value}}",
     "availability": {
       "to": "a las {{time}}"
+    },
+    "booking": {
+      "title": "Reservar turno",
+      "message": "¿Confirmar reserva para {{court}} el {{date}} de {{start}} a {{end}}?",
+      "notesLabel": "Notas (opcional)",
+      "confirm": "Confirmar reserva",
+      "loginPrompt": "Inicia sesión para reservar este turno."
     }
   },
   "userHome": {
@@ -281,6 +288,18 @@
       "slotDurationHeader": "Duración del turno (minutos)",
       "slotDurationLabel": "Duración del turno",
       "update": "Actualizar cancha"
+    },
+    "businessHours": {
+      "title": "Horarios de apertura",
+      "subtitle": "Configura los horarios de apertura del complejo para cada día de la semana.",
+      "missingId": "Falta el identificador del complejo.",
+      "loadError": "No se pudieron cargar los horarios de apertura. Inténtalo de nuevo más tarde.",
+      "success": "Los horarios de apertura se actualizaron correctamente.",
+      "save": "Guardar horarios",
+      "dayHeader": "Día",
+      "openHeader": "Abierto",
+      "openingTimeHeader": "Hora de apertura",
+      "closingTimeHeader": "Hora de cierre"
     },
     "reservations": {
       "title": "Reservas",
@@ -400,6 +419,7 @@
     "brand": "Mova",
     "dashboard": "Panel",
     "profile": "Perfil",
+    "businessHours": "Horarios",
     "courts": "Canchas",
     "reservations": "Reservas",
     "users": "Usuarios",

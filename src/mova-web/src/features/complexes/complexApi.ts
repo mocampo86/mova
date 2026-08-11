@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../services/apiClient';
 import { useAuth } from '../auth/useAuth';
-import type { ComplexDashboard, Court, CourtAvailabilitySlot, PagedResult, Sport, SportsComplex, UpdateComplexRequest } from './complexTypes';
+import type { BusinessHours, ComplexDashboard, Court, CourtAvailabilitySlot, PagedResult, Sport, SportsComplex, UpdateBusinessHoursRequest, UpdateComplexRequest } from './complexTypes';
 
 export function useActiveComplexes(search: string, page = 1) {
   const params = new URLSearchParams({ page: String(page), pageSize: '12' });
@@ -40,10 +40,15 @@ export function useSports() {
 }
 
 export function useCourtAvailability(complexId: string, courtId: string, date: string) {
-  const params = new URLSearchParams({ courtId, date });
+  const utcOffsetMinutes = new Date(`${date}T00:00`).getTimezoneOffset();
+  const params = new URLSearchParams({
+    courtId,
+    date,
+    utcOffsetMinutes: utcOffsetMinutes.toString()
+  });
 
   return useQuery({
-    queryKey: ['court-availability', complexId, courtId, date],
+    queryKey: ['court-availability', complexId, courtId, date, utcOffsetMinutes],
     queryFn: () => apiClient<CourtAvailabilitySlot[]>(`/api/v1/complexes/${complexId}/availability?${params}`),
     enabled: Boolean(complexId && courtId && date)
   });
@@ -91,6 +96,42 @@ export function useUpdateComplex(complexId: string) {
       queryClient.invalidateQueries({ queryKey: ['active-complex', complexId] });
       queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
       queryClient.invalidateQueries({ queryKey: ['active-complexes'] });
+    }
+  });
+}
+
+export function useBusinessHours(complexId: string) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['business-hours', complexId],
+    queryFn: () =>
+      apiClient<BusinessHours[]>(`/api/v1/complexes/${complexId}/business-hours`, {}, accessToken ?? undefined),
+    enabled: Boolean(complexId && accessToken)
+  });
+}
+
+export function useUpdateBusinessHours(complexId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<BusinessHours[], Error, UpdateBusinessHoursRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to update business hours.');
+      }
+
+      return apiClient<BusinessHours[]>(
+        `/api/v1/complexes/${complexId}/business-hours`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(request)
+        },
+        accessToken
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-hours', complexId] });
     }
   });
 }

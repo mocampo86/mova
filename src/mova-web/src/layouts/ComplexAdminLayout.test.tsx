@@ -56,6 +56,7 @@ describe('ComplexAdminLayout', () => {
     expect(screen.getByText('Test Complex')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Dashboard' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Profile' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Business hours' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Courts' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Reservations' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Users' })).toBeTruthy();
@@ -72,6 +73,9 @@ describe('ComplexAdminLayout', () => {
 
     const dashboardLink = screen.getByRole('link', { name: 'Dashboard' });
     expect(dashboardLink.getAttribute('href')).toBe('/admin/complex/complex-1');
+
+    const businessHoursLink = screen.getByRole('link', { name: 'Business hours' });
+    expect(businessHoursLink.getAttribute('href')).toBe('/admin/complex/complex-1/business-hours');
 
     const courtsLink = screen.getByRole('link', { name: 'Courts' });
     expect(courtsLink.getAttribute('href')).toBe('/admin/complex/complex-1/courts');

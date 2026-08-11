@@ -181,11 +181,18 @@
     "selectPrompt": "Select a court and date to view available slots.",
     "loadingAvailability": "Loading availability…",
     "availabilityError": "Availability could not be loaded.",
-    "noAvailability": "No available slots for the selected date.",
+    "noAvailability": "No available slots for the selected date. The complex may not have business hours configured, the day may be closed, or the court may not have availability rules for that day.",
     "phoneWithValue": "Phone: {{value}}",
     "emailWithValue": "Email: {{value}}",
     "availability": {
       "to": "to {{time}}"
+    },
+    "booking": {
+      "title": "Book slot",
+      "message": "Confirm reservation for {{court}} on {{date}} from {{start}} to {{end}}?",
+      "notesLabel": "Notes (optional)",
+      "confirm": "Confirm booking",
+      "loginPrompt": "Log in to book this slot."
     }
   },
   "userHome": {
@@ -281,6 +288,18 @@
       "slotDurationHeader": "Slot duration (minutes)",
       "slotDurationLabel": "Slot duration",
       "update": "Update court"
+    },
+    "businessHours": {
+      "title": "Business hours",
+      "subtitle": "Configure the complex opening hours for each day of the week.",
+      "missingId": "The complex identifier is missing.",
+      "loadError": "Business hours could not be loaded. Please try again later.",
+      "success": "Business hours updated successfully.",
+      "save": "Save hours",
+      "dayHeader": "Day",
+      "openHeader": "Open",
+      "openingTimeHeader": "Opening time",
+      "closingTimeHeader": "Closing time"
     },
     "reservations": {
       "title": "Reservations",
@@ -400,6 +419,7 @@
     "brand": "Mova",
     "dashboard": "Dashboard",
     "profile": "Profile",
+    "businessHours": "Business hours",
     "courts": "Courts",
     "reservations": "Reservations",
     "users": "Users",

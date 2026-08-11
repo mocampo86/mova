@@ -4,6 +4,7 @@ import { useAuth } from '../auth/useAuth';
 import type { PagedResult } from '../complexes/complexTypes';
 import type {
   CancelReservationRequest,
+  CreateMyReservationRequest,
   CreateReservationRequest,
   Reservation,
   ReservationListFilters,
@@ -70,6 +71,41 @@ export function useCreateReservation(complexId: string) {
       return createReservation(complexId, request, accessToken);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
+    }
+  });
+}
+
+export async function createMyReservation(
+  complexId: string,
+  request: CreateMyReservationRequest,
+  accessToken: string
+): Promise<Reservation> {
+  return apiClient<Reservation>(
+    `/api/v1/complexes/${complexId}/reservations/me`,
+    {
+      method: 'POST',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useCreateMyReservation(complexId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<Reservation, Error, CreateMyReservationRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to create a reservation.');
+      }
+
+      return createMyReservation(complexId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['court-availability', complexId] });
       queryClient.invalidateQueries({ queryKey: ['reservations', complexId] });
       queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
     }
