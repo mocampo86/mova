@@ -36,6 +36,21 @@ public sealed class GetActiveCourtsByComplexHandlerTests
         Assert.Equal(0, result.TotalItems);
     }
 
+    [Fact]
+    public async Task HandleAsync_WithSportFilter_ReturnsOnlyCourtsForSport()
+    {
+        var complexId = Guid.NewGuid();
+        var sportId = Guid.NewGuid();
+        var matchingCourt = Court.Create(complexId, "Matching Court", "Description", "Synthetic", false, [sportId]);
+        var otherCourt = Court.Create(complexId, "Other Court", "Description", "Grass", false, [Guid.NewGuid()]);
+        var handler = new GetActiveCourtsByComplexHandler(new FakeCourtRepository([matchingCourt, otherCourt]));
+
+        var result = await handler.HandleAsync(new GetActiveCourtsByComplexQuery(complexId, 1, 20, sportId));
+
+        Assert.Single(result.Items);
+        Assert.Equal(matchingCourt.Id, result.Items[0].Id);
+    }
+
     private sealed class FakeCourtRepository(IEnumerable<Court> courts) : ICourtRepository
     {
         private readonly IReadOnlyList<Court> _courts = courts.ToList();
@@ -57,14 +72,22 @@ public sealed class GetActiveCourtsByComplexHandlerTests
         {
             var query = _courts
                 .Where(c => c.SportsComplexId == sportsComplexId && c.Status == CourtStatus.Active)
+                .AsEnumerable();
+
+            if (sportId.HasValue)
+            {
+                query = query.Where(c => c.CourtSports.Any(cs => cs.SportId == sportId.Value));
+            }
+
+            var ordered = query
                 .OrderByDescending(c => c.CreatedAt)
                 .ToList();
 
             page = page < 1 ? 1 : page;
             pageSize = pageSize < 1 ? 1 : pageSize;
 
-            var totalItems = query.Count;
-            var items = query
+            var totalItems = ordered.Count;
+            var items = ordered
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();

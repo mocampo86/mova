@@ -3,3 +3,7 @@
 -Ver reservaciones por dia tipo calendario
 -Agregar servicios del local
 -mostrar solo horarios posteriores a la hora actual
+-Dashboard de usuario
+-Filtros por deporte, solo los que tengan al menos una cancha existente
+-Busqueda de complejo, agregar el filtro por deporte
+-Poder marcar complejos como favoritos

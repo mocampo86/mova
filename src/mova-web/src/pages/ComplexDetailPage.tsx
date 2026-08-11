@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import {
   Alert,
@@ -131,11 +131,9 @@ export default function ComplexDetailPage() {
 
   const availability = useCourtAvailability(complexId, selectedCourtId, selectedDate);
 
-  const filteredCourts = useMemo(() => {
-    if (!courts.data?.items) return [];
-    if (!selectedSportId) return courts.data.items;
-    return courts.data.items.filter((court) => court.sportIds.includes(selectedSportId));
-  }, [courts.data, selectedSportId]);
+  useEffect(() => {
+    setSelectedCourtId('');
+  }, [selectedSportId]);
 
   if (complex.isLoading || courts.isLoading) {
     return (
@@ -203,14 +201,14 @@ export default function ComplexDetailPage() {
 
           {sports.isError && <Alert severity="warning" sx={{ mt: 2 }}>{t('complexDetail.sportsError')}</Alert>}
           {courts.isError && <Alert severity="error" sx={{ mt: 2 }}>{t('complexDetail.courtsError')}</Alert>}
-          {!courts.isError && filteredCourts.length === 0 && (
+          {!courts.isError && (courts.data?.items ?? []).length === 0 && (
             <Alert severity="info" sx={{ mt: 2 }}>
               {t('complexDetail.noCourts')}
             </Alert>
           )}
 
           <Grid container spacing={3} sx={{ mt: 1 }}>
-            {filteredCourts.map((court) => (
+            {(courts.data?.items ?? []).map((court) => (
               <Grid key={court.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card
                   variant="outlined"
@@ -253,7 +251,7 @@ export default function ComplexDetailPage() {
                 onChange={(event) => setSelectedCourtId(event.target.value)}
               >
                 <MenuItem value="">{t('complexDetail.selectCourt')}</MenuItem>
-                {filteredCourts.map((court) => (
+                {(courts.data?.items ?? []).map((court) => (
                   <MenuItem key={court.id} value={court.id}>
                     {court.name}
                   </MenuItem>
@@ -313,7 +311,7 @@ export default function ComplexDetailPage() {
           {selectedSlot && (
             <BookingDialog
               slot={selectedSlot}
-              courtName={filteredCourts.find((court) => court.id === selectedCourtId)?.name ?? ''}
+              courtName={courts.data?.items?.find((court) => court.id === selectedCourtId)?.name ?? ''}
               notes={bookingNotes}
               onNotesChange={setBookingNotes}
               isAuthenticated={isAuthenticated}
