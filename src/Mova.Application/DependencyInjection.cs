@@ -45,14 +45,17 @@ public static class DependencyInjection
         services.AddScoped<IGetReservationByIdHandler, GetReservationByIdHandler>();
         services.AddScoped<IGetReservationsByComplexHandler, GetReservationsByComplexHandler>();
         services.AddScoped<IGetMyUpcomingReservationsHandler, GetMyUpcomingReservationsHandler>();
+        services.AddScoped<IGetMyReservationHistoryHandler, GetMyReservationHistoryHandler>();
         services.AddScoped<ICancelReservationHandler, CancelReservationHandler>();
         services.AddScoped<IUpdateReservationStatusHandler, UpdateReservationStatusHandler>();
         services.AddValidatorsFromAssemblyContaining<CreateReservationCommandValidator>();
 
         services.AddScoped<IGetUsersByComplexHandler, GetUsersByComplexHandler>();
+        services.AddScoped<IGetUserDashboardHandler, GetUserDashboardHandler>();
         services.AddScoped<IBlockUserHandler, BlockUserHandler>();
         services.AddScoped<IUnblockUserHandler, UnblockUserHandler>();
         services.AddValidatorsFromAssemblyContaining<BlockUserCommandValidator>();
+        services.AddValidatorsFromAssemblyContaining<GetUserDashboardQueryValidator>();
 
         return services;
     }

@@ -3,6 +3,7 @@ import { RequireComplexAdmin } from '../features/auth/RequireComplexAdmin';
 import { RequireRole } from '../features/auth/RequireRole';
 import ComplexAdminLayout from '../layouts/ComplexAdminLayout';
 import PublicLayout from '../layouts/PublicLayout';
+import UserLayout from '../layouts/UserLayout';
 import CompleteComplexAdminPage from '../pages/CompleteComplexAdminPage';
 import CompleteProfilePage from '../pages/CompleteProfilePage';
 import ComplexAdminPage from '../pages/ComplexAdminPage';
@@ -21,7 +22,10 @@ import LoginPage from '../pages/LoginPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import SuperAdminPage from '../pages/SuperAdminPage';
 import UnauthorizedPage from '../pages/UnauthorizedPage';
-import UserHomePage from '../pages/UserHomePage';
+import UserDashboardPage from '../pages/UserDashboardPage';
+import UserHistoryPage from '../pages/UserHistoryPage';
+import UserProfilePage from '../pages/UserProfilePage';
+import UserReservationsPage from '../pages/UserReservationsPage';
 
 export default function AppRouter() {
   return (
@@ -70,10 +74,15 @@ export default function AppRouter() {
           path="user"
           element={
             <RequireRole allowedRoles={['User', 'ComplexAdmin', 'SuperAdmin']}>
-              <UserHomePage />
+              <UserLayout />
             </RequireRole>
           }
-        />
+        >
+          <Route index element={<UserDashboardPage />} />
+          <Route path="reservations" element={<UserReservationsPage />} />
+          <Route path="history" element={<UserHistoryPage />} />
+          <Route path="profile" element={<UserProfilePage />} />
+        </Route>
         <Route
           path="admin/super"
           element={

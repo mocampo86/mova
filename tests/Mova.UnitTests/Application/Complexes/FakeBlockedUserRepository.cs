@@ -40,6 +40,15 @@ public sealed class FakeBlockedUserRepository : IBlockedUserRepository
         return Task.FromResult<IReadOnlyList<BlockedUser>>(blocks);
     }
 
+    public Task<IReadOnlyList<BlockedUser>> GetActiveBlocksByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var blocks = _blockedUsers
+            .Where(b => b.UserId == userId && IsActive(b))
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<BlockedUser>>(blocks);
+    }
+
     public Task<int> CountActiveByComplexIdAsync(Guid sportsComplexId, CancellationToken cancellationToken = default)
     {
         var count = _blockedUsers.Count(b => b.SportsComplexId == sportsComplexId && IsActive(b));

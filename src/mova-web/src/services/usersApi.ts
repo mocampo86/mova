@@ -1,4 +1,6 @@
 import { apiClient } from './apiClient';
+import type { PagedResult } from '../features/complexes/complexTypes';
+import type { Reservation } from '../features/reservations/reservationTypes';
 
 export interface CompleteProfileRequest {
   phoneNumber: string;
@@ -10,6 +12,27 @@ export interface UserInfo {
   fullName: string;
   phoneNumber: string | null;
   phoneVerified: boolean;
+}
+
+export interface UserBlockInfo {
+  id: string;
+  complexId: string;
+  complexName: string;
+  reason?: string | null;
+  blockedAt: string;
+  blockedUntil?: string | null;
+}
+
+export interface ReservationHistorySummaryInfo {
+  totalItems: number;
+  recentReservations: Reservation[];
+}
+
+export interface UserDashboardInfo {
+  user: UserInfo;
+  upcomingReservations: PagedResult<Reservation>;
+  historySummary: ReservationHistorySummaryInfo;
+  activeBlocks: UserBlockInfo[];
 }
 
 export async function completeProfile(
@@ -24,4 +47,17 @@ export async function completeProfile(
     },
     accessToken
   );
+}
+
+export async function getUserDashboard(
+  accessToken: string,
+  upcomingPageSize = 5,
+  historyPageSize = 3
+): Promise<UserDashboardInfo> {
+  const params = new URLSearchParams({
+    upcomingPageSize: String(upcomingPageSize),
+    historyPageSize: String(historyPageSize)
+  });
+
+  return apiClient<UserDashboardInfo>(`/api/v1/users/me/dashboard?${params}`, {}, accessToken);
 }

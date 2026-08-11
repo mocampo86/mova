@@ -27,7 +27,7 @@ export function useGoogleLogin(intent: 'user' | 'complex' = 'user') {
       } else if (response.requiresProfileCompletion) {
         navigate('/complete-profile', { replace: true });
       } else {
-        navigate('/complexes', { replace: true });
+        navigate('/user', { replace: true });
       }
     }
   });

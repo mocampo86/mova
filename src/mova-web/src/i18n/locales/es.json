@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "Mova",
+    "brandTitle": "MOVA | INICIO",
     "loading": "Cargando…",
     "search": "Buscar",
     "cancel": "Cancelar",
@@ -42,6 +43,8 @@
     "indoor": "Interior",
     "outdoor": "Exterior",
     "emptyValue": "—",
+    "yes": "Sí",
+    "no": "No",
     "formatSeparator": " · ",
     "noDescription": "Explora las canchas y disponibilidad de este complejo.",
     "until": "Hasta {{value}}",
@@ -149,6 +152,8 @@
   "login": {
     "userTitle": "Bienvenido a Mova",
     "complexTitle": "Administra tu complejo",
+    "userButton": "Login de usuario",
+    "adminButton": "Login de Administrador",
     "userSubtitle": "Inicia sesión con tu cuenta de Google para continuar.",
     "complexSubtitle": "Inicia sesión con tu cuenta de Google para registrar y administrar tu complejo deportivo.",
     "switchToUser": "¿Quieres reservar una cancha?",
@@ -425,5 +430,43 @@
     "users": "Usuarios",
     "complexAdmin": "Administrador del complejo",
     "openMenu": "abrir menú"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido, {{name}}",
+    "logout": "Cerrar sesión",
+    "errorTitle": "No se pudo cargar el panel",
+    "errorMessage": "El panel no pudo cargarse. Inténtalo de nuevo más tarde.",
+    "nav": {
+      "home": "Inicio",
+      "complexes": "Buscar complejo",
+      "reservations": "Mis reservas",
+      "history": "Mi historial",
+      "recurring": "Reservas recurrentes",
+      "profile": "Mi perfil"
+    },
+    "upcomingTitle": "Reservas próximas",
+    "historyTitle": "Historial de reservas",
+    "historyCount": "{{count}} reservas anteriores",
+    "newReservation": "Reservar cancha",
+    "newRecurringReservation": "Reservar semanal",
+    "recurringTitle": "Reservas recurrentes",
+    "recurringDescription": "Reserva el mismo turno semanal por el período que elijas.",
+    "exploreComplexesTitle": "Buscar complejo",
+    "exploreComplexesDescription": "Busca complejos deportivos activos y consulta disponibilidad.",
+    "browseComplexes": "Explorar complejos",
+    "profileTitle": "Mi perfil",
+    "profileDescription": "Consulta y actualiza tu información de contacto.",
+    "viewProfile": "Ver perfil",
+    "updatePhone": "Actualizar teléfono",
+    "phoneVerified": "Teléfono verificado",
+    "profileError": "No se pudo cargar tu perfil.",
+    "viewAllReservations": "Ver todas las reservas",
+    "viewAllHistory": "Ver historial completo",
+    "noUpcomingReservations": "No tienes reservas próximas.",
+    "noHistory": "No se encontró historial de reservas.",
+    "reservationsError": "No se pudieron cargar las reservas.",
+    "activeBlocksTitle": "Estás bloqueado en los siguientes complejos",
+    "activeBlockMessage": "{{complex}}: {{reason}}",
+    "noReason": "sin motivo indicado"
   }
 }

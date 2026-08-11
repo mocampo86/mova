@@ -3,7 +3,6 @@
 -Ver reservaciones por dia tipo calendario
 -Agregar servicios del local
 -mostrar solo horarios posteriores a la hora actual
--Dashboard de usuario
 -Filtros por deporte, solo los que tengan al menos una cancha existente
 -Busqueda de complejo, agregar el filtro por deporte
 -Poder marcar complejos como favoritos
@@ -12,3 +11,4 @@
 -Cancelaciones: permitir/denegar cancelaciones desde los complejos
 -Cancelaciones: configurar tiempo mínimo para cancelar reservas
 -Check si el usuario puede ver reservaciones
+-Mejoras Dashboard de usuario: iconos, eliminar cards irrelevanets

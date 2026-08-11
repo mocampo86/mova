@@ -18,12 +18,14 @@ public sealed class ReservationsController(
     ICreateReservationHandler createHandler,
     IGetReservationsByComplexHandler getListHandler,
     IGetMyUpcomingReservationsHandler getMyUpcomingHandler,
+    IGetMyReservationHistoryHandler getMyHistoryHandler,
     IGetReservationByIdHandler getByIdHandler,
     ICancelReservationHandler cancelHandler,
     IUpdateReservationStatusHandler updateStatusHandler,
     FluentValidation.IValidator<CreateReservationCommand> createValidator,
     FluentValidation.IValidator<GetReservationsByComplexQuery> listValidator,
     FluentValidation.IValidator<GetMyUpcomingReservationsQuery> myUpcomingValidator,
+    FluentValidation.IValidator<GetMyReservationHistoryQuery> myHistoryValidator,
     FluentValidation.IValidator<CancelReservationCommand> cancelValidator,
     FluentValidation.IValidator<UpdateReservationStatusCommand> updateStatusValidator) : ControllerBase
 {
@@ -97,6 +99,26 @@ public sealed class ReservationsController(
 
         var result = await createHandler.HandleAsync(command, cancellationToken);
         return Created($"/api/v1/complexes/{complexId}/reservations/{result.Id}", result);
+    }
+
+    [HttpGet("~/api/v1/users/me/reservations/history")]
+    [Authorize(Policy = AuthorizationPolicies.User)]
+    public async Task<ActionResult<PagedResult<ReservationInfo>>> GetMyHistory(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var query = new GetMyReservationHistoryQuery(userId, page, pageSize);
+        await myHistoryValidator.ValidateAndThrowAsync(query, cancellationToken);
+
+        var result = await getMyHistoryHandler.HandleAsync(query, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost("me")]
