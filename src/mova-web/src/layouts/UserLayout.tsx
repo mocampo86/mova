@@ -1,24 +1,8 @@
 import { useState } from 'react';
 import { Link as RouterLink, Navigate, Outlet, useLocation } from 'react-router-dom';
-import {
-  AppBar,
-  Box,
-  Divider,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Skeleton,
-  Toolbar,
-  Typography,
-  useMediaQuery,
-  useTheme
-} from '@mui/material';
+import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import LanguageSelector from '../components/LanguageSelector';
-import { useAuth } from '../features/auth/useAuth';
+import AppHeader from './AppHeader';
 import { useUserDashboard } from '../features/users/useUserDashboard';
 
 function isActivePath(pathname: string, to: string, exact = false): boolean {
@@ -34,7 +18,6 @@ export default function UserLayout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { logout } = useAuth();
   const { data, isLoading, isError } = useUserDashboard();
 
   const handleDrawerToggle = () => setMobileOpen((open) => !open);
@@ -96,43 +79,11 @@ export default function UserLayout() {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar
-        position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      >
-        <Toolbar>
-          {isMobile && (
-            <IconButton
-              color="inherit"
-              aria-label={t('nav.openMenu')}
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2 }}
-            >
-              <Typography component="span" sx={{ fontSize: '1.5rem', lineHeight: 1 }}>
-                ☰
-              </Typography>
-            </IconButton>
-          )}
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {isLoading || !greetingName ? (
-              <Skeleton variant="text" width={180} />
-            ) : (
-              t('dashboard.welcome', { name: greetingName })
-            )}
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <LanguageSelector />
-            {!isMobile && (
-              <IconButton color="inherit" onClick={logout} aria-label={t('dashboard.logout')}>
-                <Typography component="span" sx={{ fontSize: '0.875rem' }}>
-                  {t('dashboard.logout')}
-                </Typography>
-              </IconButton>
-            )}
-          </Box>
-        </Toolbar>
-      </AppBar>
+      <AppHeader
+        greetingName={greetingName || undefined}
+        showMenuToggle={isMobile}
+        onMenuToggle={handleDrawerToggle}
+      />
       <Box
         component="nav"
         sx={{
