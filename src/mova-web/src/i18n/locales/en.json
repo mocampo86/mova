@@ -282,6 +282,18 @@
       "slotDurationLabel": "Slot duration",
       "update": "Update court"
     },
+    "businessHours": {
+      "title": "Business hours",
+      "subtitle": "Configure the complex opening hours for each day of the week.",
+      "missingId": "The complex identifier is missing.",
+      "loadError": "Business hours could not be loaded. Please try again later.",
+      "success": "Business hours updated successfully.",
+      "save": "Save hours",
+      "dayHeader": "Day",
+      "closedHeader": "Closed",
+      "openingTimeHeader": "Opening time",
+      "closingTimeHeader": "Closing time"
+    },
     "reservations": {
       "title": "Reservations",
       "create": "Create reservation",
@@ -400,6 +412,7 @@
     "brand": "Mova",
     "dashboard": "Dashboard",
     "profile": "Profile",
+    "businessHours": "Business hours",
     "courts": "Courts",
     "reservations": "Reservations",
     "users": "Users",

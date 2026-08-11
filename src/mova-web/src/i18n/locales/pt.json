@@ -282,6 +282,18 @@
       "slotDurationLabel": "Duração do turno",
       "update": "Atualizar quadra"
     },
+    "businessHours": {
+      "title": "Horário de funcionamento",
+      "subtitle": "Configure o horário de funcionamento do complexo para cada dia da semana.",
+      "missingId": "O identificador do complexo está ausente.",
+      "loadError": "Não foi possível carregar o horário de funcionamento. Tente novamente mais tarde.",
+      "success": "Horário de funcionamento atualizado com sucesso.",
+      "save": "Salvar horários",
+      "dayHeader": "Dia",
+      "closedHeader": "Fechado",
+      "openingTimeHeader": "Hora de abertura",
+      "closingTimeHeader": "Hora de fechamento"
+    },
     "reservations": {
       "title": "Reservas",
       "create": "Criar reserva",
@@ -400,6 +412,7 @@
     "brand": "Mova",
     "dashboard": "Painel",
     "profile": "Perfil",
+    "businessHours": "Horários",
     "courts": "Quadras",
     "reservations": "Reservas",
     "users": "Usuários",

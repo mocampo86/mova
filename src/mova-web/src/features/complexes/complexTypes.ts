@@ -57,6 +57,26 @@ export interface CourtAvailabilitySlot {
   endAt: string;
 }
 
+export interface BusinessHours {
+  id: string;
+  sportsComplexId: string;
+  dayOfWeek: number;
+  openingTime: string;
+  closingTime: string;
+  isClosed: boolean;
+}
+
+export interface BusinessHoursItem {
+  dayOfWeek: number;
+  openingTime: string;
+  closingTime: string;
+  isClosed: boolean;
+}
+
+export interface UpdateBusinessHoursRequest {
+  hours: BusinessHoursItem[];
+}
+
 export interface DashboardComplexSummary {
   id: string;
   name: string;

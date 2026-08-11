@@ -37,13 +37,13 @@ import { useSports } from '../features/complexes/complexApi';
 import type { CourtAvailabilityRule } from '../features/courts/courtTypes';
 
 const DEFAULT_AVAILABILITY: AvailabilityFormRule[] = [
-  { dayOfWeek: 1, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: false },
-  { dayOfWeek: 2, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: false },
-  { dayOfWeek: 3, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: false },
-  { dayOfWeek: 4, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: false },
-  { dayOfWeek: 5, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: false },
-  { dayOfWeek: 6, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: false },
-  { dayOfWeek: 0, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: false }
+  { dayOfWeek: 1, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: true },
+  { dayOfWeek: 2, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: true },
+  { dayOfWeek: 3, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: true },
+  { dayOfWeek: 4, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: true },
+  { dayOfWeek: 5, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: true },
+  { dayOfWeek: 6, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: true },
+  { dayOfWeek: 0, startTime: '08:00', endTime: '22:00', slotDurationMinutes: 60, isActive: true }
 ];
 
 const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;

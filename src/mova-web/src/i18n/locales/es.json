@@ -282,6 +282,18 @@
       "slotDurationLabel": "Duración del turno",
       "update": "Actualizar cancha"
     },
+    "businessHours": {
+      "title": "Horarios de apertura",
+      "subtitle": "Configura los horarios de apertura del complejo para cada día de la semana.",
+      "missingId": "Falta el identificador del complejo.",
+      "loadError": "No se pudieron cargar los horarios de apertura. Inténtalo de nuevo más tarde.",
+      "success": "Los horarios de apertura se actualizaron correctamente.",
+      "save": "Guardar horarios",
+      "dayHeader": "Día",
+      "closedHeader": "Cerrado",
+      "openingTimeHeader": "Hora de apertura",
+      "closingTimeHeader": "Hora de cierre"
+    },
     "reservations": {
       "title": "Reservas",
       "create": "Crear reserva",
@@ -400,6 +412,7 @@
     "brand": "Mova",
     "dashboard": "Panel",
     "profile": "Perfil",
+    "businessHours": "Horarios",
     "courts": "Canchas",
     "reservations": "Reservas",
     "users": "Usuarios",
