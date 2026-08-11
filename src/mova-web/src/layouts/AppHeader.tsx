@@ -43,19 +43,8 @@ export default function AppHeader({ greetingName, showMenuToggle, onMenuToggle }
           to="/"
           sx={{ color: 'inherit', textDecoration: 'none' }}
         >
-          {t('common.appName')}
+          {t('common.brandTitle')}
         </Typography>
-        {isAuthenticated && user && (
-          <Button
-            color="inherit"
-            component={RouterLink}
-            to="/user"
-            size="small"
-            sx={{ ml: 2 }}
-          >
-            {t('dashboard.nav.home')}
-          </Button>
-        )}
         <Box sx={{ flexGrow: 1 }} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {isAuthenticated && user && (

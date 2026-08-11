@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "Mova",
+    "brandTitle": "MOVA | INICIO",
     "loading": "Cargando…",
     "search": "Buscar",
     "cancel": "Cancelar",
