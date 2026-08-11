@@ -2,24 +2,34 @@ using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mova.Api.Authorization;
 using Mova.Application.Users.Commands;
 using Mova.Application.Users.Handlers;
+using Mova.Application.Users.Queries;
 using Mova.Contracts.Users;
 
 namespace Mova.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/users")]
-[Authorize]
+[Authorize(Policy = AuthorizationPolicies.User)]
 public class UsersController : ControllerBase
 {
-    private readonly ICompleteProfileHandler _handler;
-    private readonly IValidator<CompleteProfileCommand> _validator;
+    private readonly ICompleteProfileHandler _completeProfileHandler;
+    private readonly IGetUserDashboardHandler _dashboardHandler;
+    private readonly IValidator<CompleteProfileCommand> _completeProfileValidator;
+    private readonly IValidator<GetUserDashboardQuery> _dashboardValidator;
 
-    public UsersController(ICompleteProfileHandler handler, IValidator<CompleteProfileCommand> validator)
+    public UsersController(
+        ICompleteProfileHandler completeProfileHandler,
+        IGetUserDashboardHandler dashboardHandler,
+        IValidator<CompleteProfileCommand> completeProfileValidator,
+        IValidator<GetUserDashboardQuery> dashboardValidator)
     {
-        _handler = handler;
-        _validator = validator;
+        _completeProfileHandler = completeProfileHandler;
+        _dashboardHandler = dashboardHandler;
+        _completeProfileValidator = completeProfileValidator;
+        _dashboardValidator = dashboardValidator;
     }
 
     [HttpPatch("me")]
@@ -27,18 +37,49 @@ public class UsersController : ControllerBase
         [FromBody] CompleteProfileRequest request,
         CancellationToken cancellationToken)
     {
-        var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value;
-
-        if (string.IsNullOrWhiteSpace(userIdValue) || !Guid.TryParse(userIdValue, out var userId))
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
         {
             return Unauthorized();
         }
 
         var command = new CompleteProfileCommand(userId, request.PhoneNumber);
-        await _validator.ValidateAndThrowAsync(command, cancellationToken);
+        await _completeProfileValidator.ValidateAndThrowAsync(command, cancellationToken);
 
-        var userInfo = await _handler.HandleAsync(command, cancellationToken);
+        var userInfo = await _completeProfileHandler.HandleAsync(command, cancellationToken);
         return Ok(userInfo);
+    }
+
+    [HttpGet("me/dashboard")]
+    public async Task<ActionResult<UserDashboardInfo>> GetMyDashboard(
+        [FromQuery] int upcomingPage = 1,
+        [FromQuery] int upcomingPageSize = 5,
+        [FromQuery] int historyPageSize = 3,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var query = new GetUserDashboardQuery(userId, upcomingPage, upcomingPageSize, historyPageSize);
+        await _dashboardValidator.ValidateAndThrowAsync(query, cancellationToken);
+
+        var dashboard = await _dashboardHandler.HandleAsync(query, cancellationToken);
+        return Ok(dashboard);
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value;
+
+        if (string.IsNullOrWhiteSpace(userIdValue) || !Guid.TryParse(userIdValue, out var userId))
+        {
+            return Guid.Empty;
+        }
+
+        return userId;
     }
 }

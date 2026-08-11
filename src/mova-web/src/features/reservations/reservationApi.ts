@@ -8,7 +8,8 @@ import type {
   CreateReservationRequest,
   Reservation,
   ReservationListFilters,
-  UpdateReservationStatusRequest
+  UpdateReservationStatusRequest,
+  UserReservationsFilters
 } from './reservationTypes';
 
 export function useReservations(complexId: string, filters: ReservationListFilters) {
@@ -40,6 +41,44 @@ export function useReservations(complexId: string, filters: ReservationListFilte
         accessToken ?? undefined
       ),
     enabled: Boolean(complexId && accessToken)
+  });
+}
+
+export function useMyReservations(filters: UserReservationsFilters) {
+  const { accessToken } = useAuth();
+  const params = new URLSearchParams({
+    page: String(filters.page + 1),
+    pageSize: String(filters.pageSize)
+  });
+
+  return useQuery({
+    queryKey: ['my-reservations', filters],
+    queryFn: () =>
+      apiClient<PagedResult<Reservation>>(
+        `/api/v1/users/me/reservations?${params}`,
+        {},
+        accessToken ?? undefined
+      ),
+    enabled: Boolean(accessToken)
+  });
+}
+
+export function useMyReservationHistory(filters: UserReservationsFilters) {
+  const { accessToken } = useAuth();
+  const params = new URLSearchParams({
+    page: String(filters.page + 1),
+    pageSize: String(filters.pageSize)
+  });
+
+  return useQuery({
+    queryKey: ['my-reservation-history', filters],
+    queryFn: () =>
+      apiClient<PagedResult<Reservation>>(
+        `/api/v1/users/me/reservations/history?${params}`,
+        {},
+        accessToken ?? undefined
+      ),
+    enabled: Boolean(accessToken)
   });
 }
 

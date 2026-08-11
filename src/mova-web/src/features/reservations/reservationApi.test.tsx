@@ -10,13 +10,16 @@ import {
   updateReservationStatus,
   useCancelReservation,
   useCreateReservation,
+  useMyReservationHistory,
+  useMyReservations,
   useReservations,
   useUpdateReservationStatus
 } from './reservationApi';
 import type {
   CreateReservationRequest,
   ReservationListFilters,
-  UpdateReservationStatusRequest
+  UpdateReservationStatusRequest,
+  UserReservationsFilters
 } from './reservationTypes';
 
 const mockAuthState: AuthState = {
@@ -348,5 +351,95 @@ describe('updateReservationStatus', () => {
     );
 
     fetchSpy.mockRestore();
+  });
+});
+
+describe('useMyReservations', () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalItems: 0,
+          totalPages: 0
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+  });
+
+  afterEach(() => {
+    fetchSpy.mockRestore();
+  });
+
+  it('sends a 1-based page number to the user reservations endpoint', async () => {
+    const filters: UserReservationsFilters = { page: 0, pageSize: 10 };
+
+    const { result } = renderHook(() => useMyReservations(filters), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/users/me/reservations?'),
+      expect.any(Object)
+    );
+
+    const url = fetchSpy.mock.calls[0][0] as string;
+    expect(url).toContain('page=1');
+    expect(url).toContain('pageSize=10');
+  });
+});
+
+describe('useMyReservationHistory', () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalItems: 0,
+          totalPages: 0
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+  });
+
+  afterEach(() => {
+    fetchSpy.mockRestore();
+  });
+
+  it('sends a 1-based page number to the user reservation history endpoint', async () => {
+    const filters: UserReservationsFilters = { page: 0, pageSize: 10 };
+
+    const { result } = renderHook(() => useMyReservationHistory(filters), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/users/me/reservations/history?'),
+      expect.any(Object)
+    );
+
+    const url = fetchSpy.mock.calls[0][0] as string;
+    expect(url).toContain('page=1');
+    expect(url).toContain('pageSize=10');
   });
 });

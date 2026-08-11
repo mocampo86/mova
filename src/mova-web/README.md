@@ -51,7 +51,10 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/complexes/:complexId` | View an active complex, filter its courts by sport, and check court availability for a selected date. | Public |
 | `/login` | Sign in with Google. | Public |
 | `/complete-profile` | Complete the user profile (phone number). | Authenticated users |
-| `/user` | User portal home. | Authenticated users |
+| `/user` | User dashboard overview with upcoming reservations, history summary, block notifications, and entry points to discovery, bookings, and profile. | Authenticated users |
+| `/user/reservations` | List of the authenticated user's upcoming reservations. | Authenticated users |
+| `/user/history` | List of the authenticated user's reservation history. | Authenticated users |
+| `/user/profile` | View the authenticated user's profile and update the phone number. | Authenticated users |
 | `/admin/super` | Super admin dashboard. | `SuperAdmin` |
 | `/admin/complex/:complexId` | Complex admin dashboard overview with courts, reservations, and blocked users summaries. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/profile` | Edit the complex public profile. | `ComplexAdmin` of the requested complex |

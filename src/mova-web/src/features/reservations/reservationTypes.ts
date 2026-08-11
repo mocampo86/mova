@@ -33,6 +33,11 @@ export interface ReservationListFilters {
   date: string;
 }
 
+export interface UserReservationsFilters {
+  page: number;
+  pageSize: number;
+}
+
 export interface CreateReservationRequest {
   courtId: string;
   userId: string;

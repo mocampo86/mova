@@ -130,6 +130,33 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
         return (items, totalItems);
     }
 
+    public async Task<(IReadOnlyList<Reservation> Items, int TotalItems)> GetHistoryByUserIdAsync(
+        Guid userId,
+        DateTime from,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 1 : pageSize;
+        pageSize = pageSize > MaxPageSize ? MaxPageSize : pageSize;
+
+        var query = context.Reservations
+            .Include(r => r.Court)
+            .Include(r => r.User)
+            .Where(r => r.UserId == userId)
+            .Where(r => r.StartAt < from || r.Status == ReservationStatus.Completed || r.Status == ReservationStatus.CancelledByUser || r.Status == ReservationStatus.CancelledByAdmin || r.Status == ReservationStatus.NoShow)
+            .OrderByDescending(r => r.StartAt);
+
+        var totalItems = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
+    }
+
     public async Task<bool> HasOverlappingActiveReservationAsync(
         Guid courtId,
         DateTime start,

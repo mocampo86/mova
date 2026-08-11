@@ -24,6 +24,12 @@ public interface IReservationRepository
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<Reservation> Items, int TotalItems)> GetHistoryByUserIdAsync(
+        Guid userId,
+        DateTime from,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
     Task<bool> HasOverlappingActiveReservationAsync(
         Guid courtId,
         DateTime start,
