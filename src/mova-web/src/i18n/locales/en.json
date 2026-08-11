@@ -151,6 +151,8 @@
   "login": {
     "userTitle": "Welcome to Mova",
     "complexTitle": "Administra tu complejo",
+    "userButton": "User login",
+    "adminButton": "Admin login",
     "userSubtitle": "Sign in with your Google account to continue.",
     "complexSubtitle": "Sign in with your Google account to register and manage your sports complex.",
     "switchToUser": "Want to book a court?",

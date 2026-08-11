@@ -151,6 +151,8 @@
   "login": {
     "userTitle": "Bienvenido a Mova",
     "complexTitle": "Administra tu complejo",
+    "userButton": "Login de usuario",
+    "adminButton": "Login de Administrador",
     "userSubtitle": "Inicia sesión con tu cuenta de Google para continuar.",
     "complexSubtitle": "Inicia sesión con tu cuenta de Google para registrar y administrar tu complejo deportivo.",
     "switchToUser": "¿Quieres reservar una cancha?",

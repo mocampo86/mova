@@ -80,10 +80,18 @@ export default function AppHeader({ greetingName, showMenuToggle, onMenuToggle }
               <Button
                 color="inherit"
                 component={RouterLink}
-                to="/login"
+                to="/login?intent=user"
                 size="small"
               >
-                {t('login.userTitle')}
+                {t('login.userButton')}
+              </Button>
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to="/login?intent=complex"
+                size="small"
+              >
+                {t('login.adminButton')}
               </Button>
               <LanguageSelector />
             </>
