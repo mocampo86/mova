@@ -181,7 +181,7 @@
     "selectPrompt": "Selecciona una cancha y una fecha para ver los horarios disponibles.",
     "loadingAvailability": "Cargando disponibilidad…",
     "availabilityError": "No se pudo cargar la disponibilidad.",
-    "noAvailability": "No hay horarios disponibles para la fecha seleccionada.",
+    "noAvailability": "No hay horarios disponibles para la fecha seleccionada. El complejo podría no tener configurados los horarios de apertura o la cancha no tener reglas de disponibilidad para ese día.",
     "phoneWithValue": "Teléfono: {{value}}",
     "emailWithValue": "Correo: {{value}}",
     "availability": {

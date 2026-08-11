@@ -181,7 +181,7 @@
     "selectPrompt": "Select a court and date to view available slots.",
     "loadingAvailability": "Loading availability…",
     "availabilityError": "Availability could not be loaded.",
-    "noAvailability": "No available slots for the selected date.",
+    "noAvailability": "No available slots for the selected date. The complex may not have business hours configured or the court may not have availability rules for that day.",
     "phoneWithValue": "Phone: {{value}}",
     "emailWithValue": "Email: {{value}}",
     "availability": {

@@ -12,17 +12,20 @@ public sealed class CreateComplexHandler : ICreateComplexHandler
     private readonly IUserRepository _userRepository;
     private readonly ISportsComplexRepository _sportsComplexRepository;
     private readonly IComplexAdministratorRepository _complexAdministratorRepository;
+    private readonly IBusinessHoursRepository _businessHours;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateComplexHandler(
         IUserRepository userRepository,
         ISportsComplexRepository sportsComplexRepository,
         IComplexAdministratorRepository complexAdministratorRepository,
+        IBusinessHoursRepository businessHours,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
         _sportsComplexRepository = sportsComplexRepository;
         _complexAdministratorRepository = complexAdministratorRepository;
+        _businessHours = businessHours;
         _unitOfWork = unitOfWork;
     }
 
@@ -47,6 +50,14 @@ public sealed class CreateComplexHandler : ICreateComplexHandler
 
         await _sportsComplexRepository.AddAsync(sportsComplex, cancellationToken);
         await _complexAdministratorRepository.AddAsync(administrator, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
+        {
+            var hours = BusinessHours.Create(sportsComplex.Id, day, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
+            await _businessHours.AddAsync(hours, cancellationToken);
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return SportsComplexInfoMapper.ToInfo(sportsComplex);

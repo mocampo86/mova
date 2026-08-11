@@ -181,7 +181,7 @@
     "selectPrompt": "Selecione uma quadra e uma data para ver os horários disponíveis.",
     "loadingAvailability": "Carregando disponibilidade…",
     "availabilityError": "Não foi possível carregar a disponibilidade.",
-    "noAvailability": "Não há horários disponíveis para a data selecionada.",
+    "noAvailability": "Não há horários disponíveis para a data selecionada. O complexo pode não ter horários de funcionamento configurados ou a quadra pode não ter regras de disponibilidade para esse dia.",
     "phoneWithValue": "Telefone: {{value}}",
     "emailWithValue": "E-mail: {{value}}",
     "availability": {

@@ -13,10 +13,11 @@ public class CreateComplexHandlerTests
     private readonly FakeUserRepository _userRepository = new();
     private readonly FakeSportsComplexRepository _sportsComplexRepository = new();
     private readonly FakeComplexAdministratorRepository _complexAdministratorRepository = new();
+    private readonly FakeBusinessHoursRepository _businessHours = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private CreateComplexHandler CreateHandler() =>
-        new(_userRepository, _sportsComplexRepository, _complexAdministratorRepository, _unitOfWork);
+        new(_userRepository, _sportsComplexRepository, _complexAdministratorRepository, _businessHours, _unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WithValidData_CreatesComplexAndLinksAdministrator()
@@ -48,6 +49,9 @@ public class CreateComplexHandlerTests
         Assert.Equal(Role.ComplexAdmin, administrator.Role);
 
         Assert.True(user.HasRole(Role.ComplexAdmin));
+
+        var hours = await _businessHours.GetBySportsComplexIdAsync(result.Id);
+        Assert.Equal(7, hours.Count);
     }
 
     [Fact]

@@ -87,6 +87,27 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
     }
 
     [Fact]
+    public async Task GetAvailability_WithMonToSatSchedule_ReturnsSlotsForSaturday()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"availability-week-admin-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        await SetBusinessHoursForWeekAsync(client, complex.Id);
+        await SetAvailabilityRulesForWeekAsync(client, complex.Id, court.Id);
+
+        client.DefaultRequestHeaders.Authorization = null;
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/availability?courtId={court.Id}&date=2026-08-15");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<List<CourtAvailabilitySlotInfo>>();
+        Assert.NotNull(result);
+        Assert.Equal(14, result.Count);
+    }
+
+    [Fact]
     public async Task GetAvailability_ForInactiveComplex_ReturnsNotFound()
     {
         var client = _factory.CreateClient();
@@ -174,6 +195,27 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
         response.EnsureSuccessStatusCode();
     }
 
+    private static async Task SetBusinessHoursForWeekAsync(HttpClient client, Guid complexId)
+    {
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complexId}/business-hours", new UpdateBusinessHoursRequest
+        {
+            Hours = new[]
+            {
+                DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                DayOfWeek.Friday, DayOfWeek.Saturday
+            }
+            .Select(d => new BusinessHoursRequest
+            {
+                DayOfWeek = d,
+                OpeningTime = TimeSpan.FromHours(8),
+                ClosingTime = TimeSpan.FromHours(22),
+                IsClosed = false
+            })
+            .ToList()
+        });
+        response.EnsureSuccessStatusCode();
+    }
+
     private static async Task SetAvailabilityRuleAsync(HttpClient client, Guid complexId, Guid courtId)
     {
         var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complexId}/courts/{courtId}/availability", new UpdateCourtAvailabilityRulesRequest
@@ -189,6 +231,28 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
                     IsActive = true
                 }
             ]
+        });
+        response.EnsureSuccessStatusCode();
+    }
+
+    private static async Task SetAvailabilityRulesForWeekAsync(HttpClient client, Guid complexId, Guid courtId)
+    {
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complexId}/courts/{courtId}/availability", new UpdateCourtAvailabilityRulesRequest
+        {
+            Rules = new[]
+            {
+                DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                DayOfWeek.Friday, DayOfWeek.Saturday
+            }
+            .Select(d => new CreateCourtAvailabilityRuleRequest
+            {
+                DayOfWeek = d,
+                StartTime = TimeSpan.FromHours(8),
+                EndTime = TimeSpan.FromHours(22),
+                SlotDurationMinutes = 60,
+                IsActive = true
+            })
+            .ToList()
         });
         response.EnsureSuccessStatusCode();
     }

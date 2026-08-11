@@ -11,10 +11,11 @@ public sealed class CreateCourtHandler : ICreateCourtHandler
     private readonly ISportsComplexRepository _complexes;
     private readonly ICourtRepository _courts;
     private readonly ISportRepository _sports;
+    private readonly ICourtAvailabilityRuleRepository _rules;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateCourtHandler(ISportsComplexRepository complexes, ICourtRepository courts, ISportRepository sports, IUnitOfWork unitOfWork)
-        => (_complexes, _courts, _sports, _unitOfWork) = (complexes, courts, sports, unitOfWork);
+    public CreateCourtHandler(ISportsComplexRepository complexes, ICourtRepository courts, ISportRepository sports, ICourtAvailabilityRuleRepository rules, IUnitOfWork unitOfWork)
+        => (_complexes, _courts, _sports, _rules, _unitOfWork) = (complexes, courts, sports, rules, unitOfWork);
 
     public async Task<CourtInfo> HandleAsync(CreateCourtCommand command, CancellationToken cancellationToken = default)
     {
@@ -29,6 +30,14 @@ public sealed class CreateCourtHandler : ICreateCourtHandler
 
         var court = Court.Create(command.SportsComplexId, command.Name, command.Description, command.SurfaceType, command.Indoor, sportIds);
         await _courts.AddAsync(court, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
+        {
+            var rule = CourtAvailabilityRule.Create(court.Id, day, TimeSpan.FromHours(8), TimeSpan.FromHours(22), 60, true);
+            await _rules.AddAsync(rule, cancellationToken);
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return CourtMapper.ToInfo(court);
     }

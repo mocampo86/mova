@@ -2,6 +2,7 @@ using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Courts.Queries;
 using Mova.Contracts.Courts;
+using Mova.Domain.Entities;
 
 namespace Mova.Application.Courts.Handlers;
 
@@ -23,7 +24,8 @@ public sealed class GetCourtAvailabilityHandler(
 
         var dayOfWeek = query.Date.DayOfWeek;
         var rulesForCourt = await rules.GetByCourtIdAsync(query.CourtId, cancellationToken);
-        var rule = rulesForCourt.FirstOrDefault(r => r.DayOfWeek == dayOfWeek && r.IsActive);
+        var rule = rulesForCourt.FirstOrDefault(r => r.DayOfWeek == dayOfWeek && r.IsActive)
+                   ?? (rulesForCourt.Any() ? null : CourtAvailabilityRule.Create(query.CourtId, dayOfWeek, TimeSpan.FromHours(8), TimeSpan.FromHours(22), 60, true));
 
         if (rule is null)
         {
@@ -31,7 +33,8 @@ public sealed class GetCourtAvailabilityHandler(
         }
 
         var hoursForComplex = await businessHours.GetBySportsComplexIdAsync(query.SportsComplexId, cancellationToken);
-        var businessHour = hoursForComplex.FirstOrDefault(h => h.DayOfWeek == dayOfWeek);
+        var businessHour = hoursForComplex.FirstOrDefault(h => h.DayOfWeek == dayOfWeek)
+                          ?? (hoursForComplex.Any() ? null : BusinessHours.Create(query.SportsComplexId, dayOfWeek, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false));
 
         if (businessHour is null)
         {
