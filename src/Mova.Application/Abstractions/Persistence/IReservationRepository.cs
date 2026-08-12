@@ -17,6 +17,7 @@ public interface IReservationRepository
         DateTime? date = null,
         string? sort = null,
         Guid? userId = null,
+        int utcOffsetMinutes = 0,
         CancellationToken cancellationToken = default);
     Task<(IReadOnlyList<Reservation> Items, int TotalItems)> GetUpcomingByUserIdAsync(
         Guid userId,

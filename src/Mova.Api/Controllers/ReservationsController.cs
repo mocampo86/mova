@@ -40,6 +40,7 @@ public sealed class ReservationsController(
         [FromQuery] int pageSize = 20,
         [FromQuery] string? sort = null,
         [FromQuery] Guid? userId = null,
+        [FromQuery] int utcOffsetMinutes = 0,
         CancellationToken cancellationToken = default)
     {
         DateTime? dateFilter = null;
@@ -49,7 +50,7 @@ public sealed class ReservationsController(
             dateFilter = date.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         }
 
-        var query = new GetReservationsByComplexQuery(complexId, page, pageSize, courtId, status, dateFilter, sort, userId);
+        var query = new GetReservationsByComplexQuery(complexId, page, pageSize, courtId, status, dateFilter, sort, userId, utcOffsetMinutes);
         await listValidator.ValidateAndThrowAsync(query, cancellationToken);
 
         var result = await getListHandler.HandleAsync(query, cancellationToken);

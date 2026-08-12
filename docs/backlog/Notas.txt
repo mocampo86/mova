@@ -1,4 +1,5 @@
 -Coplex:
+-La pagina del admin no permite seleccionar el idioma
 -poder abrir google maps con la ubicación del complejo
 -Ver reservaciones por dia tipo calendario
 -Agregar servicios del local

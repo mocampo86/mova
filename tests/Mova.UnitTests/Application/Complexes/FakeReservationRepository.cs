@@ -43,6 +43,7 @@ public sealed class FakeReservationRepository : IReservationRepository
         DateTime? date = null,
         string? sort = null,
         Guid? userId = null,
+        int utcOffsetMinutes = 0,
         CancellationToken cancellationToken = default)
     {
         var query = _reservations.Where(r => r.SportsComplexId == sportsComplexId);
@@ -59,7 +60,7 @@ public sealed class FakeReservationRepository : IReservationRepository
 
         if (date.HasValue)
         {
-            var dayStart = date.Value.Date;
+            var dayStart = date.Value.Date.AddMinutes(utcOffsetMinutes);
             var dayEnd = dayStart.AddDays(1);
             query = query.Where(r => r.StartAt >= dayStart && r.StartAt < dayEnd);
         }
