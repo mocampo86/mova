@@ -65,20 +65,22 @@ function CalendarLegend({ t }: { t: (key: string) => string }) {
   );
 }
 
-function TimeAxis({ dayStart, totalMinutes }: { dayStart: Date | null; totalMinutes: number }) {
+function TimeAxis({
+  dayStart,
+  totalMinutes,
+  columns
+}: {
+  dayStart: Date | null;
+  totalMinutes: number;
+  columns: CalendarCourtColumn[];
+}) {
   if (!dayStart || totalMinutes === 0) {
     return null;
   }
 
-  const labels: Date[] = [];
-  const startTime = new Date(dayStart.getTime());
-  const endTime = new Date(startTime.getTime() + totalMinutes * 60 * 1000);
-
-  startTime.setMinutes(0, 0, 0);
-  for (let time = new Date(startTime); time <= endTime; time = new Date(time.getTime() + 60 * 60 * 1000)) {
-    if (time >= dayStart) {
-      labels.push(new Date(time));
-    }
+  const referenceColumn = columns.find((column) => column.slots.length > 0);
+  if (!referenceColumn) {
+    return null;
   }
 
   return (
@@ -91,8 +93,10 @@ function TimeAxis({ dayStart, totalMinutes }: { dayStart: Date | null; totalMinu
         mt: HOUR_LABEL_HEIGHT
       }}
     >
-      {labels.map((time, index) => {
-        const top = ((time.getTime() - dayStart.getTime()) / (60 * 1000)) * PIXELS_PER_MINUTE + 2;
+      {referenceColumn.slots.map((slot, index) => {
+        const startMinutes = (new Date(slot.startAt).getTime() - dayStart.getTime()) / (60 * 1000);
+        const durationMinutes = (new Date(slot.endAt).getTime() - new Date(slot.startAt).getTime()) / (60 * 1000);
+        const top = (startMinutes + durationMinutes / 2) * PIXELS_PER_MINUTE;
         return (
           <Typography
             key={index}
@@ -101,13 +105,14 @@ function TimeAxis({ dayStart, totalMinutes }: { dayStart: Date | null; totalMinu
               position: 'absolute',
               top,
               right: 12,
+              transform: 'translateY(-50%)',
               color: 'text.secondary',
               lineHeight: 1,
               fontVariantNumeric: 'tabular-nums',
               whiteSpace: 'nowrap'
             }}
           >
-            {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {new Date(slot.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </Typography>
         );
       })}
@@ -271,7 +276,7 @@ export default function ReservationCalendar({
           pb: 2
         }}
       >
-        <TimeAxis dayStart={dayStart} totalMinutes={totalMinutes} />
+        <TimeAxis dayStart={dayStart} totalMinutes={totalMinutes} columns={columns} />
         {columns.map((column) => (
           <CourtColumn
             key={column.court.id}
