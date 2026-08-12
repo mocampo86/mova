@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Mova.Contracts.Auth;
+using Mova.Contracts.Complexes;
 using Mova.Contracts.Common;
 using Mova.Contracts.Courts;
 using Mova.Contracts.Reservations;
@@ -65,6 +66,49 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         var response = await client.PatchAsJsonAsync("/api/v1/users/me", request);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetMyDashboard_ReturnsUpcomingAndHistorySummary()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"dashboard-user-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var now = DateTime.UtcNow;
+        Guid upcomingId;
+        Guid historyId;
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+
+            var upcoming = Reservation.Create(complex.Id, court.Id, login.User.Id, now.AddHours(2), now.AddHours(3), ReservationSource.Web);
+            upcoming.Confirm();
+            upcomingId = upcoming.Id;
+
+            var history = Reservation.Create(complex.Id, court.Id, login.User.Id, now.AddHours(-2), now.AddHours(-1), ReservationSource.Web);
+            history.Confirm();
+            historyId = history.Id;
+
+            await context.Reservations.AddRangeAsync(upcoming, history);
+            await context.SaveChangesAsync();
+        }
+
+        var response = await client.GetAsync("/api/v1/users/me/dashboard?upcomingPageSize=5&historyPageSize=3");
+
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<UserDashboardInfo>();
+        Assert.NotNull(result);
+        Assert.Equal(login.User.FullName, result.User.FullName);
+        Assert.Equal(1, result.UpcomingReservations.TotalItems);
+        Assert.Equal(upcomingId, result.UpcomingReservations.Items[0].Id);
+        Assert.Equal(1, result.HistorySummary.TotalItems);
+        Assert.Single(result.HistorySummary.RecentReservations);
+        Assert.Equal(historyId, result.HistorySummary.RecentReservations[0].Id);
     }
 
     [Fact]
@@ -185,6 +229,42 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         await context.SaveChangesAsync();
 
         return (adminSuffix, complex.Id, customerUser.Id, court.Id);
+    }
+
+    private static async Task<GoogleLoginResponse> LoginWithUserAsync(HttpClient client, string suffix)
+    {
+        var response = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" });
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<GoogleLoginResponse>())!;
+    }
+
+    private static async Task<SportsComplexInfo> CreateComplexAsync(HttpClient client)
+    {
+        var response = await client.PostAsJsonAsync("/api/v1/complexes", new CreateComplexRequest
+        {
+            Name = $"Dashboard Complex {Guid.NewGuid()}",
+            Description = "Complex",
+            Address = "Address",
+            City = "Montevideo",
+            PhoneNumber = "+598 99 123 456",
+            Email = $"dashboard-{Guid.NewGuid()}@test.com"
+        });
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<SportsComplexInfo>())!;
+    }
+
+    private static async Task<CourtInfo> CreateCourtAsync(HttpClient client, Guid complexId)
+    {
+        var response = await client.PostAsJsonAsync($"/api/v1/complexes/{complexId}/courts", new CreateCourtRequest
+        {
+            Name = $"Court {Guid.NewGuid()}",
+            Description = "Court",
+            SurfaceType = "Synthetic",
+            Indoor = true,
+            SportIds = []
+        });
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<CourtInfo>())!;
     }
 
     private static async Task<string> LoginAsync(HttpClient client)

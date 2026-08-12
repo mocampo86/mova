@@ -205,6 +205,88 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         Assert.All(result.Items, reservation => Assert.Equal(login.User.Id, reservation.UserId));
     }
 
+    [Fact]
+    public async Task GetMyHistory_WithoutAuthorization_ReturnsUnauthorized()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/v1/users/me/reservations/history?page=1&pageSize=10");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetMyHistory_WithInvalidPageSize_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"reservation-history-invalid-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync("/api/v1/users/me/reservations/history?page=1&pageSize=0");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetMyHistory_ReturnsOnlyAuthenticatedUsersPastAndCompletedOrCancelledReservations()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"reservation-history-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var now = DateTime.UtcNow;
+        var futureStart = now.AddDays(1);
+        Guid pastId;
+        Guid completedId;
+        Guid cancelledId;
+
+        var otherUserLogin = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-other-{Guid.NewGuid()}" });
+        otherUserLogin.EnsureSuccessStatusCode();
+        var otherUser = await otherUserLogin.Content.ReadFromJsonAsync<GoogleLoginResponse>();
+        Assert.NotNull(otherUser);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+
+            var past = Reservation.Create(complex.Id, court.Id, login.User.Id, now.AddDays(-2), now.AddDays(-2).AddHours(1), ReservationSource.Web);
+            past.Confirm();
+            pastId = past.Id;
+
+            var completed = Reservation.Create(complex.Id, court.Id, login.User.Id, futureStart, futureStart.AddHours(1), ReservationSource.Web);
+            completed.Confirm();
+            completed.MarkCompleted();
+            completedId = completed.Id;
+
+            var cancelled = Reservation.Create(complex.Id, court.Id, login.User.Id, futureStart.AddHours(2), futureStart.AddHours(3), ReservationSource.Web);
+            cancelled.Confirm();
+            cancelled.Cancel("No longer needed");
+            cancelledId = cancelled.Id;
+
+            var upcoming = Reservation.Create(complex.Id, court.Id, login.User.Id, futureStart.AddHours(4), futureStart.AddHours(5), ReservationSource.Web);
+            upcoming.Confirm();
+
+            var otherUsers = Reservation.Create(complex.Id, court.Id, otherUser.User.Id, now.AddDays(-1), now.AddDays(-1).AddHours(1), ReservationSource.Web);
+            otherUsers.Confirm();
+
+            await context.Reservations.AddRangeAsync(past, completed, cancelled, upcoming, otherUsers);
+            await context.SaveChangesAsync();
+        }
+
+        var response = await client.GetAsync("/api/v1/users/me/reservations/history?page=1&pageSize=10");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(result);
+        Assert.Equal(3, result.TotalItems);
+        Assert.Equal([cancelledId, completedId, pastId], result.Items.Select(r => r.Id));
+        Assert.All(result.Items, reservation => Assert.Equal(login.User.Id, reservation.UserId));
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         return (await LoginWithUserAsync(client, suffix)).AccessToken;
