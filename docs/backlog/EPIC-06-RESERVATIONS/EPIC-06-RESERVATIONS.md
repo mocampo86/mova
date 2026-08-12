@@ -19,6 +19,7 @@ Allow users to make, view, and cancel reservations, while administrators can man
 - Conflict prevention (no overlapping active reservations).
 - Mark reservation as completed or no-show.
 - Basic reservation history.
+- Daily calendar view of reservations with color-coded slots and legend.
 
 ## User stories
 
@@ -32,6 +33,7 @@ Allow users to make, view, and cancel reservations, while administrators can man
 | [US-034](US-034.md) | As an administrator, I want to create a reservation manually for a user. |
 | [US-035](US-035.md) | As an administrator, I want to cancel a reservation if necessary. |
 | [US-036](US-036.md) | As an administrator, I want to mark a reservation as completed or no-show. |
+| [US-073](US-073.md) | As a complex administrator, I want to view reservations in a daily calendar with color-coded slots. |
 
 ## Acceptance criteria
 

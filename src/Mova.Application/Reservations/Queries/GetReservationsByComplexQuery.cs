@@ -10,7 +10,8 @@ public sealed class GetReservationsByComplexQuery
         string? status = null,
         DateTime? date = null,
         string? sort = null,
-        Guid? userId = null)
+        Guid? userId = null,
+        int utcOffsetMinutes = 0)
     {
         SportsComplexId = sportsComplexId;
         Page = page;
@@ -20,6 +21,7 @@ public sealed class GetReservationsByComplexQuery
         Date = date;
         Sort = sort;
         UserId = userId;
+        UtcOffsetMinutes = utcOffsetMinutes;
     }
 
     public Guid SportsComplexId { get; }
@@ -30,4 +32,5 @@ public sealed class GetReservationsByComplexQuery
     public DateTime? Date { get; }
     public string? Sort { get; }
     public Guid? UserId { get; }
+    public int UtcOffsetMinutes { get; }
 }

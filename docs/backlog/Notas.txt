@@ -1,4 +1,5 @@
 -Coplex:
+-La pagina del admin no permite seleccionar el idioma
 -poder abrir google maps con la ubicación del complejo
 -Ver reservaciones por dia tipo calendario
 -Agregar servicios del local
@@ -12,3 +13,4 @@
 -Cancelaciones: configurar tiempo mínimo para cancelar reservas
 -Check si el usuario puede ver reservaciones
 -Mejoras Dashboard de usuario: iconos, eliminar cards irrelevanets
+# US-032 — Cancel a reservation according to the cancellation policy (Implementar cuando se defina el policy)

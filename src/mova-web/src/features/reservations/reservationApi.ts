@@ -12,12 +12,20 @@ import type {
   UserReservationsFilters
 } from './reservationTypes';
 
-export function useReservations(complexId: string, filters: ReservationListFilters) {
+function getUtcOffsetMinutes(date: string): number {
+  return new Date(`${date}T00:00`).getTimezoneOffset();
+}
+
+export function useReservations(
+  complexId: string,
+  filters: ReservationListFilters,
+  enabled = true
+) {
   const { accessToken } = useAuth();
   const params = new URLSearchParams({
     page: String(filters.page + 1),
     pageSize: String(filters.pageSize),
-    sort: 'startAt:desc'
+    sort: filters.sort ?? 'startAt:desc'
   });
 
   if (filters.courtId) {
@@ -30,6 +38,7 @@ export function useReservations(complexId: string, filters: ReservationListFilte
 
   if (filters.date) {
     params.set('date', filters.date);
+    params.set('utcOffsetMinutes', String(getUtcOffsetMinutes(filters.date)));
   }
 
   return useQuery({
@@ -40,7 +49,7 @@ export function useReservations(complexId: string, filters: ReservationListFilte
         {},
         accessToken ?? undefined
       ),
-    enabled: Boolean(complexId && accessToken)
+    enabled: Boolean(complexId && accessToken) && enabled
   });
 }
 
