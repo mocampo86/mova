@@ -65,61 +65,6 @@ function CalendarLegend({ t }: { t: (key: string) => string }) {
   );
 }
 
-function TimeAxis({
-  dayStart,
-  totalMinutes,
-  columns
-}: {
-  dayStart: Date | null;
-  totalMinutes: number;
-  columns: CalendarCourtColumn[];
-}) {
-  if (!dayStart || totalMinutes === 0) {
-    return null;
-  }
-
-  const referenceColumn = columns.find((column) => column.slots.length > 0);
-  if (!referenceColumn) {
-    return null;
-  }
-
-  return (
-    <Box
-      sx={{
-        position: 'relative',
-        minWidth: 90,
-        height: totalMinutes * PIXELS_PER_MINUTE,
-        flex: '0 0 auto',
-        mt: HOUR_LABEL_HEIGHT
-      }}
-    >
-      {referenceColumn.slots.map((slot, index) => {
-        const startMinutes = (new Date(slot.startAt).getTime() - dayStart.getTime()) / (60 * 1000);
-        const durationMinutes = (new Date(slot.endAt).getTime() - new Date(slot.startAt).getTime()) / (60 * 1000);
-        const top = (startMinutes + durationMinutes / 2) * PIXELS_PER_MINUTE;
-        return (
-          <Typography
-            key={index}
-            variant="caption"
-            sx={{
-              position: 'absolute',
-              top,
-              right: 12,
-              transform: 'translateY(-50%)',
-              color: 'text.secondary',
-              lineHeight: 1,
-              fontVariantNumeric: 'tabular-nums',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {new Date(slot.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </Typography>
-        );
-      })}
-    </Box>
-  );
-}
-
 function CalendarSlotCard({
   slot,
   dayStart,
@@ -276,7 +221,6 @@ export default function ReservationCalendar({
           pb: 2
         }}
       >
-        <TimeAxis dayStart={dayStart} totalMinutes={totalMinutes} columns={columns} />
         {columns.map((column) => (
           <CourtColumn
             key={column.court.id}
