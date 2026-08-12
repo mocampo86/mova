@@ -344,7 +344,8 @@
       "legendFree": "Libre",
       "calendarEmpty": "No hay franjas horarias para mostrar en la fecha seleccionada.",
       "slotDetailsTitle": "Detalles del turno",
-      "reservationDetailsTitle": "Detalles de la reserva"
+      "reservationDetailsTitle": "Detalles de la reserva",
+      "reserveSlot": "Reservar turno"
     },
     "profile": {
       "title": "Editar perfil del complejo",

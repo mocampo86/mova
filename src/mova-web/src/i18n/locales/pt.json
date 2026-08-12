@@ -344,7 +344,8 @@
       "legendFree": "Livre",
       "calendarEmpty": "Não há horários para exibir na data selecionada.",
       "slotDetailsTitle": "Detalhes do horário",
-      "reservationDetailsTitle": "Detalhes da reserva"
+      "reservationDetailsTitle": "Detalhes da reserva",
+      "reserveSlot": "Reservar horário"
     },
     "profile": {
       "title": "Editar perfil do complexo",

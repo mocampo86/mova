@@ -16,8 +16,8 @@ import {
   getSlotTextColor
 } from './reservationCalendarUtils';
 
-const PIXELS_PER_MINUTE = 1.5;
-const HOUR_LABEL_HEIGHT = 20;
+const PIXELS_PER_MINUTE = 1;
+const HOUR_LABEL_HEIGHT = 28;
 
 interface ReservationCalendarProps {
   columns: CalendarCourtColumn[];
@@ -103,7 +103,8 @@ function TimeAxis({ dayStart, totalMinutes }: { dayStart: Date | null; totalMinu
               right: 8,
               transform: 'translateY(-50%)',
               color: 'text.secondary',
-              lineHeight: 1
+              lineHeight: 1,
+              fontVariantNumeric: 'tabular-nums'
             }}
           >
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -144,7 +145,10 @@ function CalendarSlotCard({
         bgcolor: getSlotBackgroundColor(slot),
         color: getSlotTextColor(slot),
         borderRadius: 1,
-        p: 0.75,
+        border: 1,
+        borderColor: 'background.paper',
+        boxSizing: 'border-box',
+        p: 0.5,
         cursor: 'pointer',
         overflow: 'hidden',
         display: 'flex',
@@ -194,8 +198,9 @@ function CourtColumn({
         variant="subtitle2"
         sx={{
           fontWeight: 700,
-          mb: 1,
           height: HOUR_LABEL_HEIGHT,
+          pb: 1,
+          boxSizing: 'border-box',
           display: 'flex',
           alignItems: 'flex-end'
         }}

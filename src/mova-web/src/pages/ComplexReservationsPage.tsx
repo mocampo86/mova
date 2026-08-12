@@ -583,6 +583,23 @@ export default function ComplexReservationsPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setSelectedFreeSlot(null)}>{t('common.close')}</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (!selectedFreeSlot) return;
+              setCreateForm({
+                courtId: selectedFreeSlot.courtId,
+                userId: '',
+                startAt: toLocalDateTimeInputValue(selectedFreeSlot.startAt),
+                endAt: toLocalDateTimeInputValue(selectedFreeSlot.endAt),
+                notes: ''
+              });
+              setSelectedFreeSlot(null);
+              setCreateOpen(true);
+            }}
+          >
+            {t('admin.reservations.reserveSlot')}
+          </Button>
         </DialogActions>
       </Dialog>
 

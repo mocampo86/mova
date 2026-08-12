@@ -110,7 +110,15 @@ describe('ComplexReservationsPage', () => {
     } as unknown as ReturnType<typeof useUpdateReservationStatus>);
 
     vi.mocked(useCourtAvailabilityForCourts).mockReturnValue({
-      data: {},
+      data: {
+        'court-1': [
+          {
+            courtId: 'court-1',
+            startAt: '2026-08-10T12:00:00Z',
+            endAt: '2026-08-10T13:00:00Z'
+          }
+        ]
+      },
       isLoading: false,
       isError: false
     } as unknown as ReturnType<typeof useCourtAvailabilityForCourts>);
@@ -208,5 +216,39 @@ describe('ComplexReservationsPage', () => {
     const dateInputAfter = screen.getByLabelText('Date') as HTMLInputElement;
     expect(dateInputAfter.value).toBe(previousDate);
     expect(screen.getByLabelText('Court')).toBeTruthy();
+  });
+
+  it('opens the create dialog prefilled from a free calendar slot', async () => {
+    setupMocks();
+
+    renderWithAuth(
+      <Routes>
+        <Route path="/admin/complex/:complexId/reservations" element={<ComplexReservationsPage />} />
+      </Routes>,
+      { initialRoute: '/admin/complex/complex-1/reservations' }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Reservations' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Calendar' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Legend:')).toBeTruthy();
+    });
+
+    const freeSlots = screen.getAllByText('Free');
+    fireEvent.click(freeSlots[freeSlots.length - 1]);
+
+    await waitFor(() => {
+      expect(screen.getByText('Slot details')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reserve slot' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create manual reservation' })).toBeTruthy();
+    });
   });
 });

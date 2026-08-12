@@ -344,7 +344,8 @@
       "legendFree": "Free",
       "calendarEmpty": "No slots to display for the selected date.",
       "slotDetailsTitle": "Slot details",
-      "reservationDetailsTitle": "Reservation details"
+      "reservationDetailsTitle": "Reservation details",
+      "reserveSlot": "Reserve slot"
     },
     "profile": {
       "title": "Edit complex profile",
