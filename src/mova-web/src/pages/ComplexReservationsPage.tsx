@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Alert,
@@ -24,6 +24,8 @@ import {
   TablePagination,
   TableRow,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -40,14 +42,14 @@ import type {
   ReservationListFilters,
   ReservationStatus
 } from '../features/reservations/reservationTypes';
-
-function statusColor(status: ReservationStatus): 'success' | 'info' | 'warning' | 'error' | 'default' {
-  if (status === 'Confirmed') return 'success';
-  if (status === 'Completed') return 'info';
-  if (status === 'Pending') return 'warning';
-  if (status === 'CancelledByUser' || status === 'CancelledByAdmin') return 'error';
-  return 'default';
-}
+import ReservationCalendar from '../features/reservations/ReservationCalendar';
+import { useCourtAvailabilityForCourts } from '../features/reservations/reservationCalendarApi';
+import type {
+  FreeCalendarSlot,
+  ReservationCalendarSlot
+} from '../features/reservations/reservationCalendarTypes';
+import { buildCalendarColumns } from '../features/reservations/reservationCalendarUtils';
+import { getReservationStatusColor } from '../features/reservations/reservationStatus';
 
 function formatDateTimeRange(startAt: string, endAt: string): string {
   const start = new Date(startAt);
@@ -102,6 +104,7 @@ export default function ComplexReservationsPage() {
     status: 'All',
     date: getTodayLocalDateString()
   });
+  const [view, setView] = useState<'list' | 'calendar'>('list');
 
   const courtFilters: CourtListFilters = {
     page: 0,
@@ -111,11 +114,42 @@ export default function ComplexReservationsPage() {
     search: ''
   };
 
-  const { data, isLoading, isError } = useReservations(complexId, filters);
+  const listReservations = useReservations(complexId, filters);
+  const calendarFilters = useMemo<ReservationListFilters>(
+    () => ({ ...filters, page: 0, pageSize: 100, sort: 'startAt:asc', status: 'All' }),
+    [filters]
+  );
+  const calendarReservations = useReservations(complexId, calendarFilters, view === 'calendar');
+
   const courts = useCourts(complexId, courtFilters);
   const createReservation = useCreateReservation(complexId);
   const cancelReservation = useCancelReservation(complexId);
   const updateStatus = useUpdateReservationStatus(complexId);
+
+  const targetCourtIds = useMemo(() => {
+    if (!courts.data) {
+      return [];
+    }
+    return filters.courtId ? [filters.courtId] : courts.data.items.map((court) => court.id);
+  }, [filters.courtId, courts.data]);
+
+  const availability = useCourtAvailabilityForCourts(
+    complexId,
+    filters.date,
+    targetCourtIds,
+    view === 'calendar'
+  );
+
+  const calendarColumns = useMemo(() => {
+    const targetCourts = filters.courtId
+      ? courts.data?.items.filter((court) => court.id === filters.courtId) ?? []
+      : courts.data?.items ?? [];
+    return buildCalendarColumns(
+      targetCourts,
+      calendarReservations.data?.items ?? [],
+      availability.data
+    );
+  }, [filters.courtId, courts.data, calendarReservations.data, availability.data]);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState(initialCreateForm);
@@ -132,6 +166,9 @@ export default function ComplexReservationsPage() {
     reservation: null
   });
   const [selectedStatus, setSelectedStatus] = useState<'Completed' | 'NoShow'>('Completed');
+
+  const [selectedFreeSlot, setSelectedFreeSlot] = useState<FreeCalendarSlot | null>(null);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
 
   const statusOptions: { value: ReservationStatus | 'All'; label: string }[] = [
     { value: 'All', label: t('status.all') },
@@ -202,7 +239,10 @@ export default function ComplexReservationsPage() {
     setStatusDialog({ open: false, reservation: null });
   };
 
-  const emptyState = !isLoading && !isError && data?.items?.length === 0;
+  const emptyState =
+    !listReservations.isLoading &&
+    !listReservations.isError &&
+    listReservations.data?.items?.length === 0;
   const isActionsDisabled = (status: ReservationStatus) =>
     status === 'CancelledByUser' ||
     status === 'CancelledByAdmin' ||
@@ -221,9 +261,20 @@ export default function ComplexReservationsPage() {
           <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>
             {t('admin.reservations.title')}
           </Typography>
-          <Button variant="contained" onClick={() => setCreateOpen(true)}>
-            {t('admin.reservations.create')}
-          </Button>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <ToggleButtonGroup
+              value={view}
+              exclusive
+              onChange={(_, value) => value && setView(value)}
+              aria-label={t('admin.reservations.viewLabel')}
+            >
+              <ToggleButton value="list">{t('admin.reservations.listView')}</ToggleButton>
+              <ToggleButton value="calendar">{t('admin.reservations.calendarView')}</ToggleButton>
+            </ToggleButtonGroup>
+            <Button variant="contained" onClick={() => setCreateOpen(true)}>
+              {t('admin.reservations.create')}
+            </Button>
+          </Stack>
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -256,113 +307,125 @@ export default function ComplexReservationsPage() {
               ))}
             </Select>
           </FormControl>
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="reservation-status-filter-label">{t('admin.reservations.statusFilter')}</InputLabel>
-            <Select
-              labelId="reservation-status-filter-label"
-              value={filters.status}
-              label={t('admin.reservations.statusFilter')}
-              onChange={(event) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  status: event.target.value as ReservationStatus | 'All',
-                  page: 0
-                }))
-              }
-            >
-              {statusOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {view === 'list' && (
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel id="reservation-status-filter-label">{t('admin.reservations.statusFilter')}</InputLabel>
+              <Select
+                labelId="reservation-status-filter-label"
+                value={filters.status}
+                label={t('admin.reservations.statusFilter')}
+                onChange={(event) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    status: event.target.value as ReservationStatus | 'All',
+                    page: 0
+                  }))
+                }
+              >
+                {statusOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </Stack>
 
         {courts.isError && (
           <Alert severity="warning">{t('admin.reservations.courtsError')}</Alert>
         )}
 
-        {isLoading ? (
-          <Skeleton variant="rectangular" height={200} />
-        ) : isError ? (
-          <Alert severity="error">{t('admin.reservations.error')}</Alert>
-        ) : emptyState ? (
-          <Alert severity="info">{t('admin.reservations.empty')}</Alert>
-        ) : (
-          <>
-            <TableContainer
-              component={Box}
-              sx={{ border: 1, borderColor: 'divider', borderRadius: 2 }}
-            >
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('admin.reservations.dateTimeHeader')}</TableCell>
-                    <TableCell>{t('admin.reservations.courtHeader')}</TableCell>
-                    <TableCell>{t('admin.reservations.userHeader')}</TableCell>
-                    <TableCell>{t('admin.reservations.statusHeader')}</TableCell>
-                    <TableCell align="right">{t('admin.reservations.actionsHeader')}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data?.items.map((reservation) => (
-                    <TableRow key={reservation.id} hover>
-                      <TableCell>
-                        <Typography fontWeight={700}>
-                          {new Date(reservation.startAt).toLocaleDateString()}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {formatDateTimeRange(reservation.startAt, reservation.endAt)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>{reservation.courtName}</TableCell>
-                      <TableCell>{reservation.userName}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={statusOptions.find((s) => s.value === reservation.status)?.label ?? reservation.status}
-                          color={statusColor(reservation.status)}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell align="right">
-                        <Stack direction="row" spacing={1} justifyContent="flex-end">
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            disabled={isActionsDisabled(reservation.status) || cancelReservation.isPending}
-                            onClick={() => setCancelDialog({ open: true, reservation })}
-                          >
-                            {t('admin.reservations.cancel')}
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            disabled={isActionsDisabled(reservation.status) || updateStatus.isPending}
-                            onClick={() => {
-                              setStatusDialog({ open: true, reservation });
-                              setSelectedStatus('Completed');
-                            }}
-                          >
-                            {t('admin.reservations.markStatus')}
-                          </Button>
-                        </Stack>
-                      </TableCell>
+        {view === 'list' ? (
+          listReservations.isLoading ? (
+            <Skeleton variant="rectangular" height={200} />
+          ) : listReservations.isError ? (
+            <Alert severity="error">{t('admin.reservations.error')}</Alert>
+          ) : emptyState ? (
+            <Alert severity="info">{t('admin.reservations.empty')}</Alert>
+          ) : (
+            <>
+              <TableContainer
+                component={Box}
+                sx={{ border: 1, borderColor: 'divider', borderRadius: 2 }}
+              >
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>{t('admin.reservations.dateTimeHeader')}</TableCell>
+                      <TableCell>{t('admin.reservations.courtHeader')}</TableCell>
+                      <TableCell>{t('admin.reservations.userHeader')}</TableCell>
+                      <TableCell>{t('admin.reservations.statusHeader')}</TableCell>
+                      <TableCell align="right">{t('admin.reservations.actionsHeader')}</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              component="div"
-              count={data?.totalItems ?? 0}
-              page={filters.page}
-              onPageChange={handleChangePage}
-              rowsPerPage={filters.pageSize}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              rowsPerPageOptions={[5, 10, 25]}
-            />
-          </>
+                  </TableHead>
+                  <TableBody>
+                    {listReservations.data?.items.map((reservation) => (
+                      <TableRow key={reservation.id} hover>
+                        <TableCell>
+                          <Typography fontWeight={700}>
+                            {new Date(reservation.startAt).toLocaleDateString()}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {formatDateTimeRange(reservation.startAt, reservation.endAt)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>{reservation.courtName}</TableCell>
+                        <TableCell>{reservation.userName}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={statusOptions.find((s) => s.value === reservation.status)?.label ?? reservation.status}
+                            color={getReservationStatusColor(reservation.status)}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell align="right">
+                          <Stack direction="row" spacing={1} justifyContent="flex-end">
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              disabled={isActionsDisabled(reservation.status) || cancelReservation.isPending}
+                              onClick={() => setCancelDialog({ open: true, reservation })}
+                            >
+                              {t('admin.reservations.cancel')}
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              disabled={isActionsDisabled(reservation.status) || updateStatus.isPending}
+                              onClick={() => {
+                                setStatusDialog({ open: true, reservation });
+                                setSelectedStatus('Completed');
+                              }}
+                            >
+                              {t('admin.reservations.markStatus')}
+                            </Button>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                component="div"
+                count={listReservations.data?.totalItems ?? 0}
+                page={filters.page}
+                onPageChange={handleChangePage}
+                rowsPerPage={filters.pageSize}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[5, 10, 25]}
+              />
+            </>
+          )
+        ) : (
+          <ReservationCalendar
+            columns={calendarColumns}
+            isLoading={calendarReservations.isLoading || availability.isLoading || courts.isLoading}
+            isError={calendarReservations.isError || availability.isError || courts.isError}
+            onFreeSlotClick={setSelectedFreeSlot}
+            onReservationClick={(slot: ReservationCalendarSlot) => setSelectedReservation(slot.reservation)}
+          />
         )}
       </Stack>
 
@@ -501,6 +564,78 @@ export default function ComplexReservationsPage() {
           <Button variant="contained" onClick={handleStatusSubmit} disabled={updateStatus.isPending}>
             {t('admin.reservations.updateButton')}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={Boolean(selectedFreeSlot)} onClose={() => setSelectedFreeSlot(null)} fullWidth maxWidth="sm">
+        <DialogTitle>{t('admin.reservations.slotDetailsTitle')}</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Typography>
+              {t('admin.reservations.courtHeader')}: {selectedFreeSlot?.courtName}
+            </Typography>
+            <Typography>
+              {t('admin.reservations.dateTimeHeader')}:{' '}
+              {selectedFreeSlot && formatDateTimeRange(selectedFreeSlot.startAt, selectedFreeSlot.endAt)}
+            </Typography>
+            <Chip label={t('admin.reservations.legendFree')} color="success" size="small" />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSelectedFreeSlot(null)}>{t('common.close')}</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={Boolean(selectedReservation)} onClose={() => setSelectedReservation(null)} fullWidth maxWidth="sm">
+        <DialogTitle>{t('admin.reservations.reservationDetailsTitle')}</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Typography>
+              {t('admin.reservations.courtHeader')}: {selectedReservation?.courtName}
+            </Typography>
+            <Typography>
+              {t('admin.reservations.userHeader')}: {selectedReservation?.userName}
+            </Typography>
+            <Typography>
+              {t('admin.reservations.dateTimeHeader')}:{' '}
+              {selectedReservation && formatDateTimeRange(selectedReservation.startAt, selectedReservation.endAt)}
+            </Typography>
+            {selectedReservation && (
+              <Chip
+                label={statusOptions.find((s) => s.value === selectedReservation.status)?.label ?? selectedReservation.status}
+                color={getReservationStatusColor(selectedReservation.status)}
+                size="small"
+              />
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSelectedReservation(null)}>{t('common.close')}</Button>
+          {selectedReservation && (
+            <>
+              <Button
+                variant="outlined"
+                disabled={isActionsDisabled(selectedReservation.status) || cancelReservation.isPending}
+                onClick={() => {
+                  setSelectedReservation(null);
+                  setCancelDialog({ open: true, reservation: selectedReservation });
+                }}
+              >
+                {t('admin.reservations.cancel')}
+              </Button>
+              <Button
+                variant="outlined"
+                disabled={isActionsDisabled(selectedReservation.status) || updateStatus.isPending}
+                onClick={() => {
+                  setSelectedReservation(null);
+                  setSelectedStatus('Completed');
+                  setStatusDialog({ open: true, reservation: selectedReservation });
+                }}
+              >
+                {t('admin.reservations.markStatus')}
+              </Button>
+            </>
+          )}
         </DialogActions>
       </Dialog>
     </Container>

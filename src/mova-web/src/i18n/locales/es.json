@@ -336,7 +336,15 @@
       "updateDialogTitle": "Actualizar estado de la reserva",
       "updateButton": "Actualizar",
       "endTimeError": "La hora de fin debe ser posterior a la hora de inicio.",
-      "notesLabel": "Notas"
+      "notesLabel": "Notas",
+      "listView": "Lista",
+      "calendarView": "Calendario",
+      "viewLabel": "Vista de reservas",
+      "legendTitle": "Leyenda",
+      "legendFree": "Libre",
+      "calendarEmpty": "No hay franjas horarias para mostrar en la fecha seleccionada.",
+      "slotDetailsTitle": "Detalles del turno",
+      "reservationDetailsTitle": "Detalles de la reserva"
     },
     "profile": {
       "title": "Editar perfil del complejo",

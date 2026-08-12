@@ -336,7 +336,15 @@
       "updateDialogTitle": "Update reservation status",
       "updateButton": "Update",
       "endTimeError": "End time must be after start time.",
-      "notesLabel": "Notes"
+      "notesLabel": "Notes",
+      "listView": "List",
+      "calendarView": "Calendar",
+      "viewLabel": "Reservation view",
+      "legendTitle": "Legend",
+      "legendFree": "Free",
+      "calendarEmpty": "No slots to display for the selected date.",
+      "slotDetailsTitle": "Slot details",
+      "reservationDetailsTitle": "Reservation details"
     },
     "profile": {
       "title": "Edit complex profile",

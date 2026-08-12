@@ -9,10 +9,12 @@ import {
   useReservations,
   useUpdateReservationStatus
 } from '../features/reservations/reservationApi';
+import { useCourtAvailabilityForCourts } from '../features/reservations/reservationCalendarApi';
 import { renderWithAuth } from '../test-utils';
 
 vi.mock('../features/reservations/reservationApi');
 vi.mock('../features/courts/courtApi');
+vi.mock('../features/reservations/reservationCalendarApi');
 
 const mockCourts = {
   items: [
@@ -106,6 +108,12 @@ describe('ComplexReservationsPage', () => {
       isPending: false,
       error: null
     } as unknown as ReturnType<typeof useUpdateReservationStatus>);
+
+    vi.mocked(useCourtAvailabilityForCourts).mockReturnValue({
+      data: {},
+      isLoading: false,
+      isError: false
+    } as unknown as ReturnType<typeof useCourtAvailabilityForCourts>);
   }
 
   it('renders the reservations list with details and actions', async () => {
@@ -169,5 +177,36 @@ describe('ComplexReservationsPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
     expect(createMutate).not.toHaveBeenCalled();
+  });
+
+  it('switches to the calendar view and preserves the date and court filter', async () => {
+    setupMocks();
+
+    renderWithAuth(
+      <Routes>
+        <Route path="/admin/complex/:complexId/reservations" element={<ComplexReservationsPage />} />
+      </Routes>,
+      { initialRoute: '/admin/complex/complex-1/reservations' }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Reservations' })).toBeTruthy();
+    });
+
+    const dateInputBefore = screen.getByLabelText('Date') as HTMLInputElement;
+    const previousDate = dateInputBefore.value;
+
+    fireEvent.click(screen.getByRole('button', { name: 'Calendar' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Legend:')).toBeTruthy();
+    });
+
+    expect(screen.getByText('Court One')).toBeTruthy();
+    expect(screen.getByText('Test User')).toBeTruthy();
+
+    const dateInputAfter = screen.getByLabelText('Date') as HTMLInputElement;
+    expect(dateInputAfter.value).toBe(previousDate);
+    expect(screen.getByLabelText('Court')).toBeTruthy();
   });
 });

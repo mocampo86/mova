@@ -31,6 +31,7 @@ export interface ReservationListFilters {
   courtId: string;
   status: ReservationStatus | 'All';
   date: string;
+  sort?: string;
 }
 
 export interface UserReservationsFilters {
