@@ -85,14 +85,14 @@ function TimeAxis({ dayStart, totalMinutes }: { dayStart: Date | null; totalMinu
     <Box
       sx={{
         position: 'relative',
-        minWidth: 60,
+        minWidth: 90,
         height: totalMinutes * PIXELS_PER_MINUTE,
         flex: '0 0 auto',
         mt: HOUR_LABEL_HEIGHT
       }}
     >
       {labels.map((time, index) => {
-        const top = ((time.getTime() - dayStart.getTime()) / (60 * 1000)) * PIXELS_PER_MINUTE;
+        const top = ((time.getTime() - dayStart.getTime()) / (60 * 1000)) * PIXELS_PER_MINUTE + 2;
         return (
           <Typography
             key={index}
@@ -100,11 +100,11 @@ function TimeAxis({ dayStart, totalMinutes }: { dayStart: Date | null; totalMinu
             sx={{
               position: 'absolute',
               top,
-              right: 8,
-              transform: 'translateY(-50%)',
+              right: 12,
               color: 'text.secondary',
               lineHeight: 1,
-              fontVariantNumeric: 'tabular-nums'
+              fontVariantNumeric: 'tabular-nums',
+              whiteSpace: 'nowrap'
             }}
           >
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
