@@ -56,5 +56,6 @@ Allow users to make, view, and cancel reservations, while administrators can man
 - `Reservation` entity: `Id`, `SportsComplexId`, `CourtId`, `UserId`, `StartAt`, `EndAt`, `Status`, `Source`, `RecurringReservationId`, `Notes`, `CreatedAt`, `CancelledAt`, `CancellationReason`, `CancelledByUserId`.
 - Status values: `Pending`, `Confirmed`, `CancelledByUser`, `CancelledByAdmin`, `Completed`, `NoShow`.
 - For the MVP, reservations made by users are auto-confirmed.
-- Cancellation policy is global or per-complex; it has a minimum number of hours before the slot and an `AllowUserCancellation` flag to disable user cancellations.
+- User cancellation policy is configured per complex through US-075. `MinimumHours` defines the minimum notice required and `AllowUserCancellation` can disable user self-cancellation. The global `CancellationPolicy` configuration is the fallback when a complex has no explicit policy.
+- Administrative cancellation is not governed by the user cancellation deadline.
 - Concurrency protection: serializable transaction or advisory lock per `(CourtId, StartAt)`.

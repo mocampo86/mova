@@ -34,21 +34,23 @@ To satisfy the additional requirement of tracking the actor, we added a new null
 
 A new `CancelledByUser` navigation property and foreign key relationship to `Users` were also added.
 
-User cancellations are additionally governed by a configurable `ICancellationPolicy`. The default implementation reads from the `CancellationPolicy` configuration section, which contains:
+User cancellations are additionally governed by a complex-scoped `ICancellationPolicy`. The policy is configured by a complex administrator through US-075. Complexes without an explicit saved policy use the global `CancellationPolicy` configuration section as fallback, which contains:
 
 - `MinimumHours` — how far in advance of the slot start a user can cancel.
-- `AllowUserCancellation` — a global switch to disable user self-cancellation entirely.
+- `AllowUserCancellation` — a switch to disable user self-cancellation for the complex.
 
 Cancellation logic is implemented in the domain entity (`Reservation.Cancel`) and is invoked by dedicated handlers:
 
-- `CancelMyReservationHandler` for users, which enforces the configured cancellation policy.
+- `CancelMyReservationHandler` for users, which resolves and enforces the configured policy for the reservation's complex.
 - `CancelReservationHandler` for administrators, which does not enforce the user deadline.
+
+The administrative cancellation policy is intentionally separate: administrators authorized for a complex may cancel its reservations without applying `MinimumHours` or `AllowUserCancellation`.
 
 ## Consequences
 
 ### Positive
 
-- No new table or migration is required beyond the new `CancelledByUserId` column.
+- The policy configuration requires complex-scoped persistence and a migration when implemented; this is separate from the soft-cancellation storage decision.
 - All existing reservation queries can continue to use the `Reservations` table.
 - Availability/conflict detection naturally excludes cancelled rows by filtering on `Status`.
 - History, dashboard, and reporting can include cancelled reservations without joins to a separate table.

@@ -20,6 +20,7 @@ Provide complex administrators with a centralized, self-contained dashboard wher
   - Court list, creation, editing, status toggle, sports assignment, and availability
   - Reservation list, manual creation, cancellation, and status updates
   - User search and block management
+  - Complex configuration, initially limited to cancellation policy
 
 ## User stories
 
@@ -35,6 +36,7 @@ Provide complex administrators with a centralized, self-contained dashboard wher
 | [US-069](US-069.md) | As a complex administrator, I want to configure a court's sports, availability rules, and slot duration from the admin panel. |
 | [US-070](US-070.md) | As a complex administrator, I want to view and manage all reservations of my complex from the admin panel. |
 | [US-071](US-071.md) | As a complex administrator, I want to search users of my complex and manage blocks from the admin panel. |
+| [US-075](US-075.md) | As a complex administrator, I want to configure my complex's cancellation policy from the admin panel. |
 
 ## Acceptance criteria
 

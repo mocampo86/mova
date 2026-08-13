@@ -20,8 +20,10 @@
 
 ### Cancellation
 
-- Cancellation policy is configurable per complex; the MVP may use a global default.
-- A minimum number of hours before the slot is required for user cancellation.
+- User cancellation policy is configurable per complex through the admin panel.
+- The global `CancellationPolicy` configuration (`MinimumHours = 24`, `AllowUserCancellation = true`) is the fallback for complexes without explicit settings.
+- `MinimumHours` defines the minimum notice required for user cancellation.
+- `AllowUserCancellation = false` disables user self-cancellation in that complex.
 - Administrators can cancel reservations without the same time restriction.
 - Every cancellation records actor, timestamp, previous status, and optional reason.
 
