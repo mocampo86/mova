@@ -41,6 +41,7 @@ All API errors use the following JSON envelope:
 | `COURT_BLOCK_CONFLICT` | 409 | Time range overlaps with a court block |
 | `CONCURRENCY_ERROR` | 409 | Optimistic concurrency conflict |
 | `RECURRING_CONFLICT` | 409 | One or more occurrences conflict with existing reservations |
+| `CANCELLATION_DEADLINE_PASSED` | 409 | User cancellation is not allowed after the configured minimum notice period |
 | `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
 | `INTERNAL_SERVER_ERROR` | 500 | Unexpected server error |
 

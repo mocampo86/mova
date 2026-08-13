@@ -160,6 +160,41 @@ export function useCreateMyReservation(complexId: string) {
   });
 }
 
+export async function cancelMyReservation(
+  reservationId: string,
+  request: CancelReservationRequest,
+  accessToken: string
+): Promise<Reservation> {
+  return apiClient<Reservation>(
+    `/api/v1/users/me/reservations/${reservationId}/cancel`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useCancelMyReservation() {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<Reservation, Error, { reservationId: string; request: CancelReservationRequest }>({
+    mutationFn: async ({ reservationId, request }) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to cancel a reservation.');
+      }
+
+      return cancelMyReservation(reservationId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-reservations'] });
+      queryClient.invalidateQueries({ queryKey: ['my-reservation-history'] });
+      queryClient.invalidateQueries({ queryKey: ['court-availability'] });
+    }
+  });
+}
+
 export async function cancelReservation(
   complexId: string,
   reservationId: string,
@@ -191,6 +226,7 @@ export function useCancelReservation(complexId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reservations', complexId] });
       queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['court-availability', complexId] });
     }
   });
 }
@@ -226,6 +262,7 @@ export function useUpdateReservationStatus(complexId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reservations', complexId] });
       queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['court-availability', complexId] });
     }
   });
 }

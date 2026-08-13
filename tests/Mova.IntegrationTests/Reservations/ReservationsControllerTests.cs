@@ -189,7 +189,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
             var otherUsers = Reservation.Create(complex.Id, court.Id, otherUser.User.Id, soonerStart.AddHours(2), soonerStart.AddHours(3), ReservationSource.Web);
             otherUsers.Confirm();
             var cancelled = Reservation.Create(complex.Id, court.Id, login.User.Id, soonerStart.AddHours(4), soonerStart.AddHours(5), ReservationSource.Web);
-            cancelled.Cancel("No longer needed");
+            cancelled.Cancel(login.User.Id, false, "No longer needed");
 
             await context.Reservations.AddRangeAsync(past, later, sooner, otherUsers, cancelled);
             await context.SaveChangesAsync();
@@ -264,7 +264,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
 
             var cancelled = Reservation.Create(complex.Id, court.Id, login.User.Id, futureStart.AddHours(2), futureStart.AddHours(3), ReservationSource.Web);
             cancelled.Confirm();
-            cancelled.Cancel("No longer needed");
+            cancelled.Cancel(login.User.Id, false, "No longer needed");
             cancelledId = cancelled.Id;
 
             var upcoming = Reservation.Create(complex.Id, court.Id, login.User.Id, futureStart.AddHours(4), futureStart.AddHours(5), ReservationSource.Web);
@@ -285,6 +285,96 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         Assert.Equal(3, result.TotalItems);
         Assert.Equal([cancelledId, completedId, pastId], result.Items.Select(r => r.Id));
         Assert.All(result.Items, reservation => Assert.Equal(login.User.Id, reservation.UserId));
+    }
+
+    [Fact]
+    public async Task CancelMyReservation_WithinPolicyWindow_ReturnsCancelledByUser()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"cancel-user-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var start = DateTime.UtcNow.AddDays(2);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(created);
+
+        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/users/me/reservations/{created.Id}/cancel", new CancelReservationRequest { Reason = "Changed plans" });
+
+        Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+        var result = await cancelResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(result);
+        Assert.Equal("CancelledByUser", result.Status);
+        Assert.Equal("Changed plans", result.CancellationReason);
+        Assert.Equal(login.User.Id, result.CancelledByUserId);
+    }
+
+    [Fact]
+    public async Task CancelMyReservation_AfterDeadline_ReturnsConflict()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"cancel-late-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var start = DateTime.UtcNow.AddHours(1);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(created);
+
+        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/users/me/reservations/{created.Id}/cancel", new CancelReservationRequest());
+
+        Assert.Equal(HttpStatusCode.Conflict, cancelResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Cancel_AsAdmin_ReturnsCancelledByAdmin()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"cancel-admin-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var start = DateTime.UtcNow.AddDays(1);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(created);
+
+        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/{created.Id}/cancel", new CancelReservationRequest { Reason = "No show" });
+
+        Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+        var result = await cancelResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(result);
+        Assert.Equal("CancelledByAdmin", result.Status);
+        Assert.Equal("No show", result.CancellationReason);
     }
 
     private static async Task<string> LoginAsync(HttpClient client, string suffix)

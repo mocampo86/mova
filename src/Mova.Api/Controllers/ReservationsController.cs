@@ -21,12 +21,14 @@ public sealed class ReservationsController(
     IGetMyReservationHistoryHandler getMyHistoryHandler,
     IGetReservationByIdHandler getByIdHandler,
     ICancelReservationHandler cancelHandler,
+    ICancelMyReservationHandler cancelMyHandler,
     IUpdateReservationStatusHandler updateStatusHandler,
     FluentValidation.IValidator<CreateReservationCommand> createValidator,
     FluentValidation.IValidator<GetReservationsByComplexQuery> listValidator,
     FluentValidation.IValidator<GetMyUpcomingReservationsQuery> myUpcomingValidator,
     FluentValidation.IValidator<GetMyReservationHistoryQuery> myHistoryValidator,
     FluentValidation.IValidator<CancelReservationCommand> cancelValidator,
+    FluentValidation.IValidator<CancelMyReservationCommand> cancelMyValidator,
     FluentValidation.IValidator<UpdateReservationStatusCommand> updateStatusValidator) : ControllerBase
 {
     [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
@@ -119,6 +121,29 @@ public sealed class ReservationsController(
         await myHistoryValidator.ValidateAndThrowAsync(query, cancellationToken);
 
         var result = await getMyHistoryHandler.HandleAsync(query, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPatch("~/api/v1/users/me/reservations/{id:guid}/cancel")]
+    [Authorize(Policy = AuthorizationPolicies.User)]
+    public async Task<ActionResult<ReservationInfo>> CancelMyReservation(Guid id, [FromBody] CancelReservationRequest request, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var command = new CancelMyReservationCommand(id, userId, request.Reason);
+        await cancelMyValidator.ValidateAndThrowAsync(command, cancellationToken);
+
+        var result = await cancelMyHandler.HandleAsync(command, cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+
         return Ok(result);
     }
 

@@ -16,7 +16,7 @@ public sealed class CancelReservationHandler(IReservationRepository reservations
             throw new NotFoundException("Reservation not found.");
         }
 
-        reservation.Cancel(command.Reason, cancelledByAdmin: true);
+        reservation.Cancel(command.CancelledByUserId, true, command.Reason);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return ReservationMapper.ToInfo(reservation);

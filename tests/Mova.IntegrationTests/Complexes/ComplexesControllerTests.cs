@@ -450,7 +450,7 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
         var confirmed2 = Reservation.Create(complexId, activeCourt.Id, player.Id, start.AddHours(12), start.AddHours(13), ReservationSource.Web);
         confirmed2.Confirm();
         var cancelled = Reservation.Create(complexId, activeCourt.Id, player.Id, start.AddHours(14), start.AddHours(15), ReservationSource.Web);
-        cancelled.Cancel();
+        cancelled.Cancel(player.Id);
         var completed = Reservation.Create(complexId, activeCourt.Id, player.Id, start.AddHours(16), start.AddHours(17), ReservationSource.Web);
         completed.Confirm();
         context.Entry(completed).Property(r => r.Status).CurrentValue = ReservationStatus.Completed;

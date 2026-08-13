@@ -108,7 +108,7 @@ describe('buildCourtCalendarColumn', () => {
     expect(column.slots[2].type).toBe('free');
   });
 
-  it('subtracts cancelled reservations from free slots so they do not overlap', () => {
+  it('excludes cancelled reservations so the time slot is shown as free', () => {
     const cancelledReservation = createReservation({
       id: 'reservation-2',
       startAt: '2026-08-10T15:00:00Z',
@@ -123,8 +123,8 @@ describe('buildCourtCalendarColumn', () => {
       (slot) => slot.type === 'free' && slot.startAt === cancelledReservation.startAt
     );
 
-    expect(reservedSlot).toBeTruthy();
-    expect(freeAtSameTime).toBeFalsy();
+    expect(reservedSlot).toBeFalsy();
+    expect(freeAtSameTime).toBeTruthy();
   });
 
   it('returns an empty column when there are no slots', () => {

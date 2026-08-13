@@ -23,6 +23,8 @@ export interface Reservation {
   createdAt: string;
   cancelledAt?: string | null;
   cancellationReason?: string | null;
+  cancelledByUserId?: string | null;
+  cancelledByUserName?: string | null;
 }
 
 export interface ReservationListFilters {

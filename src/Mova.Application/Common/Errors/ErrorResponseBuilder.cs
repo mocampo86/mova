@@ -42,6 +42,12 @@ public static class ErrorResponseBuilder
                 message = exception.Message;
                 break;
 
+            case CancellationDeadlineExceededException:
+                statusCode = 409;
+                code = "CANCELLATION_DEADLINE_PASSED";
+                message = exception.Message;
+                break;
+
             case ConflictException:
                 statusCode = 409;
                 code = "CONFLICT";

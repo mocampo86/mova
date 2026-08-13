@@ -146,6 +146,7 @@ CREATE TABLE Reservations (
     UpdatedAt TIMESTAMPTZ,
     CancelledAt TIMESTAMPTZ,
     CancellationReason TEXT,
+    CancelledByUserId UUID REFERENCES Users(Id),
     CONSTRAINT chk_reservation_time CHECK (StartAt < EndAt)
 );
 ```
@@ -233,6 +234,7 @@ ON CourtBlocks (CourtId, StartAt, EndAt);
 
 -- Lookup by user
 CREATE INDEX IX_Reservations_UserId ON Reservations (UserId);
+CREATE INDEX IX_Reservations_CancelledByUserId ON Reservations (CancelledByUserId);
 CREATE INDEX IX_Users_GoogleSubjectId ON Users (GoogleSubjectId);
 CREATE INDEX IX_Users_Email ON Users (Email);
 

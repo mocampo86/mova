@@ -5,9 +5,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthContext } from '../auth/AuthContext';
 import type { AuthState } from '../auth/authTypes';
 import {
+  cancelMyReservation,
   cancelReservation,
   createReservation,
   updateReservationStatus,
+  useCancelMyReservation,
   useCancelReservation,
   useCreateReservation,
   useMyReservationHistory,
@@ -270,6 +272,81 @@ describe('cancelReservation', () => {
       expect.objectContaining({
         method: 'PATCH',
         body: JSON.stringify({ reason: 'No show' })
+      })
+    );
+
+    fetchSpy.mockRestore();
+  });
+});
+
+describe('useCancelMyReservation', () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: 'reservation-1',
+          status: 'CancelledByUser'
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+  });
+
+  afterEach(() => {
+    fetchSpy.mockRestore();
+  });
+
+  it('sends a PATCH request to the user cancel endpoint', async () => {
+    const { result } = renderHook(() => useCancelMyReservation(), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => expect(result.current.mutateAsync).toBeTruthy());
+
+    await result.current.mutateAsync({
+      reservationId: 'reservation-1',
+      request: { reason: 'Changed plans' }
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/users/me/reservations/reservation-1/cancel'),
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ reason: 'Changed plans' })
+      })
+    );
+  });
+});
+
+describe('cancelMyReservation', () => {
+  it('sends a PATCH request to the user cancel endpoint', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: 'reservation-1',
+          status: 'CancelledByUser'
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+
+    await cancelMyReservation('reservation-1', { reason: 'Changed plans' }, 'token');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/users/me/reservations/reservation-1/cancel'),
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ reason: 'Changed plans' })
       })
     );
 

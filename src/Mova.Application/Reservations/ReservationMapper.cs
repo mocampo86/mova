@@ -21,6 +21,8 @@ public static class ReservationMapper
         CreatedAt = reservation.CreatedAt,
         UpdatedAt = reservation.UpdatedAt,
         CancelledAt = reservation.CancelledAt,
-        CancellationReason = reservation.CancellationReason
+        CancellationReason = reservation.CancellationReason,
+        CancelledByUserId = reservation.CancelledByUserId,
+        CancelledByUserName = reservation.CancelledByUser?.FullName ?? string.Empty
     };
 }

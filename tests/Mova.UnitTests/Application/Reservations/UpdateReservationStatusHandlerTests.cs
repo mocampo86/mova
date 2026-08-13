@@ -70,7 +70,7 @@ public sealed class UpdateReservationStatusHandlerTests
             new DateTime(2026, 8, 10, 14, 0, 0, DateTimeKind.Utc),
             new DateTime(2026, 8, 10, 15, 0, 0, DateTimeKind.Utc),
             ReservationSource.Web);
-        reservation.Cancel("Reason", cancelledByAdmin: true);
+        reservation.Cancel(Guid.NewGuid(), true, "Reason");
         await _reservationRepository.AddAsync(reservation);
 
         var handler = CreateHandler();

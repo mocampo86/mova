@@ -44,13 +44,20 @@ GET    /api/v1/complexes/{complexId}/courts/{courtId}/availability
 PUT    /api/v1/complexes/{complexId}/business-hours
 GET    /api/v1/complexes/{complexId}/business-hours
 
-POST   /api/v1/reservations
-GET    /api/v1/reservations/{id}
-GET    /api/v1/users/me/reservations
 GET    /api/v1/complexes/{complexId}/reservations
+GET    /api/v1/complexes/{complexId}/reservations/{id}
+POST   /api/v1/complexes/{complexId}/reservations
+POST   /api/v1/complexes/{complexId}/reservations/me
+PATCH  /api/v1/complexes/{complexId}/reservations/{id}/cancel
+PATCH  /api/v1/complexes/{complexId}/reservations/{id}/status
+
+GET    /api/v1/users/me/reservations
+GET    /api/v1/users/me/reservations/history
+PATCH  /api/v1/users/me/reservations/{id}/cancel
+
 GET    /api/v1/complexes/{complexId}/users
 GET    /api/v1/complexes/{complexId}/users/{userId}/reservations
-PATCH  /api/v1/reservations/{id}/cancel
+
 POST   /api/v1/recurring-reservations
 PATCH  /api/v1/recurring-reservations/{id}/cancel
 
@@ -65,7 +72,7 @@ POST   /api/v1/complexes/{complexId}/court-blocks
 ### Create reservation
 
 ```http
-POST /api/v1/reservations HTTP/1.1
+POST /api/v1/complexes/{complexId}/reservations/me HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer <jwt>
 Idempotency-Key: <uuid>
@@ -89,7 +96,11 @@ Idempotency-Key: <uuid>
   "status": "Confirmed",
   "source": "Web",
   "createdAt": "2026-08-01T12:00:00Z",
-  "updatedAt": "2026-08-01T12:00:00Z"
+  "updatedAt": "2026-08-01T12:00:00Z",
+  "cancelledAt": null,
+  "cancellationReason": null,
+  "cancelledByUserId": null,
+  "cancelledByUserName": null
 }
 ```
 

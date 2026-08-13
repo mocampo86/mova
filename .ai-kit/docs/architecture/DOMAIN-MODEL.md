@@ -145,6 +145,7 @@ A concrete booking of a court for a time range.
 | UpdatedAt | DateTime? | UTC |
 | CancelledAt | DateTime? | UTC |
 | CancellationReason | string? | |
+| CancelledByUserId | Guid? | Actor who performed the cancellation |
 
 ### RecurringReservation
 
@@ -240,7 +241,7 @@ Record of administrative actions.
 3. A reservation cannot overlap with a `CourtBlock` in the same court.
 4. A blocked user cannot create reservations in the blocking complex.
 5. A recurring reservation must define an end date and a maximum number of weeks.
-6. Cancellation must be allowed only before a configurable minimum notice period.
+6. Cancellation must be allowed only before a configurable minimum notice period, and can be disabled entirely.
 7. All date/time values are stored in UTC and converted to local time in the frontend.
 
 ## Future domain extensions

@@ -31,7 +31,7 @@ public sealed class GetMyUpcomingReservationsHandlerTests
         await _reservationRepository.AddAsync(sooner);
 
         var cancelled = Reservation.Create(complexId, courtId, userId, now.AddHours(2), now.AddHours(3), ReservationSource.Web);
-        cancelled.Cancel("Changed plans");
+        cancelled.Cancel(userId, false, "Changed plans");
         await _reservationRepository.AddAsync(cancelled);
 
         var handler = CreateHandler();

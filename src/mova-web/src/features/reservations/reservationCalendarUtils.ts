@@ -113,8 +113,11 @@ export function buildCourtCalendarColumn(
   freeSlots: CourtAvailabilitySlot[],
   reservations: Reservation[]
 ): CalendarCourtColumn {
-  const reservedSlots = reservations.map((reservation) => toReservationSlot(court, reservation));
-  const availableSlots = subtractIntervals(freeSlots, reservations).map((slot) => toFreeSlot(court, slot));
+  const activeReservations = reservations.filter(
+    (reservation) => reservation.status !== 'CancelledByUser' && reservation.status !== 'CancelledByAdmin'
+  );
+  const reservedSlots = activeReservations.map((reservation) => toReservationSlot(court, reservation));
+  const availableSlots = subtractIntervals(freeSlots, activeReservations).map((slot) => toFreeSlot(court, slot));
 
   return {
     court,
