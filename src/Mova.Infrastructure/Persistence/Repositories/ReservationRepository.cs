@@ -14,6 +14,7 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
         context.Reservations
             .Include(r => r.Court)
             .Include(r => r.User)
+            .Include(r => r.CancelledByUser)
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
     public Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default) =>
@@ -47,6 +48,7 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
         IQueryable<Reservation> query = context.Reservations
             .Include(r => r.Court)
             .Include(r => r.User)
+            .Include(r => r.CancelledByUser)
             .Where(r => r.SportsComplexId == sportsComplexId);
 
         if (courtId.HasValue)
@@ -117,6 +119,7 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
         var query = context.Reservations
             .Include(r => r.Court)
             .Include(r => r.User)
+            .Include(r => r.CancelledByUser)
             .Where(r => r.UserId == userId)
             .Where(r => r.StartAt >= from)
             .Where(r => r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Confirmed)
@@ -145,6 +148,7 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
         var query = context.Reservations
             .Include(r => r.Court)
             .Include(r => r.User)
+            .Include(r => r.CancelledByUser)
             .Where(r => r.UserId == userId)
             .Where(r => r.StartAt < from || r.Status == ReservationStatus.Completed || r.Status == ReservationStatus.CancelledByUser || r.Status == ReservationStatus.CancelledByAdmin || r.Status == ReservationStatus.NoShow)
             .OrderByDescending(r => r.StartAt);

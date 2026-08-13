@@ -29,6 +29,7 @@ Provide authenticated end users with a centralized, self-contained dashboard whe
 | ID | Story |
 |----|-------|
 | [US-072](US-072.md) | As a user, I want a dashboard home page so I can access all my features and reservations at a glance. |
+| [US-074](US-074.md) | As a user, I want to cancel an upcoming reservation from the user dashboard. |
 
 ## Acceptance criteria
 

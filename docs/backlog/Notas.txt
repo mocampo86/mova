@@ -1,7 +1,8 @@
 -Coplex:
 -La pagina del admin no permite seleccionar el idioma
+-La pagina del admin no permite cerrar sesión
+-La pagina del admin deberia tener notificaciones: ejemplo nueva reserva
 -poder abrir google maps con la ubicación del complejo
--Ver reservaciones por dia tipo calendario
 -Agregar servicios del local
 -mostrar solo horarios posteriores a la hora actual
 -Filtros por deporte, solo los que tengan al menos una cancha existente

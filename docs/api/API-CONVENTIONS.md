@@ -38,9 +38,15 @@ PATCH  /api/v1/courts/{id}
 
 GET    /api/v1/complexes/{complexId}/availability?date=2026-08-10
 
-POST   /api/v1/reservations
-GET    /api/v1/reservations/{id}
-PATCH  /api/v1/reservations/{id}/cancel
+POST   /api/v1/complexes/{complexId}/reservations
+GET    /api/v1/complexes/{complexId}/reservations
+GET    /api/v1/complexes/{complexId}/reservations/{id}
+PATCH  /api/v1/complexes/{complexId}/reservations/{id}/cancel
+PATCH  /api/v1/complexes/{complexId}/reservations/{id}/status
+
+GET    /api/v1/users/me/reservations
+GET    /api/v1/users/me/reservations/history
+PATCH  /api/v1/users/me/reservations/{id}/cancel
 
 POST   /api/v1/complexes/{complexId}/court-blocks
 DELETE /api/v1/complexes/{complexId}/court-blocks/{id}

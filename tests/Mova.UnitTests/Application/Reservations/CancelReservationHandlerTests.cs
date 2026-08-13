@@ -28,16 +28,18 @@ public sealed class CancelReservationHandlerTests
             ReservationSource.Web);
         await _reservationRepository.AddAsync(reservation);
 
+        var actorId = Guid.NewGuid();
         var handler = CreateHandler();
         var result = await handler.HandleAsync(new CancelReservationCommand(
             reservation.SportsComplexId,
             reservation.Id,
-            Guid.NewGuid(),
+            actorId,
             "No show"));
 
         Assert.NotNull(result);
         Assert.Equal("CancelledByAdmin", result.Status);
         Assert.Equal("No show", result.CancellationReason);
+        Assert.Equal(actorId, result.CancelledByUserId);
     }
 
     [Fact]

@@ -86,7 +86,7 @@ public class GetComplexDashboardHandlerTests
         }
         else if (status is ReservationStatus.CancelledByUser or ReservationStatus.CancelledByAdmin)
         {
-            reservation.Cancel();
+            reservation.Cancel(Guid.NewGuid());
         }
         else if (status == ReservationStatus.Completed)
         {

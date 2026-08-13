@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Npgsql;
 using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
+using Mova.Application.Abstractions.Policies;
 using Mova.Application.Health;
 using Mova.Infrastructure.Authentication;
 using Mova.Infrastructure.Authentication.Options;
@@ -14,6 +15,7 @@ using Mova.Infrastructure.Data;
 using Mova.Infrastructure.HealthChecks;
 using Mova.Infrastructure.Persistence;
 using Mova.Infrastructure.Persistence.Repositories;
+using Mova.Infrastructure.Reservations;
 
 namespace Mova.Infrastructure;
 
@@ -64,6 +66,12 @@ public static class DependencyInjection
 
         services.AddOptions<GoogleAuthOptions>()
             .BindConfiguration(GoogleAuthOptions.SectionName);
+
+        services.AddOptions<CancellationPolicyOptions>()
+            .BindConfiguration(CancellationPolicyOptions.SectionName)
+            .Validate(options => options.MinimumHours >= 0, "CancellationPolicy:MinimumHours must be greater than or equal to 0.");
+
+        services.AddScoped<ICancellationPolicy, ConfigurationCancellationPolicy>();
 
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();

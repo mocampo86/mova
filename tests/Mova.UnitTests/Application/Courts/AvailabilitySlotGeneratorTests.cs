@@ -95,7 +95,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(12), 60, true);
         var businessHours = BusinessHours.Create(complexId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
         var reservation = Reservation.Create(complexId, courtId, userId, new DateTime(2026, 8, 10, 9, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc), ReservationSource.Web);
-        reservation.Cancel();
+        reservation.Cancel(userId);
 
         var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [reservation], []);
 

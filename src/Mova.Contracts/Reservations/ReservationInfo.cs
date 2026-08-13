@@ -48,4 +48,10 @@ public sealed class ReservationInfo
 
     [JsonPropertyName("cancellationReason")]
     public string? CancellationReason { get; set; }
+
+    [JsonPropertyName("cancelledByUserId")]
+    public Guid? CancelledByUserId { get; set; }
+
+    [JsonPropertyName("cancelledByUserName")]
+    public string CancelledByUserName { get; set; } = string.Empty;
 }

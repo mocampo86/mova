@@ -18,10 +18,13 @@ public sealed class Reservation
     public DateTime? UpdatedAt { get; private set; }
     public DateTime? CancelledAt { get; private set; }
     public string? CancellationReason { get; private set; }
+    public Guid? CancelledByUserId { get; private set; }
 
     public Court? Court { get; private set; }
 
     public User? User { get; private set; }
+
+    public User? CancelledByUser { get; private set; }
 
     private Reservation()
     {
@@ -70,18 +73,24 @@ public sealed class Reservation
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Cancel(string? reason = null, bool cancelledByAdmin = false)
+    public void Cancel(Guid cancelledByUserId, bool cancelledByAdmin = false, string? reason = null)
     {
+        if (cancelledByUserId == Guid.Empty)
+        {
+            throw new ArgumentException("CancelledByUserId cannot be empty.", nameof(cancelledByUserId));
+        }
+
         if (Status is ReservationStatus.CancelledByUser or ReservationStatus.CancelledByAdmin)
         {
             return;
         }
 
-        Status = cancelledByAdmin || DateTime.UtcNow > StartAt
+        Status = cancelledByAdmin
             ? ReservationStatus.CancelledByAdmin
             : ReservationStatus.CancelledByUser;
         CancellationReason = reason;
         CancelledAt = DateTime.UtcNow;
+        CancelledByUserId = cancelledByUserId;
         UpdatedAt = DateTime.UtcNow;
     }
 

@@ -32,7 +32,6 @@ function CalendarLegend({ t }: { t: (key: string) => string }) {
     { label: t('admin.reservations.legendFree'), color: 'success.main' },
     { label: t('status.confirmed'), color: 'primary.main' },
     { label: t('status.pending'), color: 'warning.main' },
-    { label: t('status.cancelledByUser'), color: 'error.main' },
     { label: t('status.completed'), color: 'info.main' },
     { label: t('status.noShow'), color: 'grey.500' }
   ];
