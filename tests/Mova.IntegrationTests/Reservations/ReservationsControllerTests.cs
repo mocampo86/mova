@@ -377,6 +377,36 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         Assert.Equal("No show", result.CancellationReason);
     }
 
+    [Fact]
+    public async Task Cancel_AsAdmin_ForCompletedReservation_ReturnsConflict()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"cancel-admin-completed-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var start = DateTime.UtcNow.AddDays(1);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(created);
+
+        var completeResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/{created.Id}/status", new UpdateReservationStatusRequest { Status = "Completed" });
+        Assert.Equal(HttpStatusCode.OK, completeResponse.StatusCode);
+
+        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/{created.Id}/cancel", new CancelReservationRequest { Reason = "No show" });
+
+        Assert.Equal(HttpStatusCode.Conflict, cancelResponse.StatusCode);
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         return (await LoginWithUserAsync(client, suffix)).AccessToken;
