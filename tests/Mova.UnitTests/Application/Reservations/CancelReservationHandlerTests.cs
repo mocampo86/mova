@@ -74,4 +74,55 @@ public sealed class CancelReservationHandlerTests
             Guid.NewGuid(),
             null)));
     }
+
+    [Fact]
+    public async Task HandleAsync_WithCompletedReservation_ThrowsConflictException()
+    {
+        var reservation = Reservation.Create(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new DateTime(2026, 8, 10, 14, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 8, 10, 15, 0, 0, DateTimeKind.Utc),
+            ReservationSource.Web);
+        reservation.Confirm();
+        reservation.MarkCompleted();
+        await _reservationRepository.AddAsync(reservation);
+
+        var handler = CreateHandler();
+
+        await Assert.ThrowsAsync<ConflictException>(() => handler.HandleAsync(new CancelReservationCommand(
+            reservation.SportsComplexId,
+            reservation.Id,
+            Guid.NewGuid(),
+            "No show")));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithCancelledByAdminReservation_IsIdempotent()
+    {
+        var reservation = Reservation.Create(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new DateTime(2026, 8, 10, 14, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 8, 10, 15, 0, 0, DateTimeKind.Utc),
+            ReservationSource.Web);
+
+        var actorId = Guid.NewGuid();
+        reservation.Cancel(actorId, true, "No show");
+        await _reservationRepository.AddAsync(reservation);
+
+        var handler = CreateHandler();
+        var result = await handler.HandleAsync(new CancelReservationCommand(
+            reservation.SportsComplexId,
+            reservation.Id,
+            actorId,
+            "No show"));
+
+        Assert.NotNull(result);
+        Assert.Equal("CancelledByAdmin", result.Status);
+        Assert.Equal("No show", result.CancellationReason);
+        Assert.Equal(actorId, result.CancelledByUserId);
+    }
 }
