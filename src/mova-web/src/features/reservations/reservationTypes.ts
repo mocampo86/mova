@@ -19,12 +19,38 @@ export interface Reservation {
   endAt: string;
   status: ReservationStatus;
   source: ReservationSource;
+  recurringReservationId?: string | null;
   notes?: string | null;
   createdAt: string;
   cancelledAt?: string | null;
   cancellationReason?: string | null;
   cancelledByUserId?: string | null;
   cancelledByUserName?: string | null;
+}
+
+export interface CreateMyRecurringReservationRequest {
+  courtId: string;
+  dayOfWeek: number;
+  startTime: string;
+  durationMinutes: number;
+  startDate: string;
+  endDate: string;
+  notes?: string;
+}
+
+export interface RecurringReservation {
+  id: string;
+  complexId: string;
+  courtId: string;
+  userId: string;
+  dayOfWeek: number;
+  startTime: string;
+  durationMinutes: number;
+  startDate: string;
+  endDate: string;
+  status: 'Active' | 'Cancelled';
+  createdAt: string;
+  occurrences: Reservation[];
 }
 
 export interface ReservationListFilters {

@@ -7,6 +7,7 @@ public interface IReservationRepository
 {
     Task<Reservation?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default);
+    Task AddRangeAsync(IEnumerable<Reservation> reservations, CancellationToken cancellationToken = default);
     Task<IReadOnlyCollection<Reservation>> GetActiveForCourtAsync(Guid courtId, DateTime start, DateTime end, CancellationToken cancellationToken = default);
     Task<(IReadOnlyList<Reservation> Items, int TotalItems)> GetByComplexIdAsync(
         Guid sportsComplexId,
@@ -36,6 +37,11 @@ public interface IReservationRepository
         DateTime start,
         DateTime end,
         Guid? excludeReservationId = null,
+        Guid? excludeRecurringReservationId = null,
+        CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Reservation>> GetFutureActiveByRecurringReservationIdAsync(
+        Guid recurringReservationId,
+        DateTime from,
         CancellationToken cancellationToken = default);
     Task<(int Confirmed, int Cancelled, int Completed)> GetTodayStatusCountsByComplexIdAsync(Guid sportsComplexId, DateTime start, DateTime end, CancellationToken cancellationToken = default);
 }

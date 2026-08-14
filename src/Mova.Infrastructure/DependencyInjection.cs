@@ -83,6 +83,7 @@ public static class DependencyInjection
         services.AddScoped<ICourtAvailabilityRuleRepository, CourtAvailabilityRuleRepository>();
         services.AddScoped<IBusinessHoursRepository, BusinessHoursRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
+        services.AddScoped<IRecurringReservationRepository, RecurringReservationRepository>();
         services.AddScoped<ICourtBlockRepository, CourtBlockRepository>();
         services.AddScoped<IBlockedUserRepository, BlockedUserRepository>();
         services.AddScoped<ICancellationPolicyRepository, CancellationPolicyRepository>();

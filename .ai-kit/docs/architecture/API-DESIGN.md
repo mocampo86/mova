@@ -58,8 +58,9 @@ PATCH  /api/v1/users/me/reservations/{id}/cancel
 GET    /api/v1/complexes/{complexId}/users
 GET    /api/v1/complexes/{complexId}/users/{userId}/reservations
 
-POST   /api/v1/recurring-reservations
-PATCH  /api/v1/recurring-reservations/{id}/cancel
+POST   /api/v1/complexes/{complexId}/recurring-reservations/me
+PATCH  /api/v1/complexes/{complexId}/recurring-reservations/{id}/cancel
+PATCH  /api/v1/complexes/{complexId}/recurring-reservations/{id}/future
 
 POST   /api/v1/complexes/{complexId}/blocked-users
 DELETE /api/v1/complexes/{complexId}/blocked-users/{id}
@@ -84,6 +85,27 @@ Idempotency-Key: <uuid>
   "notes": "Traer pelota"
 }
 ```
+
+### Create recurring reservation
+
+```http
+POST /api/v1/complexes/{complexId}/recurring-reservations/me HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer <jwt>
+Idempotency-Key: <uuid>
+
+{
+  "courtId": "...",
+  "dayOfWeek": 1,
+  "startTime": "14:00:00",
+  "durationMinutes": 60,
+  "startDate": "2026-08-10",
+  "endDate": "2026-08-31",
+  "notes": "Fixed weekly slot"
+}
+```
+
+The response contains the recurring reservation rule plus the generated confirmed `Reservation` occurrences. Each occurrence has `source = "Recurring"` and `recurringReservationId` populated.
 
 ```json
 {

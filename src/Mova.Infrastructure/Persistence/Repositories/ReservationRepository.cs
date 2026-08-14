@@ -20,6 +20,9 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
     public Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default) =>
         context.Reservations.AddAsync(reservation, cancellationToken).AsTask();
 
+    public Task AddRangeAsync(IEnumerable<Reservation> reservations, CancellationToken cancellationToken = default) =>
+        context.Reservations.AddRangeAsync(reservations, cancellationToken);
+
     public async Task<IReadOnlyCollection<Reservation>> GetActiveForCourtAsync(Guid courtId, DateTime start, DateTime end, CancellationToken cancellationToken = default)
     {
         return await context.Reservations
@@ -167,6 +170,7 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
         DateTime start,
         DateTime end,
         Guid? excludeReservationId = null,
+        Guid? excludeRecurringReservationId = null,
         CancellationToken cancellationToken = default)
     {
         var query = context.Reservations
@@ -179,7 +183,27 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
             query = query.Where(r => r.Id != excludeReservationId.Value);
         }
 
+        if (excludeRecurringReservationId.HasValue)
+        {
+            query = query.Where(r => r.RecurringReservationId != excludeRecurringReservationId.Value);
+        }
+
         return await query.AnyAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Reservation>> GetFutureActiveByRecurringReservationIdAsync(
+        Guid recurringReservationId,
+        DateTime from,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Reservations
+            .Include(r => r.Court)
+            .Include(r => r.User)
+            .Where(r => r.RecurringReservationId == recurringReservationId)
+            .Where(r => r.StartAt >= from)
+            .Where(r => r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Confirmed)
+            .OrderBy(r => r.StartAt)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<(int Confirmed, int Cancelled, int Completed)> GetTodayStatusCountsByComplexIdAsync(

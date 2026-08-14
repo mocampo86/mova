@@ -19,6 +19,12 @@ public sealed class FakeReservationRepository : IReservationRepository
         return Task.CompletedTask;
     }
 
+    public Task AddRangeAsync(IEnumerable<Reservation> reservations, CancellationToken cancellationToken = default)
+    {
+        _reservations.AddRange(reservations);
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyCollection<Reservation>> GetActiveForCourtAsync(
         Guid courtId,
         DateTime start,
@@ -165,6 +171,7 @@ public sealed class FakeReservationRepository : IReservationRepository
         DateTime start,
         DateTime end,
         Guid? excludeReservationId = null,
+        Guid? excludeRecurringReservationId = null,
         CancellationToken cancellationToken = default)
     {
         var query = _reservations
@@ -177,7 +184,27 @@ public sealed class FakeReservationRepository : IReservationRepository
             query = query.Where(r => r.Id != excludeReservationId.Value);
         }
 
+        if (excludeRecurringReservationId.HasValue)
+        {
+            query = query.Where(r => r.RecurringReservationId != excludeRecurringReservationId.Value);
+        }
+
         return Task.FromResult(query.Any());
+    }
+
+    public Task<IReadOnlyList<Reservation>> GetFutureActiveByRecurringReservationIdAsync(
+        Guid recurringReservationId,
+        DateTime from,
+        CancellationToken cancellationToken = default)
+    {
+        var result = _reservations
+            .Where(r => r.RecurringReservationId == recurringReservationId)
+            .Where(r => r.StartAt >= from)
+            .Where(r => r.Status is ReservationStatus.Pending or ReservationStatus.Confirmed)
+            .OrderBy(r => r.StartAt)
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<Reservation>>(result);
     }
 
     public Task<(int Confirmed, int Cancelled, int Completed)> GetTodayStatusCountsByComplexIdAsync(

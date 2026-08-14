@@ -17,6 +17,7 @@ public static class ReservationMapper
         EndAt = reservation.EndAt,
         Status = reservation.Status.ToString(),
         Source = reservation.Source.ToString(),
+        RecurringReservationId = reservation.RecurringReservationId,
         Notes = reservation.Notes,
         CreatedAt = reservation.CreatedAt,
         UpdatedAt = reservation.UpdatedAt,

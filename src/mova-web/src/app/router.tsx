@@ -26,6 +26,7 @@ import UnauthorizedPage from '../pages/UnauthorizedPage';
 import UserDashboardPage from '../pages/UserDashboardPage';
 import UserHistoryPage from '../pages/UserHistoryPage';
 import UserProfilePage from '../pages/UserProfilePage';
+import UserRecurringReservationsPage from '../pages/UserRecurringReservationsPage';
 import UserReservationsPage from '../pages/UserReservationsPage';
 
 export default function AppRouter() {
@@ -82,6 +83,7 @@ export default function AppRouter() {
         >
           <Route index element={<UserDashboardPage />} />
           <Route path="reservations" element={<UserReservationsPage />} />
+          <Route path="recurring" element={<UserRecurringReservationsPage />} />
           <Route path="history" element={<UserHistoryPage />} />
           <Route path="profile" element={<UserProfilePage />} />
         </Route>
