@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../services/apiClient';
 import { useAuth } from '../auth/useAuth';
-import type { BusinessHours, ComplexDashboard, Court, CourtAvailabilitySlot, PagedResult, Sport, SportsComplex, UpdateBusinessHoursRequest, UpdateComplexRequest } from './complexTypes';
+import type { BusinessHours, CancellationPolicy, ComplexDashboard, Court, CourtAvailabilitySlot, PagedResult, Sport, SportsComplex, UpdateBusinessHoursRequest, UpdateCancellationPolicyRequest, UpdateComplexRequest } from './complexTypes';
 
 export function useActiveComplexes(search: string, page = 1) {
   const params = new URLSearchParams({ page: String(page), pageSize: '12' });
@@ -132,6 +132,54 @@ export function useUpdateBusinessHours(complexId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-hours', complexId] });
+    }
+  });
+}
+
+export function useCancellationPolicy(complexId: string) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['cancellation-policy', complexId],
+    queryFn: () =>
+      apiClient<CancellationPolicy>(
+        `/api/v1/complexes/${complexId}/configuration/cancellation-policy`,
+        {},
+        accessToken ?? undefined
+      ),
+    enabled: Boolean(complexId && accessToken)
+  });
+}
+
+export async function updateCancellationPolicy(
+  complexId: string,
+  request: UpdateCancellationPolicyRequest,
+  accessToken: string
+): Promise<CancellationPolicy> {
+  return apiClient<CancellationPolicy>(
+    `/api/v1/complexes/${complexId}/configuration/cancellation-policy`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useUpdateCancellationPolicy(complexId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<CancellationPolicy, Error, UpdateCancellationPolicyRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to update the cancellation policy.');
+      }
+
+      return updateCancellationPolicy(complexId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cancellation-policy', complexId] });
     }
   });
 }

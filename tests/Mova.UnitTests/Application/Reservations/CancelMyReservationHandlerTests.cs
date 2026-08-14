@@ -1,3 +1,4 @@
+using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Abstractions.Policies;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Reservations.Commands;
@@ -17,6 +18,7 @@ public sealed class CancelMyReservationHandlerTests
 
     private CancelMyReservationHandler CreateHandler(int minimumHours = 0, bool allowUserCancellation = true) =>
         new(_reservationRepository, new FakeCancellationPolicy(minimumHours, allowUserCancellation), _unitOfWork);
+
 
     [Fact]
     public async Task HandleAsync_WithinCancellationWindow_CancelsAndSetsUserStatus()
@@ -45,7 +47,7 @@ public sealed class CancelMyReservationHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_AfterCancellationWindow_ThrowsConflictException()
+    public async Task HandleAsync_AfterCancellationWindow_ThrowsCancellationDeadlineExceededException()
     {
         var userId = Guid.NewGuid();
         var start = DateTime.UtcNow.AddHours(1);
@@ -122,7 +124,7 @@ public sealed class CancelMyReservationHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_UserCancellationDisabled_ThrowsCancellationDeadlineExceededException()
+    public async Task HandleAsync_UserCancellationDisabled_ThrowsUserCancellationDisabledException()
     {
         var userId = Guid.NewGuid();
         var start = DateTime.UtcNow.AddDays(2);
@@ -137,22 +139,9 @@ public sealed class CancelMyReservationHandlerTests
 
         var handler = CreateHandler(24, false);
 
-        await Assert.ThrowsAsync<CancellationDeadlineExceededException>(() => handler.HandleAsync(new CancelMyReservationCommand(
+        await Assert.ThrowsAsync<UserCancellationDisabledException>(() => handler.HandleAsync(new CancelMyReservationCommand(
             reservation.Id,
             userId,
             "No user cancellations allowed")));
-    }
-
-    private sealed class FakeCancellationPolicy(int minimumHours, bool allowUserCancellation) : ICancellationPolicy
-    {
-        public bool IsWithinCancellationWindow(DateTime startAt, DateTime now)
-        {
-            if (!allowUserCancellation)
-            {
-                return false;
-            }
-
-            return now <= startAt.AddHours(-minimumHours);
-        }
     }
 }

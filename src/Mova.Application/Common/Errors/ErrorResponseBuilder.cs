@@ -48,6 +48,12 @@ public static class ErrorResponseBuilder
                 message = exception.Message;
                 break;
 
+            case UserCancellationDisabledException:
+                statusCode = 409;
+                code = "USER_CANCELLATION_DISABLED";
+                message = exception.Message;
+                break;
+
             case ConflictException:
                 statusCode = 409;
                 code = "CONFLICT";

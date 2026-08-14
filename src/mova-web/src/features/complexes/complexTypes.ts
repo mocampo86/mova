@@ -101,3 +101,14 @@ export interface ComplexDashboard {
   reservationsToday: DashboardReservationsSummary;
   blockedUsers: number;
 }
+
+export interface CancellationPolicy {
+  sportsComplexId: string;
+  minimumHours: number;
+  allowUserCancellation: boolean;
+}
+
+export interface UpdateCancellationPolicyRequest {
+  minimumHours: number;
+  allowUserCancellation: boolean;
+}

@@ -394,6 +394,19 @@
       "endHeader": "End",
       "blockError": "Failed to block the user. Please try again."
     },
+    "configuration": {
+      "title": "Configuration",
+      "subtitle": "Configure the cancellation policy for this complex.",
+      "missingId": "The complex identifier is missing.",
+      "loading": "Loading configuration...",
+      "loadError": "The configuration could not be loaded. Please try again later.",
+      "success": "The cancellation policy has been updated successfully.",
+      "saveError": "The cancellation policy could not be saved. Please try again later.",
+      "minimumHours": "Minimum cancellation notice (hours)",
+      "minimumHoursHelper": "Users must cancel at least this many hours before the reservation starts.",
+      "allowUserCancellation": "Allow users to cancel their reservations",
+      "save": "Save policy"
+    },
     "placeholder": {
       "title": "Section under construction",
       "subtitle": "This admin section is not yet available."
@@ -437,6 +450,7 @@
     "courts": "Courts",
     "reservations": "Reservations",
     "users": "Users",
+    "configuration": "Configuration",
     "complexAdmin": "Complex Admin",
     "openMenu": "open menu"
   },

@@ -26,7 +26,18 @@ public sealed class CancelMyReservationHandler(
             throw new ConflictException("Only pending or confirmed reservations can be cancelled by the user.");
         }
 
-        if (!cancellationPolicy.IsWithinCancellationWindow(reservation.StartAt, DateTime.UtcNow))
+        var evaluation = await cancellationPolicy.EvaluateAsync(
+            reservation.SportsComplexId,
+            reservation.StartAt,
+            DateTime.UtcNow,
+            cancellationToken);
+
+        if (!evaluation.AllowUserCancellation)
+        {
+            throw new UserCancellationDisabledException("User cancellation is disabled for this complex.");
+        }
+
+        if (!evaluation.IsWithinWindow)
         {
             throw new CancellationDeadlineExceededException("The cancellation deadline has passed.");
         }
