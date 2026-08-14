@@ -43,7 +43,8 @@ export default function ComplexAdminLayout() {
     { label: t('nav.businessHours'), to: `/admin/complex/${complexId}/business-hours` },
     { label: t('nav.courts'), to: `/admin/complex/${complexId}/courts` },
     { label: t('nav.reservations'), to: `/admin/complex/${complexId}/reservations` },
-    { label: t('nav.users'), to: `/admin/complex/${complexId}/users` }
+    { label: t('nav.users'), to: `/admin/complex/${complexId}/users` },
+    { label: t('nav.configuration'), to: `/admin/complex/${complexId}/configuration` }
   ];
 
   const drawerContent = (

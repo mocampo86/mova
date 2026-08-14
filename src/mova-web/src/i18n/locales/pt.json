@@ -394,6 +394,19 @@
       "endHeader": "Fim",
       "blockError": "Falha ao bloquear o usuário. Tente novamente."
     },
+    "configuration": {
+      "title": "Configuração",
+      "subtitle": "Configure a política de cancelamento deste complexo.",
+      "missingId": "O identificador do complexo está ausente.",
+      "loading": "Carregando configuração...",
+      "loadError": "Não foi possível carregar a configuração. Tente novamente mais tarde.",
+      "success": "A política de cancelamento foi atualizada com sucesso.",
+      "saveError": "Não foi possível salvar a política de cancelamento. Tente novamente mais tarde.",
+      "minimumHours": "Prazo mínimo de cancelamento (horas)",
+      "minimumHoursHelper": "Os usuários devem cancelar pelo menos estas horas antes do início da reserva.",
+      "allowUserCancellation": "Permitir que os usuários cancelem suas reservas",
+      "save": "Salvar política"
+    },
     "placeholder": {
       "title": "Seção em construção",
       "subtitle": "Esta seção de administração ainda não está disponível."
@@ -437,6 +450,7 @@
     "courts": "Quadras",
     "reservations": "Reservas",
     "users": "Usuários",
+    "configuration": "Configuração",
     "complexAdmin": "Administrador do complexo",
     "openMenu": "abrir menu"
   },

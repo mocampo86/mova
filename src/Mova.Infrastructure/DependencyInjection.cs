@@ -85,6 +85,7 @@ public static class DependencyInjection
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<ICourtBlockRepository, CourtBlockRepository>();
         services.AddScoped<IBlockedUserRepository, BlockedUserRepository>();
+        services.AddScoped<ICancellationPolicyRepository, CancellationPolicyRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
