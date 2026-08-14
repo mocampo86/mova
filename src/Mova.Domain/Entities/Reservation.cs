@@ -26,6 +26,8 @@ public sealed class Reservation
 
     public User? CancelledByUser { get; private set; }
 
+    public RecurringReservation? RecurringReservation { get; private set; }
+
     private Reservation()
     {
     }

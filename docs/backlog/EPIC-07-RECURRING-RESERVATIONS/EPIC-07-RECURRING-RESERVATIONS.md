@@ -27,6 +27,7 @@ Allow complex administrators and users to create weekly recurring reservations, 
 | [US-039](US-039.md) | As a user or administrator, I want to cancel one occurrence without affecting the rest. |
 | [US-040](US-040.md) | As a user or administrator, I want to cancel the entire recurring series. |
 | [US-041](US-041.md) | As a system, I want to detect conflicts when generating recurring reservations. |
+| [US-076](US-076.md) | As a complex administrator, I want to enable or disable recurring reservations for users. |
 
 ## Acceptance criteria
 

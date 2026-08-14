@@ -53,6 +53,7 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/complete-profile` | Complete the user profile (phone number). | Authenticated users |
 | `/user` | User dashboard overview with upcoming reservations, history summary, block notifications, and entry points to discovery, bookings, and profile. | Authenticated users |
 | `/user/reservations` | List of the authenticated user's upcoming reservations. | Authenticated users |
+| `/user/recurring` | Create a weekly recurring reservation for the authenticated user. | Authenticated users |
 | `/user/history` | List of the authenticated user's reservation history. | Authenticated users |
 | `/user/profile` | View the authenticated user's profile and update the phone number. | Authenticated users |
 | `/admin/super` | Super admin dashboard. | `SuperAdmin` |

@@ -34,6 +34,9 @@ public sealed class ReservationInfo
     [JsonPropertyName("source")]
     public string Source { get; set; } = string.Empty;
 
+    [JsonPropertyName("recurringReservationId")]
+    public Guid? RecurringReservationId { get; set; }
+
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }
 

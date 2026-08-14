@@ -18,6 +18,7 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
         builder.Property(x => x.EndAt).IsRequired();
         builder.Property(x => x.Status).IsRequired().HasConversion<string>();
         builder.Property(x => x.Source).IsRequired().HasConversion<string>();
+        builder.Property(x => x.RecurringReservationId);
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.UpdatedAt);
         builder.Property(x => x.CancelledByUserId);
@@ -26,6 +27,7 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
         builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Court).WithMany().HasForeignKey(x => x.CourtId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(x => x.CancelledByUser).WithMany().HasForeignKey(x => x.CancelledByUserId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.RecurringReservation).WithMany().HasForeignKey(x => x.RecurringReservationId).OnDelete(DeleteBehavior.SetNull);
         builder.ToTable(t => t.HasCheckConstraint("chk_reservation_time", "\"StartAt\" < \"EndAt\""));
     }
 }

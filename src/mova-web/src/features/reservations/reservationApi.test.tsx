@@ -7,10 +7,12 @@ import type { AuthState } from '../auth/authTypes';
 import {
   cancelMyReservation,
   cancelReservation,
+  createMyRecurringReservation,
   createReservation,
   updateReservationStatus,
   useCancelMyReservation,
   useCancelReservation,
+  useCreateMyRecurringReservation,
   useCreateReservation,
   useMyReservationHistory,
   useMyReservations,
@@ -18,6 +20,7 @@ import {
   useUpdateReservationStatus
 } from './reservationApi';
 import type {
+  CreateMyRecurringReservationRequest,
   CreateReservationRequest,
   ReservationListFilters,
   UpdateReservationStatusRequest,
@@ -201,6 +204,114 @@ describe('createReservation', () => {
     );
 
     fetchSpy.mockRestore();
+  });
+});
+
+describe('createMyRecurringReservation', () => {
+  it('sends a POST request to the user recurring reservations endpoint', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: 'recurring-1',
+          complexId: 'complex-1',
+          courtId: 'court-1',
+          userId: 'user-1',
+          dayOfWeek: 1,
+          startTime: '14:00:00',
+          durationMinutes: 60,
+          startDate: '2026-08-10',
+          endDate: '2026-08-31',
+          status: 'Active',
+          createdAt: '2026-08-01T12:00:00Z',
+          occurrences: []
+        }),
+        {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+
+    const request: CreateMyRecurringReservationRequest = {
+      courtId: 'court-1',
+      dayOfWeek: 1,
+      startTime: '14:00:00',
+      durationMinutes: 60,
+      startDate: '2026-08-10',
+      endDate: '2026-08-31'
+    };
+
+    await createMyRecurringReservation('complex-1', request, 'token');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/complexes/complex-1/recurring-reservations/me'),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify(request)
+      })
+    );
+
+    fetchSpy.mockRestore();
+  });
+});
+
+describe('useCreateMyRecurringReservation', () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: 'recurring-1',
+          complexId: 'complex-1',
+          courtId: 'court-1',
+          userId: 'user-1',
+          dayOfWeek: 1,
+          startTime: '14:00:00',
+          durationMinutes: 60,
+          startDate: '2026-08-10',
+          endDate: '2026-08-31',
+          status: 'Active',
+          createdAt: '2026-08-01T12:00:00Z',
+          occurrences: []
+        }),
+        {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+  });
+
+  afterEach(() => {
+    fetchSpy.mockRestore();
+  });
+
+  it('creates a user recurring reservation with the given payload', async () => {
+    const request: CreateMyRecurringReservationRequest = {
+      courtId: 'court-1',
+      dayOfWeek: 1,
+      startTime: '14:00:00',
+      durationMinutes: 60,
+      startDate: '2026-08-10',
+      endDate: '2026-08-31'
+    };
+
+    const { result } = renderHook(() => useCreateMyRecurringReservation('complex-1'), {
+      wrapper: createWrapper()
+    });
+
+    await result.current.mutateAsync(request);
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/complexes/complex-1/recurring-reservations/me'),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify(request)
+      })
+    );
   });
 });
 

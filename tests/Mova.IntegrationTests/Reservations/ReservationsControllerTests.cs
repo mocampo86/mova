@@ -840,6 +840,115 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         Assert.Equal(today, DateOnly.FromDateTime(result.Items[0].StartAt));
     }
 
+    [Fact]
+    public async Task CreateMyRecurringReservation_WithValidPeriod_CreatesSeriesAndOccurrences()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"recurring-create-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var response = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        {
+            CourtId = court.Id,
+            DayOfWeek = (int)DayOfWeek.Monday,
+            StartTime = new TimeOnly(14, 0),
+            DurationMinutes = 60,
+            StartDate = new DateOnly(2026, 8, 10),
+            EndDate = new DateOnly(2026, 8, 31),
+            Notes = "Weekly match"
+        });
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<RecurringReservationInfo>();
+        Assert.NotNull(result);
+        Assert.Equal("Active", result.Status);
+        Assert.Equal(4, result.Occurrences.Count);
+        Assert.All(result.Occurrences, occurrence =>
+        {
+            Assert.Equal("Confirmed", occurrence.Status);
+            Assert.Equal("Recurring", occurrence.Source);
+            Assert.Equal(result.Id, occurrence.RecurringReservationId);
+        });
+
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+        var persistedCount = context.Reservations.Count(r => r.RecurringReservationId == result.Id);
+        Assert.Equal(4, persistedCount);
+    }
+
+    [Fact]
+    public async Task CreateMyRecurringReservation_WithOverlappingExistingOccurrence_ReturnsConflict()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"recurring-conflict-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var singleResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = new DateTime(2026, 9, 7, 14, 30, 0, DateTimeKind.Utc),
+            EndAt = new DateTime(2026, 9, 7, 15, 30, 0, DateTimeKind.Utc)
+        });
+        Assert.Equal(HttpStatusCode.Created, singleResponse.StatusCode);
+
+        var response = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        {
+            CourtId = court.Id,
+            DayOfWeek = (int)DayOfWeek.Monday,
+            StartTime = new TimeOnly(14, 0),
+            DurationMinutes = 60,
+            StartDate = new DateOnly(2026, 9, 7),
+            EndDate = new DateOnly(2026, 9, 21)
+        });
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CancelMyRecurringReservation_CancelsSeriesAndFutureOccurrences()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"recurring-cancel-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        {
+            CourtId = court.Id,
+            DayOfWeek = (int)DayOfWeek.Monday,
+            StartTime = new TimeOnly(14, 0),
+            DurationMinutes = 60,
+            StartDate = new DateOnly(2026, 9, 14),
+            EndDate = new DateOnly(2026, 9, 28)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<RecurringReservationInfo>();
+        Assert.NotNull(created);
+
+        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/{created.Id}/cancel", new CancelReservationRequest
+        {
+            Reason = "Season changed"
+        });
+
+        Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+        var result = await cancelResponse.Content.ReadFromJsonAsync<RecurringReservationInfo>();
+        Assert.NotNull(result);
+        Assert.Equal("Cancelled", result.Status);
+        Assert.Equal(3, result.Occurrences.Count);
+        Assert.All(result.Occurrences, occurrence => Assert.Equal("CancelledByUser", occurrence.Status));
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         return (await LoginWithUserAsync(client, suffix)).AccessToken;
