@@ -407,6 +407,285 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         Assert.Equal(HttpStatusCode.Conflict, cancelResponse.StatusCode);
     }
 
+    [Fact]
+    public async Task GetList_WithoutAuthorization_ReturnsUnauthorized()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync($"/api/v1/complexes/{Guid.NewGuid()}/reservations?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetList_AsComplexAdmin_ReturnsAllReservationsForComplex()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"reservation-list-admin-{Guid.NewGuid()}";
+        var initialToken = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", initialToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var adminToken = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var playerLogin = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-player-{Guid.NewGuid()}" });
+        playerLogin.EnsureSuccessStatusCode();
+        var playerInfo = await playerLogin.Content.ReadFromJsonAsync<GoogleLoginResponse>();
+        Assert.NotNull(playerInfo);
+
+        var start1 = DateTime.UtcNow.AddDays(1);
+        var firstResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start1,
+            EndAt = start1.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, firstResponse.StatusCode);
+        var first = await firstResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(first);
+
+        var start2 = DateTime.UtcNow.AddDays(2);
+        var secondResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations", new CreateReservationRequest
+        {
+            CourtId = court.Id,
+            UserId = playerInfo.User.Id,
+            StartAt = start2,
+            EndAt = start2.AddHours(1),
+            Notes = "Manual admin booking"
+        });
+        Assert.Equal(HttpStatusCode.Created, secondResponse.StatusCode);
+        var second = await secondResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(second);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(result);
+        Assert.Equal(2, result.TotalItems);
+        Assert.Equal(2, result.Items.Count);
+        Assert.Contains(result.Items, r => r.Id == first.Id);
+        Assert.Contains(result.Items, r => r.Id == second.Id);
+        Assert.All(result.Items, r => Assert.Equal(complex.Id, r.SportsComplexId));
+        Assert.All(result.Items, r => Assert.NotEmpty(r.CourtName));
+        Assert.All(result.Items, r => Assert.NotEmpty(r.UserName));
+    }
+
+    [Fact]
+    public async Task GetList_AsAdminOfDifferentComplex_ReturnsForbidden()
+    {
+        var client = _factory.CreateClient();
+        var suffixA = $"reservation-list-owner-{Guid.NewGuid()}";
+        var tokenA = await LoginAsync(client, suffixA);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenA);
+        var complexA = await CreateComplexAsync(client);
+
+        var adminTokenA = await LoginAsync(client, suffixA);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminTokenA);
+        await CreateCourtAsync(client, complexA.Id);
+
+        var suffixB = $"reservation-list-intruder-{Guid.NewGuid()}";
+        var tokenB = await LoginAsync(client, suffixB);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenB);
+        var complexB = await CreateComplexAsync(client);
+
+        var adminTokenB = await LoginAsync(client, suffixB);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminTokenB);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complexA.Id}/reservations?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetList_WithCourtFilter_ReturnsFilteredReservations()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"reservation-list-court-filter-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var complex = await CreateComplexAsync(client);
+
+        var adminToken = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var courtA = await CreateCourtAsync(client, complex.Id);
+        var courtB = await CreateCourtAsync(client, complex.Id);
+
+        var start = DateTime.UtcNow.AddDays(1);
+        var responseA = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = courtA.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, responseA.StatusCode);
+        var createdA = await responseA.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(createdA);
+
+        var responseB = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = courtB.Id,
+            StartAt = start.AddHours(2),
+            EndAt = start.AddHours(3)
+        });
+        Assert.Equal(HttpStatusCode.Created, responseB.StatusCode);
+        var createdB = await responseB.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(createdB);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=1&pageSize=10&courtId={courtA.Id}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(result);
+        Assert.Single(result.Items);
+        Assert.Equal(createdA.Id, result.Items[0].Id);
+        Assert.Equal(1, result.TotalItems);
+    }
+
+    [Fact]
+    public async Task GetList_WithStatusFilter_ReturnsFilteredReservations()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"reservation-list-status-filter-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var complex = await CreateComplexAsync(client);
+
+        var adminToken = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var start = DateTime.UtcNow.AddDays(1);
+        var activeResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, activeResponse.StatusCode);
+        var active = await activeResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(active);
+
+        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/{active.Id}/cancel", new CancelReservationRequest { Reason = "No longer needed" });
+        Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+        var cancelled = await cancelResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(cancelled);
+        Assert.Equal("CancelledByAdmin", cancelled.Status);
+
+        var activeListResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=1&pageSize=10&status=Confirmed");
+        Assert.Equal(HttpStatusCode.OK, activeListResponse.StatusCode);
+
+        var activeResult = await activeListResponse.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(activeResult);
+        Assert.Empty(activeResult.Items);
+        Assert.Equal(0, activeResult.TotalItems);
+
+        var cancelledListResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=1&pageSize=10&status=CancelledByAdmin");
+        Assert.Equal(HttpStatusCode.OK, cancelledListResponse.StatusCode);
+
+        var cancelledResult = await cancelledListResponse.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(cancelledResult);
+        Assert.Single(cancelledResult.Items);
+        Assert.Equal(active.Id, cancelledResult.Items[0].Id);
+        Assert.Equal(1, cancelledResult.TotalItems);
+    }
+
+    [Fact]
+    public async Task GetList_WithPagination_ReturnsPagedResult()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"reservation-list-pagination-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var complex = await CreateComplexAsync(client);
+
+        var adminToken = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        for (var i = 0; i < 3; i++)
+        {
+            var start = DateTime.UtcNow.AddDays(i + 1);
+            var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+            {
+                CourtId = court.Id,
+                StartAt = start,
+                EndAt = start.AddHours(1)
+            });
+            Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        }
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=1&pageSize=2");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal(3, result.TotalItems);
+        Assert.Equal(2, result.PageSize);
+        Assert.Equal(2, result.TotalPages);
+
+        var secondPageResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=2&pageSize=2");
+        Assert.Equal(HttpStatusCode.OK, secondPageResponse.StatusCode);
+
+        var secondPage = await secondPageResponse.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(secondPage);
+        Assert.Single(secondPage.Items);
+        Assert.Equal(2, secondPage.Page);
+        Assert.Equal(3, secondPage.TotalItems);
+    }
+
+    [Fact]
+    public async Task GetList_WithDateFilter_ReturnsReservationsForRequestedDay()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"reservation-list-date-filter-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var complex = await CreateComplexAsync(client);
+
+        var adminToken = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var todayStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 10, 0, 0, DateTimeKind.Utc);
+        var tomorrowStart = todayStart.AddDays(1);
+
+        var todayResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = todayStart,
+            EndAt = todayStart.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, todayResponse.StatusCode);
+
+        var tomorrowResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = tomorrowStart,
+            EndAt = tomorrowStart.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, tomorrowResponse.StatusCode);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=1&pageSize=10&date={today:yyyy-MM-dd}&utcOffsetMinutes=0");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(result);
+        Assert.Single(result.Items);
+        Assert.Equal(1, result.TotalItems);
+        Assert.Equal(today, DateOnly.FromDateTime(result.Items[0].StartAt));
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         return (await LoginWithUserAsync(client, suffix)).AccessToken;
