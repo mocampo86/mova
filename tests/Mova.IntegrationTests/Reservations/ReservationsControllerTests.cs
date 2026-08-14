@@ -408,6 +408,160 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
     }
 
     [Fact]
+    public async Task UpdateStatus_AsAdmin_ToCompleted_ReturnsCompletedReservation()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"update-status-completed-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var start = DateTime.UtcNow.AddDays(1);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(created);
+
+        var response = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/{created.Id}/status", new UpdateReservationStatusRequest { Status = "Completed" });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(result);
+        Assert.Equal("Completed", result.Status);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_AsAdmin_ToNoShow_ReturnsNoShowReservation()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"update-status-noshow-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var start = DateTime.UtcNow.AddDays(1);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(created);
+
+        var response = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/{created.Id}/status", new UpdateReservationStatusRequest { Status = "NoShow" });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(result);
+        Assert.Equal("NoShow", result.Status);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_AsAdmin_WithInvalidStatus_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"update-status-invalid-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var start = DateTime.UtcNow.AddDays(1);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(created);
+
+        var response = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/{created.Id}/status", new UpdateReservationStatusRequest { Status = "Confirmed" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_WithoutAuthorization_ReturnsUnauthorized()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.PatchAsJsonAsync($"/api/v1/complexes/{Guid.NewGuid()}/reservations/{Guid.NewGuid()}/status", new UpdateReservationStatusRequest { Status = "Completed" });
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_AsAdmin_ForDifferentComplex_ReturnsForbidden()
+    {
+        var client = _factory.CreateClient();
+        var suffixA = $"update-status-owner-{Guid.NewGuid()}";
+        var tokenA = await LoginAsync(client, suffixA);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenA);
+        var complexA = await CreateComplexAsync(client);
+        var courtA = await CreateCourtAsync(client, complexA.Id);
+
+        var start = DateTime.UtcNow.AddDays(1);
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complexA.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = courtA.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(created);
+
+        var suffixB = $"update-status-intruder-{Guid.NewGuid()}";
+        var tokenB = await LoginAsync(client, suffixB);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenB);
+        await CreateComplexAsync(client);
+
+        var response = await client.PatchAsJsonAsync($"/api/v1/complexes/{complexA.Id}/reservations/{created.Id}/status", new UpdateReservationStatusRequest { Status = "Completed" });
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_AsAdmin_ForCancelledReservation_ReturnsConflict()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"update-status-cancelled-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        var start = DateTime.UtcNow.AddDays(1);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
+        {
+            CourtId = court.Id,
+            StartAt = start,
+            EndAt = start.AddHours(1)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(created);
+
+        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/{created.Id}/cancel", new CancelReservationRequest { Reason = "No longer needed" });
+        Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+
+        var response = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/{created.Id}/status", new UpdateReservationStatusRequest { Status = "Completed" });
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetList_WithoutAuthorization_ReturnsUnauthorized()
     {
         var client = _factory.CreateClient();
