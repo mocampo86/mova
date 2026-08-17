@@ -48,7 +48,7 @@ For detailed architecture, domain, and workflow docs, see [.ai-kit/docs](.ai-kit
 1. Clone the repository and open it in your terminal:
 
    ```powershell
-   cd C:\Endava\EndevLocal\source\mova
+   cd C:\source\mova
    ```
 
 2. Create the local environment file for PostgreSQL:
