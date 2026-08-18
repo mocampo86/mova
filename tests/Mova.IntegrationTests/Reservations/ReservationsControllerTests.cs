@@ -1007,6 +1007,54 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         Assert.All(remaining.Items, occurrence => Assert.Equal("Confirmed", occurrence.Status));
     }
 
+    [Fact]
+    public async Task CancelRecurringReservation_AsAdmin_ForAnotherUser_CancelsSeriesAsCancelledByAdmin()
+    {
+        var client = _factory.CreateClient();
+        var adminSuffix = $"recurring-admin-{Guid.NewGuid()}";
+        var adminLogin = await LoginWithUserAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var playerSuffix = $"recurring-player-{Guid.NewGuid()}";
+        var playerLogin = await LoginWithUserAsync(client, playerSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", playerLogin.AccessToken);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        {
+            CourtId = court.Id,
+            DayOfWeek = (int)DayOfWeek.Monday,
+            StartTime = new TimeOnly(14, 0),
+            DurationMinutes = 60,
+            StartDate = new DateOnly(2026, 9, 14),
+            EndDate = new DateOnly(2026, 9, 28)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<RecurringReservationInfo>();
+        Assert.NotNull(created);
+
+        var adminToken = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/{created.Id}/cancel", new CancelReservationRequest
+        {
+            Reason = "Court maintenance"
+        });
+
+        Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+        var result = await cancelResponse.Content.ReadFromJsonAsync<RecurringReservationInfo>();
+        Assert.NotNull(result);
+        Assert.Equal("Cancelled", result.Status);
+        Assert.Equal(3, result.Occurrences.Count);
+        Assert.All(result.Occurrences, occurrence =>
+        {
+            Assert.Equal("CancelledByAdmin", occurrence.Status);
+            Assert.Equal("Court maintenance", occurrence.CancellationReason);
+        });
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         return (await LoginWithUserAsync(client, suffix)).AccessToken;

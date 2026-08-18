@@ -1,3 +1,4 @@
+using Mova.Application.Common.Exceptions;
 using Mova.Application.Reservations.Commands;
 using Mova.Application.Reservations.Handlers;
 using Mova.Domain.Entities;
@@ -16,7 +17,7 @@ public sealed class RecurringReservationMutationHandlerTests
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     [Fact]
-    public async Task CancelAsync_WithActiveSeries_CancelsFutureOccurrences()
+    public async Task CancelAsync_AsUser_CancelsFutureOccurrences()
     {
         var series = await CreateSeriesWithOccurrencesAsync(
             new DateOnly(2030, 1, 7),
@@ -36,7 +37,112 @@ public sealed class RecurringReservationMutationHandlerTests
 
         Assert.Equal("Cancelled", result.Status);
         Assert.Equal(3, result.Occurrences.Count);
-        Assert.All(result.Occurrences, occurrence => Assert.Equal("CancelledByUser", occurrence.Status));
+        Assert.All(result.Occurrences, occurrence =>
+        {
+            Assert.Equal("CancelledByUser", occurrence.Status);
+            Assert.Equal("No longer needed", occurrence.CancellationReason);
+            Assert.Equal(series.UserId, occurrence.CancelledByUserId);
+        });
+    }
+
+    [Fact]
+    public async Task CancelAsync_AsAdmin_CancelsFutureOccurrencesAsCancelledByAdmin()
+    {
+        var series = await CreateSeriesWithOccurrencesAsync(
+            new DateOnly(2030, 1, 7),
+            new DateOnly(2030, 1, 21));
+
+        var adminUserId = Guid.NewGuid();
+        var handler = new CancelRecurringReservationHandler(
+            _recurringReservationRepository,
+            _reservationRepository,
+            new FakeCancellationPolicy(0, true),
+            _unitOfWork);
+
+        var result = await handler.HandleAsync(new CancelRecurringReservationCommand(
+            series.SportsComplexId,
+            series.Id,
+            adminUserId,
+            "Admin cancel",
+            true));
+
+        Assert.Equal("Cancelled", result.Status);
+        Assert.Equal(3, result.Occurrences.Count);
+        Assert.All(result.Occurrences, occurrence =>
+        {
+            Assert.Equal("CancelledByAdmin", occurrence.Status);
+            Assert.Equal("Admin cancel", occurrence.CancellationReason);
+            Assert.Equal(adminUserId, occurrence.CancelledByUserId);
+        });
+    }
+
+    [Fact]
+    public async Task CancelAsync_AsUnrelatedUser_ThrowsNotFoundException()
+    {
+        var series = await CreateSeriesWithOccurrencesAsync(
+            new DateOnly(2030, 1, 7),
+            new DateOnly(2030, 1, 21));
+
+        var handler = new CancelRecurringReservationHandler(
+            _recurringReservationRepository,
+            _reservationRepository,
+            new FakeCancellationPolicy(0, true),
+            _unitOfWork);
+
+        var unrelatedUserId = Guid.NewGuid();
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(new CancelRecurringReservationCommand(
+            series.SportsComplexId,
+            series.Id,
+            unrelatedUserId,
+            "No longer needed")));
+
+        Assert.Equal("Recurring reservation not found.", exception.Message);
+    }
+
+    [Fact]
+    public async Task CancelAsync_AsUser_WhenUserCancellationDisabled_ThrowsUserCancellationDisabledException()
+    {
+        var series = await CreateSeriesWithOccurrencesAsync(
+            new DateOnly(2030, 1, 7),
+            new DateOnly(2030, 1, 21));
+
+        var handler = new CancelRecurringReservationHandler(
+            _recurringReservationRepository,
+            _reservationRepository,
+            new FakeCancellationPolicy(0, false),
+            _unitOfWork);
+
+        await Assert.ThrowsAsync<UserCancellationDisabledException>(() => handler.HandleAsync(new CancelRecurringReservationCommand(
+            series.SportsComplexId,
+            series.Id,
+            series.UserId,
+            "No longer needed")));
+    }
+
+    [Fact]
+    public async Task CancelAsync_AsAdmin_WhenUserCancellationDisabled_CancelsFutureOccurrences()
+    {
+        var series = await CreateSeriesWithOccurrencesAsync(
+            new DateOnly(2030, 1, 7),
+            new DateOnly(2030, 1, 21));
+
+        var adminUserId = Guid.NewGuid();
+        var handler = new CancelRecurringReservationHandler(
+            _recurringReservationRepository,
+            _reservationRepository,
+            new FakeCancellationPolicy(0, false),
+            _unitOfWork);
+
+        var result = await handler.HandleAsync(new CancelRecurringReservationCommand(
+            series.SportsComplexId,
+            series.Id,
+            adminUserId,
+            "Admin cancel",
+            true));
+
+        Assert.Equal("Cancelled", result.Status);
+        Assert.Equal(3, result.Occurrences.Count);
+        Assert.All(result.Occurrences, occurrence => Assert.Equal("CancelledByAdmin", occurrence.Status));
     }
 
     [Fact]
