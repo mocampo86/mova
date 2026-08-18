@@ -125,4 +125,56 @@ public sealed class CancelReservationHandlerTests
         Assert.Equal("No show", result.CancellationReason);
         Assert.Equal(actorId, result.CancelledByUserId);
     }
+
+    [Fact]
+    public async Task HandleAsync_RecurringOccurrence_CancelsOnlyThatOccurrenceAndTracksActor()
+    {
+        var complexId = Guid.NewGuid();
+        var courtId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var recurringReservationId = Guid.NewGuid();
+
+        var first = Reservation.Create(
+            complexId,
+            courtId,
+            userId,
+            new DateTime(2030, 1, 7, 14, 0, 0, DateTimeKind.Utc),
+            new DateTime(2030, 1, 7, 15, 0, 0, DateTimeKind.Utc),
+            ReservationSource.Recurring,
+            null,
+            recurringReservationId);
+        first.Confirm();
+
+        var second = Reservation.Create(
+            complexId,
+            courtId,
+            userId,
+            new DateTime(2030, 1, 14, 14, 0, 0, DateTimeKind.Utc),
+            new DateTime(2030, 1, 14, 15, 0, 0, DateTimeKind.Utc),
+            ReservationSource.Recurring,
+            null,
+            recurringReservationId);
+        second.Confirm();
+
+        await _reservationRepository.AddAsync(first);
+        await _reservationRepository.AddAsync(second);
+
+        var actorId = Guid.NewGuid();
+        var handler = CreateHandler();
+        var result = await handler.HandleAsync(new CancelReservationCommand(
+            complexId,
+            first.Id,
+            actorId,
+            "No show"));
+
+        Assert.NotNull(result);
+        Assert.Equal("CancelledByAdmin", result.Status);
+        Assert.Equal(recurringReservationId, result.RecurringReservationId);
+        Assert.Equal("No show", result.CancellationReason);
+        Assert.Equal(actorId, result.CancelledByUserId);
+
+        var other = await _reservationRepository.GetByIdAsync(second.Id);
+        Assert.NotNull(other);
+        Assert.Equal("Confirmed", other.Status.ToString());
+    }
 }
