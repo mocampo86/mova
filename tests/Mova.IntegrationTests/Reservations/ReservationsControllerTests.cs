@@ -949,6 +949,64 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         Assert.All(result.Occurrences, occurrence => Assert.Equal("CancelledByUser", occurrence.Status));
     }
 
+    [Fact]
+    public async Task CancelMyRecurringReservationOneOccurrence_CancelsOnlyThatOccurrence()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"recurring-cancel-one-{Guid.NewGuid()}";
+        var login = await LoginWithUserAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        {
+            CourtId = court.Id,
+            DayOfWeek = (int)DayOfWeek.Monday,
+            StartTime = new TimeOnly(14, 0),
+            DurationMinutes = 60,
+            StartDate = new DateOnly(2026, 9, 14),
+            EndDate = new DateOnly(2026, 9, 28)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<RecurringReservationInfo>();
+        Assert.NotNull(created);
+        Assert.Equal(3, created.Occurrences.Count);
+
+        var occurrenceToCancel = created.Occurrences[0];
+        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/users/me/reservations/{occurrenceToCancel.Id}/cancel", new CancelReservationRequest
+        {
+            Reason = "Changed plans"
+        });
+
+        Assert.Equal(HttpStatusCode.OK, cancelResponse.StatusCode);
+        var cancelled = await cancelResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(cancelled);
+        Assert.Equal("CancelledByUser", cancelled.Status);
+        Assert.Equal("Changed plans", cancelled.CancellationReason);
+        Assert.Equal(created.Id, cancelled.RecurringReservationId);
+
+        var getResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations/{occurrenceToCancel.Id}");
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        var persisted = await getResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(persisted);
+        Assert.Equal("CancelledByUser", persisted.Status);
+
+        var otherResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations/{created.Occurrences[1].Id}");
+        Assert.Equal(HttpStatusCode.OK, otherResponse.StatusCode);
+        var other = await otherResponse.Content.ReadFromJsonAsync<ReservationInfo>();
+        Assert.NotNull(other);
+        Assert.Equal("Confirmed", other.Status);
+
+        var recurringSeriesResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=1&pageSize=10&status=Confirmed");
+        Assert.Equal(HttpStatusCode.OK, recurringSeriesResponse.StatusCode);
+        var remaining = await recurringSeriesResponse.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
+        Assert.NotNull(remaining);
+        Assert.Equal(2, remaining.TotalItems);
+        Assert.All(remaining.Items, occurrence => Assert.Equal("Confirmed", occurrence.Status));
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         return (await LoginWithUserAsync(client, suffix)).AccessToken;

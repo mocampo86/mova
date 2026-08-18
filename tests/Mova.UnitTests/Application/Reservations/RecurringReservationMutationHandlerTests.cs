@@ -18,7 +18,10 @@ public sealed class RecurringReservationMutationHandlerTests
     [Fact]
     public async Task CancelAsync_WithActiveSeries_CancelsFutureOccurrences()
     {
-        var series = await CreateSeriesWithOccurrencesAsync();
+        var series = await CreateSeriesWithOccurrencesAsync(
+            new DateOnly(2030, 1, 7),
+            new DateOnly(2030, 1, 21));
+
         var handler = new CancelRecurringReservationHandler(
             _recurringReservationRepository,
             _reservationRepository,
@@ -32,14 +35,16 @@ public sealed class RecurringReservationMutationHandlerTests
             "No longer needed"));
 
         Assert.Equal("Cancelled", result.Status);
-        Assert.Equal(2, result.Occurrences.Count);
+        Assert.Equal(3, result.Occurrences.Count);
         Assert.All(result.Occurrences, occurrence => Assert.Equal("CancelledByUser", occurrence.Status));
     }
 
     [Fact]
     public async Task ModifyFutureAsync_CancelsOldFutureAndCreatesNewOccurrences()
     {
-        var series = await CreateSeriesWithOccurrencesAsync();
+        var series = await CreateSeriesWithOccurrencesAsync(
+            new DateOnly(2026, 8, 10),
+            new DateOnly(2026, 8, 24));
         var handler = new ModifyRecurringReservationFutureHandler(
             _recurringReservationRepository,
             _reservationRepository,
@@ -73,7 +78,7 @@ public sealed class RecurringReservationMutationHandlerTests
         Assert.Equal(2, oldFuture.Count);
     }
 
-    private async Task<RecurringReservation> CreateSeriesWithOccurrencesAsync()
+    private async Task<RecurringReservation> CreateSeriesWithOccurrencesAsync(DateOnly startDate, DateOnly endDate)
     {
         var complexId = Guid.NewGuid();
         var courtId = Guid.NewGuid();
@@ -85,8 +90,8 @@ public sealed class RecurringReservationMutationHandlerTests
             DayOfWeek.Monday,
             new TimeOnly(14, 0),
             60,
-            new DateOnly(2026, 8, 10),
-            new DateOnly(2026, 8, 24));
+            startDate,
+            endDate);
 
         await _recurringReservationRepository.AddAsync(series);
 
@@ -98,8 +103,8 @@ public sealed class RecurringReservationMutationHandlerTests
             DayOfWeek.Monday,
             new TimeOnly(14, 0),
             60,
-            new DateOnly(2026, 8, 10),
-            new DateOnly(2026, 8, 24),
+            startDate,
+            endDate,
             null);
 
         await _reservationRepository.AddRangeAsync(occurrences);

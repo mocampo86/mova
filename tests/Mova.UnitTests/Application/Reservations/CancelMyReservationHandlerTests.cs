@@ -144,4 +144,54 @@ public sealed class CancelMyReservationHandlerTests
             userId,
             "No user cancellations allowed")));
     }
+
+    [Fact]
+    public async Task HandleAsync_RecurringOccurrence_CancelsOnlyThatOccurrenceAndTracksActor()
+    {
+        var userId = Guid.NewGuid();
+        var complexId = Guid.NewGuid();
+        var courtId = Guid.NewGuid();
+        var recurringReservationId = Guid.NewGuid();
+
+        var first = Reservation.Create(
+            complexId,
+            courtId,
+            userId,
+            DateTime.UtcNow.AddDays(2),
+            DateTime.UtcNow.AddDays(2).AddHours(1),
+            ReservationSource.Recurring,
+            null,
+            recurringReservationId);
+        first.Confirm();
+
+        var second = Reservation.Create(
+            complexId,
+            courtId,
+            userId,
+            DateTime.UtcNow.AddDays(9),
+            DateTime.UtcNow.AddDays(9).AddHours(1),
+            ReservationSource.Recurring,
+            null,
+            recurringReservationId);
+        second.Confirm();
+
+        await _reservationRepository.AddAsync(first);
+        await _reservationRepository.AddAsync(second);
+
+        var handler = CreateHandler(24);
+        var result = await handler.HandleAsync(new CancelMyReservationCommand(
+            first.Id,
+            userId,
+            "Changed plans"));
+
+        Assert.NotNull(result);
+        Assert.Equal("CancelledByUser", result.Status);
+        Assert.Equal(recurringReservationId, result.RecurringReservationId);
+        Assert.Equal("Changed plans", result.CancellationReason);
+        Assert.Equal(userId, result.CancelledByUserId);
+
+        var other = await _reservationRepository.GetByIdAsync(second.Id);
+        Assert.NotNull(other);
+        Assert.Equal("Confirmed", other.Status.ToString());
+    }
 }
