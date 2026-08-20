@@ -36,6 +36,9 @@ public sealed class SportsComplexInfo
     [JsonPropertyName("status")]
     public string Status { get; set; } = string.Empty;
 
+    [JsonPropertyName("allowUserRecurringReservations")]
+    public bool AllowUserRecurringReservations { get; set; }
+
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
 

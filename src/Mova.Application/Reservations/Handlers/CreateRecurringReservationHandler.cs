@@ -21,7 +21,7 @@ public sealed class CreateRecurringReservationHandler(
 {
     public async Task<RecurringReservationInfo> HandleAsync(CreateRecurringReservationCommand command, CancellationToken cancellationToken = default)
     {
-        await ValidateContextAsync(command.SportsComplexId, command.CourtId, command.UserId, cancellationToken);
+        await ValidateContextAsync(command.SportsComplexId, command.CourtId, command.UserId, command.IsAdmin, cancellationToken);
 
         return await unitOfWork.ExecuteInTransactionAsync(
             async token =>
@@ -65,7 +65,7 @@ public sealed class CreateRecurringReservationHandler(
             cancellationToken);
     }
 
-    private async Task ValidateContextAsync(Guid sportsComplexId, Guid courtId, Guid userId, CancellationToken cancellationToken)
+    private async Task ValidateContextAsync(Guid sportsComplexId, Guid courtId, Guid userId, bool isAdmin, CancellationToken cancellationToken)
     {
         var complex = await sportsComplexes.GetByIdAsync(sportsComplexId, cancellationToken)
             ?? throw new NotFoundException("Sports complex not found.");
@@ -73,6 +73,11 @@ public sealed class CreateRecurringReservationHandler(
         if (complex.Status != ComplexStatus.Active)
         {
             throw new ConflictException("The selected complex is not active.");
+        }
+
+        if (!isAdmin && !complex.AllowUserRecurringReservations)
+        {
+            throw new UserRecurringReservationsDisabledException("Recurring reservations are not available for this complex.");
         }
 
         var court = await courts.GetByIdAsync(courtId, cancellationToken);

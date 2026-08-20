@@ -59,8 +59,11 @@ GET    /api/v1/complexes/{complexId}/users
 GET    /api/v1/complexes/{complexId}/users/{userId}/reservations
 
 POST   /api/v1/complexes/{complexId}/recurring-reservations/me
+POST   /api/v1/complexes/{complexId}/recurring-reservations
 PATCH  /api/v1/complexes/{complexId}/recurring-reservations/{id}/cancel
 PATCH  /api/v1/complexes/{complexId}/recurring-reservations/{id}/future
+
+PUT    /api/v1/complexes/{complexId}/configuration/recurring-reservations
 
 POST   /api/v1/complexes/{complexId}/blocked-users
 DELETE /api/v1/complexes/{complexId}/blocked-users/{id}
@@ -126,6 +129,31 @@ The response contains the recurring reservation rule plus the generated confirme
 }
 ```
 
+### Update recurring reservation settings
+
+Complex administrators can enable or disable regular user-created recurring reservations for their complex. The setting does not affect administrators, who can always create recurring reservations.
+
+```http
+PUT /api/v1/complexes/{complexId}/configuration/recurring-reservations HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer <jwt>
+
+{
+  "allowUserRecurringReservations": false
+}
+```
+
+The response returns the updated `SportsComplex` settings including the new value.
+
+```json
+{
+  "id": "...",
+  "name": "...",
+  "allowUserRecurringReservations": false,
+  "status": "Active"
+}
+```
+
 ## Error contract
 
 All errors follow a consistent envelope:
@@ -151,6 +179,7 @@ Common error codes:
 |------|-------------|---------|
 | VALIDATION_ERROR | 400 | Request fails FluentValidation or Zod validation |
 | RESERVATION_CONFLICT | 409 | Overlapping reservation or block |
+|| RECURRING_RESERVATIONS_DISABLED | 409 | User recurring reservations are disabled for the complex |
 | USER_BLOCKED | 403 | User is blocked in the complex |
 | UNAUTHORIZED | 401 | Missing or invalid JWT |
 | FORBIDDEN | 403 | Insufficient role or complex access |

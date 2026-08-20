@@ -19,6 +19,7 @@ public static class SportsComplexInfoMapper
             PhoneNumber = sportsComplex.PhoneNumber,
             Email = sportsComplex.Email,
             Status = sportsComplex.Status.ToString(),
+            AllowUserRecurringReservations = sportsComplex.AllowUserRecurringReservations,
             CreatedAt = sportsComplex.CreatedAt,
             UpdatedAt = sportsComplex.UpdatedAt
         };

@@ -46,7 +46,8 @@ public sealed class CreateRecurringReservationHandlerTests
             60,
             new DateOnly(2026, 8, 10),
             new DateOnly(2026, 8, 31),
-            "Weekly slot"));
+            "Weekly slot",
+            false));
 
         Assert.Equal(complex.Id, result.SportsComplexId);
         Assert.Equal(court.Id, result.CourtId);
@@ -85,7 +86,8 @@ public sealed class CreateRecurringReservationHandlerTests
             60,
             new DateOnly(2026, 8, 10),
             new DateOnly(2026, 8, 31),
-            null)));
+            null,
+            false)));
     }
 
     [Fact]
@@ -110,7 +112,51 @@ public sealed class CreateRecurringReservationHandlerTests
             60,
             new DateOnly(2026, 8, 10),
             new DateOnly(2026, 8, 31),
-            null)));
+            null,
+            false)));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithUserRecurringReservationsDisabled_ThrowsUserRecurringReservationsDisabledException()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        complex.UpdateRecurringReservationSettings(false);
+        var handler = CreateHandler();
+
+        await Assert.ThrowsAsync<UserRecurringReservationsDisabledException>(() => handler.HandleAsync(new CreateRecurringReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            DayOfWeek.Monday,
+            new TimeOnly(14, 0),
+            60,
+            new DateOnly(2026, 8, 10),
+            new DateOnly(2026, 8, 31),
+            null,
+            false)));
+    }
+
+    [Fact]
+    public async Task HandleAsync_AsAdministrator_WithUserRecurringReservationsDisabled_CreatesConfirmedOccurrences()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        complex.UpdateRecurringReservationSettings(false);
+        var handler = CreateHandler();
+
+        var result = await handler.HandleAsync(new CreateRecurringReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            DayOfWeek.Monday,
+            new TimeOnly(14, 0),
+            60,
+            new DateOnly(2026, 8, 10),
+            new DateOnly(2026, 8, 31),
+            null,
+            true));
+
+        Assert.Equal("Active", result.Status);
+        Assert.Equal(4, result.Occurrences.Count);
     }
 
     private async Task<(SportsComplex Complex, Court Court, User User)> CreateScenarioAsync()

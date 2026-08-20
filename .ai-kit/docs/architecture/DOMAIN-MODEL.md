@@ -47,6 +47,7 @@ A sports facility that owns courts and reservations.
 | PhoneNumber | string? | |
 | Email | string? | |
 | Status | enum | Active / Inactive |
+| AllowUserRecurringReservations | bool | Default `true`; controls regular user recurring bookings |
 | CreatedAt | DateTime | UTC |
 | UpdatedAt | DateTime? | UTC |
 
@@ -215,7 +216,7 @@ Record of administrative actions.
 | Aggregate | Root entity | Invariants |
 |-----------|-------------|------------|
 | User | User | Email uniqueness, phone validation, status |
-| SportsComplex | SportsComplex | One or more administrators must be linkable |
+| SportsComplex | SportsComplex | One or more administrators must be linkable; regular user recurring reservations can be toggled |
 | Court | Court | Belongs to exactly one complex; has at least one sport when active |
 | Reservation | Reservation | No overlapping active reservations on the same court |
 | RecurringReservation | RecurringReservation | Generated occurrences cannot overlap existing active reservations |

@@ -54,6 +54,12 @@ public static class ErrorResponseBuilder
                 message = exception.Message;
                 break;
 
+            case UserRecurringReservationsDisabledException:
+                statusCode = 409;
+                code = "RECURRING_RESERVATIONS_DISABLED";
+                message = exception.Message;
+                break;
+
             case ConflictException:
                 statusCode = 409;
                 code = "CONFLICT";

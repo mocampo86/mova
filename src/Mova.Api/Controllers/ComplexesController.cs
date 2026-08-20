@@ -23,6 +23,7 @@ public class ComplexesController : ControllerBase
 {
     private readonly ICreateComplexHandler _createHandler;
     private readonly IUpdateComplexHandler _updateHandler;
+    private readonly IUpdateRecurringReservationSettingsHandler _updateRecurringReservationSettingsHandler;
     private readonly IGetActiveComplexesHandler _getActiveComplexesHandler;
     private readonly IGetActiveComplexByIdHandler _getActiveComplexByIdHandler;
     private readonly IUpdateComplexStatusHandler _updateComplexStatusHandler;
@@ -30,12 +31,14 @@ public class ComplexesController : ControllerBase
     private readonly IGetComplexDashboardHandler _getComplexDashboardHandler;
     private readonly IValidator<CreateComplexCommand> _createValidator;
     private readonly IValidator<UpdateComplexCommand> _updateValidator;
+    private readonly IValidator<UpdateRecurringReservationSettingsCommand> _updateRecurringReservationSettingsValidator;
     private readonly IValidator<UpdateComplexStatusCommand> _updateComplexStatusValidator;
     private readonly IValidator<GetCourtAvailabilityQuery> _getCourtAvailabilityValidator;
 
     public ComplexesController(
         ICreateComplexHandler createHandler,
         IUpdateComplexHandler updateHandler,
+        IUpdateRecurringReservationSettingsHandler updateRecurringReservationSettingsHandler,
         IGetActiveComplexesHandler getActiveComplexesHandler,
         IGetActiveComplexByIdHandler getActiveComplexByIdHandler,
         IUpdateComplexStatusHandler updateComplexStatusHandler,
@@ -43,11 +46,13 @@ public class ComplexesController : ControllerBase
         IGetComplexDashboardHandler getComplexDashboardHandler,
         IValidator<CreateComplexCommand> createValidator,
         IValidator<UpdateComplexCommand> updateValidator,
+        IValidator<UpdateRecurringReservationSettingsCommand> updateRecurringReservationSettingsValidator,
         IValidator<UpdateComplexStatusCommand> updateComplexStatusValidator,
         IValidator<GetCourtAvailabilityQuery> getCourtAvailabilityValidator)
     {
         _createHandler = createHandler;
         _updateHandler = updateHandler;
+        _updateRecurringReservationSettingsHandler = updateRecurringReservationSettingsHandler;
         _getActiveComplexesHandler = getActiveComplexesHandler;
         _getActiveComplexByIdHandler = getActiveComplexByIdHandler;
         _updateComplexStatusHandler = updateComplexStatusHandler;
@@ -55,6 +60,7 @@ public class ComplexesController : ControllerBase
         _getComplexDashboardHandler = getComplexDashboardHandler;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
+        _updateRecurringReservationSettingsValidator = updateRecurringReservationSettingsValidator;
         _updateComplexStatusValidator = updateComplexStatusValidator;
         _getCourtAvailabilityValidator = getCourtAvailabilityValidator;
     }
@@ -176,6 +182,21 @@ public class ComplexesController : ControllerBase
         await _updateValidator.ValidateAndThrowAsync(command, cancellationToken);
 
         var result = await _updateHandler.HandleAsync(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPut("{complexId:guid}/configuration/recurring-reservations")]
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
+    public async Task<ActionResult<SportsComplexInfo>> UpdateRecurringReservationSettings(
+        Guid complexId,
+        [FromBody] UpdateRecurringReservationSettingsRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new UpdateRecurringReservationSettingsCommand(complexId, request.AllowUserRecurringReservations);
+
+        await _updateRecurringReservationSettingsValidator.ValidateAndThrowAsync(command, cancellationToken);
+
+        var result = await _updateRecurringReservationSettingsHandler.HandleAsync(command, cancellationToken);
         return Ok(result);
     }
 

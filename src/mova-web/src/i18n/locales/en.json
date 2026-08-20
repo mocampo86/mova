@@ -396,7 +396,7 @@
     },
     "configuration": {
       "title": "Configuration",
-      "subtitle": "Configure the cancellation policy for this complex.",
+      "subtitle": "Configure the cancellation policy and recurring reservation settings for this complex.",
       "missingId": "The complex identifier is missing.",
       "loading": "Loading configuration...",
       "loadError": "The configuration could not be loaded. Please try again later.",
@@ -405,7 +405,17 @@
       "minimumHours": "Minimum cancellation notice (hours)",
       "minimumHoursHelper": "Users must cancel at least this many hours before the reservation starts.",
       "allowUserCancellation": "Allow users to cancel their reservations",
-      "save": "Save policy"
+      "save": "Save policy",
+      "cancellationTitle": "Cancellation policy",
+      "recurringTitle": "Recurring reservations",
+      "recurringSubtitle": "Control whether regular users can create recurring reservations for this complex. Administrators can always create recurring reservations.",
+      "recurringLoading": "Loading recurring reservation settings...",
+      "recurringLoadError": "The recurring reservation settings could not be loaded. Please try again later.",
+      "recurringSuccess": "The recurring reservation settings have been updated successfully.",
+      "recurringSaveError": "The recurring reservation settings could not be saved. Please try again later.",
+      "allowUserRecurringReservations": "Allow regular users to create recurring reservations",
+      "allowUserRecurringReservationsHelper": "When disabled, regular users will not be able to create recurring reservations for this complex. Complex administrators are not affected by this setting.",
+      "recurringSave": "Save recurring reservation settings"
     },
     "recurringPage": {
       "title": "Recurring bookings",
@@ -500,7 +510,10 @@
       "create": "Create recurring booking",
       "success": "Recurring booking created with {{count}} confirmed occurrences.",
       "complexesError": "Complexes could not be loaded.",
-      "courtsError": "Courts could not be loaded."
+      "courtsError": "Courts could not be loaded.",
+      "settingsError": "Complex settings could not be loaded.",
+      "disabledForComplex": "Recurring reservations are not available for this complex.",
+      "disabledTooltip": "Recurring reservations are disabled for this complex."
     },
     "exploreComplexesTitle": "Find a complex",
     "exploreComplexesDescription": "Search active sports complexes and check court availability.",
