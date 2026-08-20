@@ -407,6 +407,15 @@
       "allowUserCancellation": "Permitir a los usuarios cancelar sus reservas",
       "save": "Guardar política"
     },
+    "recurringPage": {
+      "title": "Reservas recurrentes",
+      "subtitle": "Reserva un turno semanal fijo para un cliente durante el período que definas.",
+      "customer": "Cliente",
+      "selectCustomer": "Selecciona un cliente",
+      "usersError": "No se pudieron cargar los clientes. Inténtalo de nuevo más tarde.",
+      "create": "Crear reserva recurrente",
+      "success": "Se crearon {{count}} reservas recurrentes correctamente."
+    },
     "placeholder": {
       "title": "Sección en construcción",
       "subtitle": "Esta sección de administración aún no está disponible."
@@ -449,6 +458,7 @@
     "businessHours": "Horarios",
     "courts": "Canchas",
     "reservations": "Reservas",
+    "recurring": "Reservas recurrentes",
     "users": "Usuarios",
     "configuration": "Configuración",
     "complexAdmin": "Administrador del complejo",

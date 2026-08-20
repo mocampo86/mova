@@ -407,6 +407,15 @@
       "allowUserCancellation": "Permitir que os usuários cancelem suas reservas",
       "save": "Salvar política"
     },
+    "recurringPage": {
+      "title": "Reservas recorrentes",
+      "subtitle": "Reserve um horário semanal fixo para um cliente durante o período definido.",
+      "customer": "Cliente",
+      "selectCustomer": "Selecione um cliente",
+      "usersError": "Não foi possível carregar os clientes. Tente novamente mais tarde.",
+      "create": "Criar reserva recorrente",
+      "success": "{{count}} reservas recorrentes criadas com sucesso."
+    },
     "placeholder": {
       "title": "Seção em construção",
       "subtitle": "Esta seção de administração ainda não está disponível."
@@ -449,6 +458,7 @@
     "businessHours": "Horários",
     "courts": "Quadras",
     "reservations": "Reservas",
+    "recurring": "Reservas recorrentes",
     "users": "Usuários",
     "configuration": "Configuração",
     "complexAdmin": "Administrador do complexo",

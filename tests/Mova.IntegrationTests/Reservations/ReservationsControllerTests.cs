@@ -1055,6 +1055,38 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         });
     }
 
+    [Fact]
+    public async Task CreateRecurringReservation_AsAdmin_ForCustomer_CreatesConfirmedOccurrences()
+    {
+        var client = _factory.CreateClient();
+        var adminLogin = await LoginWithUserAsync(client, $"recurring-admin-create-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var playerLogin = await LoginWithUserAsync(client, $"recurring-player-create-{Guid.NewGuid()}");
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations", new CreateRecurringReservationForCustomerRequest
+        {
+            UserId = playerLogin.User.Id,
+            CourtId = court.Id,
+            DayOfWeek = (int)DayOfWeek.Monday,
+            StartTime = new TimeOnly(14, 0),
+            DurationMinutes = 60,
+            StartDate = new DateOnly(2026, 9, 14),
+            EndDate = new DateOnly(2026, 9, 28)
+        });
+
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<RecurringReservationInfo>();
+        Assert.NotNull(created);
+        Assert.Equal(playerLogin.User.Id, created.UserId);
+        Assert.Equal("Active", created.Status);
+        Assert.Equal(3, created.Occurrences.Count);
+        Assert.All(created.Occurrences, occurrence => Assert.Equal("Confirmed", occurrence.Status));
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         return (await LoginWithUserAsync(client, suffix)).AccessToken;

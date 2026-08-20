@@ -407,6 +407,15 @@
       "allowUserCancellation": "Allow users to cancel their reservations",
       "save": "Save policy"
     },
+    "recurringPage": {
+      "title": "Recurring bookings",
+      "subtitle": "Book a fixed weekly slot for a customer over a defined period.",
+      "customer": "Customer",
+      "selectCustomer": "Select a customer",
+      "usersError": "The customers could not be loaded. Please try again later.",
+      "create": "Create recurring booking",
+      "success": "Created {{count}} recurring bookings successfully."
+    },
     "placeholder": {
       "title": "Section under construction",
       "subtitle": "This admin section is not yet available."
@@ -449,6 +458,7 @@
     "businessHours": "Business hours",
     "courts": "Courts",
     "reservations": "Reservations",
+    "recurring": "Recurring bookings",
     "users": "Users",
     "configuration": "Configuration",
     "complexAdmin": "Complex Admin",
