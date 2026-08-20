@@ -1,8 +1,10 @@
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import ComplexAdminLayout from './ComplexAdminLayout';
 import { useComplexDashboard } from '../features/complexes/complexApi';
+import { STORAGE_KEY } from '../i18n/languageStorage';
 import { renderWithAuth, type RenderWithAuthOptions } from '../test-utils';
 
 vi.mock('../features/complexes/complexApi');
@@ -118,5 +120,41 @@ describe('ComplexAdminLayout', () => {
     expect(screen.getByRole('link', { name: 'Courts' }).getAttribute('aria-current')).toBe('page');
     expect(screen.getByRole('link', { name: 'Dashboard' }).getAttribute('aria-current')).toBeNull();
     expect(screen.getByTestId('section')).toBeTruthy();
+  });
+
+  it('renders the language selector in the admin header', () => {
+    vi.mocked(useComplexDashboard).mockReturnValue({
+      data: mockDashboard,
+      isLoading: false,
+      isError: false
+    } as unknown as ReturnType<typeof useComplexDashboard>);
+
+    renderLayout('/admin/complex/complex-id');
+
+    expect(screen.getByRole('combobox', { name: 'Language' })).toBeTruthy();
+  });
+
+  it('updates the admin language and persists the selection when a new language is chosen', async () => {
+    const user = userEvent.setup();
+    window.localStorage.removeItem(STORAGE_KEY);
+
+    vi.mocked(useComplexDashboard).mockReturnValue({
+      data: mockDashboard,
+      isLoading: false,
+      isError: false
+    } as unknown as ReturnType<typeof useComplexDashboard>);
+
+    renderLayout('/admin/complex/complex-id');
+
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeTruthy();
+
+    await user.click(screen.getByRole('combobox', { name: 'Language' }));
+    await user.click(screen.getByRole('option', { name: 'Español' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: 'Panel' })).toBeTruthy();
+    });
+
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('es');
   });
 });

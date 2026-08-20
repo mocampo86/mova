@@ -17,6 +17,7 @@ import {
   useTheme
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 import { useComplexDashboard } from '../features/complexes/complexApi';
 
 function isActivePath(pathname: string, to: string, exact = false): boolean {
@@ -106,6 +107,9 @@ export default function ComplexAdminLayout() {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             {headerTitle}
           </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <LanguageSelector />
+          </Box>
         </Toolbar>
       </AppBar>
       <Box
