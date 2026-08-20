@@ -24,6 +24,7 @@ Enable visitors and users to view the application in their preferred language (S
 | [US-059](US-059.md) | As a visitor, I want to change the application language from the main screen so all pages display in Spanish, English, or Portuguese. |
 | [US-060](US-060.md) | As a visitor, I want the language selector to display a flag or language icon so I can identify languages visually. |
 | [US-061](US-061.md) | As a user, I want my language preference to persist and be detected from my browser so I don't have to reselect it. |
+| [US-078](US-078.md) | As an admin, I want the language selector to be available in the admin panel so I can use the admin pages in my preferred language. |
 
 ## Acceptance criteria
 
@@ -35,12 +36,14 @@ Enable visitors and users to view the application in their preferred language (S
 - [ ] Translation files are structured to make adding new languages straightforward.
 - [ ] All existing public and authenticated pages use translated strings.
 - [ ] No hard-coded UI text remains on pages covered by this epic.
+- [x] The language selector is available in the admin panel and all admin pages use translated strings.
 
 ## Dependencies
 
 - EPIC-01 — Technical Foundation.
 - EPIC-09 — Landing Page and Public Site.
 - EPIC-08 — Users (for authenticated pages if relevant).
+- EPIC-12 — Complex Admin Dashboard (for the admin panel layout).
 
 ## Technical notes
 
