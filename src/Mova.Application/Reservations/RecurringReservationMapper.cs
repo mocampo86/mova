@@ -18,6 +18,7 @@ public static class RecurringReservationMapper
         EndDate = recurringReservation.EndDate,
         Status = recurringReservation.Status.ToString(),
         CreatedAt = recurringReservation.CreatedAt,
+        UpdatedAt = recurringReservation.UpdatedAt,
         Occurrences = occurrences.Select(ReservationMapper.ToInfo).ToList()
     };
 }

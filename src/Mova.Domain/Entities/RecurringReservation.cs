@@ -15,6 +15,7 @@ public sealed class RecurringReservation
     public DateOnly EndDate { get; private set; }
     public RecurringReservationStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
 
     public Court? Court { get; private set; }
     public User? User { get; private set; }
@@ -51,13 +52,15 @@ public sealed class RecurringReservation
             StartDate = startDate,
             EndDate = endDate,
             Status = RecurringReservationStatus.Active,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
     }
 
     public void Cancel()
     {
         Status = RecurringReservationStatus.Cancelled;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void ModifyFuture(DayOfWeek dayOfWeek, TimeOnly startTime, int durationMinutes, DateOnly effectiveDate, DateOnly endDate)
@@ -81,5 +84,6 @@ public sealed class RecurringReservation
         StartTime = startTime;
         DurationMinutes = durationMinutes;
         EndDate = endDate;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
