@@ -58,6 +58,7 @@ PATCH  /api/v1/users/me/reservations/{id}/cancel
 GET    /api/v1/complexes/{complexId}/users
 GET    /api/v1/complexes/{complexId}/users/{userId}/reservations
 
+GET    /api/v1/complexes/{complexId}/recurring-reservations
 POST   /api/v1/complexes/{complexId}/recurring-reservations/me
 POST   /api/v1/complexes/{complexId}/recurring-reservations
 PATCH  /api/v1/complexes/{complexId}/recurring-reservations/{id}/cancel
@@ -126,6 +127,44 @@ The response contains the recurring reservation rule plus the generated confirme
   "cancellationReason": null,
   "cancelledByUserId": null,
   "cancelledByUserName": null
+}
+```
+
+### List recurring reservations
+
+Complex administrators can list recurring reservations for their complex with optional filtering and pagination.
+
+```http
+GET /api/v1/complexes/{complexId}/recurring-reservations?page=1&pageSize=10&status=Active&sort=createdAt%3Adesc HTTP/1.1
+Authorization: Bearer <jwt>
+```
+
+The response is a paginated list of recurring reservation series. Each item includes display-friendly court and user names.
+
+```json
+{
+  "items": [
+    {
+      "id": "...",
+      "complexId": "...",
+      "courtId": "...",
+      "courtName": "Court One",
+      "userId": "...",
+      "userName": "Test User",
+      "dayOfWeek": 1,
+      "startTime": "14:00:00",
+      "durationMinutes": 60,
+      "startDate": "2026-08-10",
+      "endDate": "2026-08-31",
+      "status": "Active",
+      "createdAt": "2026-08-01T12:00:00Z",
+      "updatedAt": "2026-08-01T12:00:00Z"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "totalItems": 1,
+  "totalPages": 1
 }
 ```
 

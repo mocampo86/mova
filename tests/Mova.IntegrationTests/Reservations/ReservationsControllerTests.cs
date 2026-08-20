@@ -1256,4 +1256,65 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CourtInfo>())!;
     }
+
+    [Fact]
+    public async Task GetRecurringReservations_AsAdmin_ReturnsSeriesForComplex()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"recurring-list-admin-{Guid.NewGuid()}";
+        var adminToken = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var playerSuffix = $"recurring-list-player-{Guid.NewGuid()}";
+        var playerLogin = await LoginWithUserAsync(client, playerSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", playerLogin.AccessToken);
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        {
+            CourtId = court.Id,
+            DayOfWeek = (int)DayOfWeek.Monday,
+            StartTime = new TimeOnly(14, 0),
+            DurationMinutes = 60,
+            StartDate = new DateOnly(2026, 11, 2),
+            EndDate = new DateOnly(2026, 11, 16)
+        });
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<RecurringReservationInfo>();
+        Assert.NotNull(created);
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var listResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode);
+        var result = await listResponse.Content.ReadFromJsonAsync<PagedResult<RecurringReservationListItem>>();
+        Assert.NotNull(result);
+        Assert.Equal(1, result.TotalItems);
+        Assert.Single(result.Items);
+        Assert.Equal(created.Id, result.Items[0].Id);
+        Assert.Equal(complex.Id, result.Items[0].SportsComplexId);
+        Assert.Equal(court.Id, result.Items[0].CourtId);
+        Assert.Equal(playerLogin.User.Id, result.Items[0].UserId);
+        Assert.Equal("Active", result.Items[0].Status);
+    }
+
+    [Fact]
+    public async Task GetRecurringReservations_AsUser_ReturnsForbidden()
+    {
+        var client = _factory.CreateClient();
+        var adminSuffix = $"recurring-list-admin-forbidden-{Guid.NewGuid()}";
+        var adminToken = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var complex = await CreateComplexAsync(client);
+
+        var playerSuffix = $"recurring-list-player-forbidden-{Guid.NewGuid()}";
+        var playerToken = await LoginAsync(client, playerSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", playerToken);
+
+        var listResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.Forbidden, listResponse.StatusCode);
+    }
 }

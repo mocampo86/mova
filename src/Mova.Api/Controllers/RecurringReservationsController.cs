@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Mova.Api.Authorization;
 using Mova.Application.Reservations.Commands;
 using Mova.Application.Reservations.Handlers;
+using Mova.Application.Reservations.Queries;
+using Mova.Contracts.Common;
 using Mova.Contracts.Reservations;
 
 namespace Mova.Api.Controllers;
@@ -15,11 +17,32 @@ public sealed class RecurringReservationsController(
     ICreateRecurringReservationHandler createHandler,
     ICancelRecurringReservationHandler cancelHandler,
     IModifyRecurringReservationFutureHandler modifyFutureHandler,
+    IGetRecurringReservationsByComplexHandler getListHandler,
     IValidator<CreateRecurringReservationCommand> createValidator,
     IValidator<CancelRecurringReservationCommand> cancelValidator,
     IValidator<ModifyRecurringReservationFutureCommand> modifyFutureValidator,
+    IValidator<GetRecurringReservationsByComplexQuery> listValidator,
     IAuthorizationService authorizationService) : ControllerBase
 {
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
+    [HttpGet]
+    public async Task<ActionResult<PagedResult<RecurringReservationListItem>>> GetList(
+        Guid complexId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] Guid? userId = null,
+        [FromQuery] Guid? courtId = null,
+        [FromQuery] string? status = null,
+        [FromQuery] string? sort = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetRecurringReservationsByComplexQuery(complexId, page, pageSize, userId, courtId, status, sort);
+        await listValidator.ValidateAndThrowAsync(query, cancellationToken);
+
+        var result = await getListHandler.HandleAsync(query, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPost("me")]
     [Authorize(Policy = AuthorizationPolicies.User)]
     public async Task<ActionResult<RecurringReservationInfo>> CreateMyRecurringReservation(

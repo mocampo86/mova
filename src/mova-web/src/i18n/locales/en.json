@@ -50,6 +50,8 @@
     "until": "Until {{value}}",
     "lastUpdated": "Last updated {{date}}",
     "notUpdatedYet": "Not updated yet",
+    "minutes": "minutes",
+    "sort": "Sort",
     "validation": {
       "value": {
         "validNumber": "Value must be a valid number."
@@ -426,6 +428,30 @@
       "create": "Create recurring booking",
       "success": "Created {{count}} recurring bookings successfully."
     },
+    "recurringList": {
+      "title": "Recurring bookings",
+      "newRecurringBooking": "New recurring booking",
+      "courtFilter": "Court",
+      "allCourts": "All courts",
+      "userFilter": "Customer",
+      "allUsers": "All customers",
+      "day": "Day",
+      "time": "Start time",
+      "duration": "Duration",
+      "period": "Period",
+      "empty": "There are no recurring bookings for this complex.",
+      "cancelSeries": "Cancel series",
+      "cancelDialogTitle": "Cancel recurring series",
+      "cancelDialogDescription": "This will cancel the recurring booking for {{court}} ({{user}}) every {{day}} at {{startTime}} for {{duration}} minutes, from {{startDate}} to {{endDate}}. All future occurrences will be cancelled.",
+      "cancelDialogFallback": "This will cancel the entire recurring series and all future occurrences.",
+      "cancelDialogInline": "This reservation is part of a recurring series for {{court}} ({{user}}) starting at {{startAt}}. Cancelling will cancel all future occurrences of the series.",
+      "sortCreatedAtDesc": "Created (newest)",
+      "sortCreatedAtAsc": "Created (oldest)",
+      "sortStartDateAsc": "Start date (earliest)",
+      "sortStartDateDesc": "Start date (latest)",
+      "sortCourtNameAsc": "Court (A-Z)",
+      "sortUserNameAsc": "Customer (A-Z)"
+    },
     "placeholder": {
       "title": "Section under construction",
       "subtitle": "This admin section is not yet available."
@@ -450,7 +476,8 @@
     "cancelledByUser": "Cancelled by user",
     "cancelledByAdmin": "Cancelled by admin",
     "noShow": "No-show",
-    "blocked": "Blocked"
+    "blocked": "Blocked",
+    "cancelled": "Cancelled"
   },
   "notFound": {
     "title": "404 - Página no encontrada"
