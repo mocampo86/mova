@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link as RouterLink, useParams } from 'react-router-dom';
 import {
   Alert,
   Button,
@@ -244,7 +244,10 @@ export default function AdminRecurringReservationsPage() {
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <Stack direction="row" justifyContent="flex-end">
+              <Stack direction="row" justifyContent="flex-end" spacing={2}>
+                <Button component={RouterLink} to={`/admin/complex/${complexId}/recurring`} variant="outlined">
+                  {t('common.cancel')}
+                </Button>
                 <Button type="submit" variant="contained" disabled={!canSubmit}>
                   {t('admin.recurringPage.create')}
                 </Button>

@@ -55,7 +55,7 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/user/reservations` | List of the authenticated user's upcoming reservations. | Authenticated users |
 | `/user/recurring` | Create a weekly recurring reservation for the authenticated user. | Authenticated users |
 | `/user/history` | List of the authenticated user's reservation history. | Authenticated users |
-| `/user/profile` | View the authenticated user's profile and update the phone number. | Authenticated users |
+| `/user/profile` | View and update the authenticated user's profile and update the phone number. | Authenticated users |
 | `/admin/super` | Super admin dashboard. | `SuperAdmin` |
 | `/admin/complex/:complexId` | Complex admin dashboard overview with courts, reservations, and blocked users summaries. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/profile` | Edit the complex public profile. | `ComplexAdmin` of the requested complex |
@@ -63,6 +63,8 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/admin/complex/:complexId/courts/new` | Create a new court for the complex. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/courts/:courtId/edit` | Edit an existing court, including sports assignment and day-of-week availability rules. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/reservations` | Complex admin reservations. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/recurring` | List and cancel recurring reservations for the complex. | `ComplexAdmin` of the requested complex |
+| `/admin/complex/:complexId/recurring/new` | Create a new recurring reservation for a customer. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/users` | Complex admin user management: search users, block/unblock users, and view reservation history. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/configuration` | Configure the complex cancellation policy: minimum notice hours and whether users may cancel reservations. | `ComplexAdmin` of the requested complex |
 

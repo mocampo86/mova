@@ -66,6 +66,32 @@ export interface RecurringReservation {
   occurrences: Reservation[];
 }
 
+export interface RecurringReservationListItem {
+  id: string;
+  complexId: string;
+  courtId: string;
+  courtName: string;
+  userId: string;
+  userName: string;
+  dayOfWeek: number;
+  startTime: string;
+  durationMinutes: number;
+  startDate: string;
+  endDate: string;
+  status: 'Active' | 'Cancelled';
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface RecurringReservationListFilters {
+  page: number;
+  pageSize: number;
+  userId?: string;
+  courtId?: string;
+  status?: string;
+  sort?: string;
+}
+
 export interface ReservationListFilters {
   page: number;
   pageSize: number;

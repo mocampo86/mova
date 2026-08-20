@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<IModifyRecurringReservationFutureHandler, ModifyRecurringReservationFutureHandler>();
         services.AddScoped<IGetReservationByIdHandler, GetReservationByIdHandler>();
         services.AddScoped<IGetReservationsByComplexHandler, GetReservationsByComplexHandler>();
+        services.AddScoped<IGetRecurringReservationsByComplexHandler, GetRecurringReservationsByComplexHandler>();
         services.AddScoped<IGetMyUpcomingReservationsHandler, GetMyUpcomingReservationsHandler>();
         services.AddScoped<IGetMyReservationHistoryHandler, GetMyReservationHistoryHandler>();
         services.AddScoped<ICancelReservationHandler, CancelReservationHandler>();

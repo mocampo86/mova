@@ -6,22 +6,27 @@ import { AuthContext } from '../auth/AuthContext';
 import type { AuthState } from '../auth/authTypes';
 import {
   cancelMyReservation,
+  cancelRecurringReservation,
   cancelReservation,
   createMyRecurringReservation,
   createReservation,
+  getRecurringReservations,
   updateReservationStatus,
   useCancelMyReservation,
+  useCancelRecurringReservation,
   useCancelReservation,
   useCreateMyRecurringReservation,
   useCreateReservation,
   useMyReservationHistory,
   useMyReservations,
+  useRecurringReservations,
   useReservations,
   useUpdateReservationStatus
 } from './reservationApi';
 import type {
   CreateMyRecurringReservationRequest,
   CreateReservationRequest,
+  RecurringReservationListFilters,
   ReservationListFilters,
   UpdateReservationStatusRequest,
   UserReservationsFilters
@@ -631,5 +636,175 @@ describe('useMyReservationHistory', () => {
     const url = fetchSpy.mock.calls[0][0] as string;
     expect(url).toContain('page=1');
     expect(url).toContain('pageSize=10');
+  });
+});
+
+describe('getRecurringReservations', () => {
+  it('sends a GET request with 1-based page and filters', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalItems: 0,
+          totalPages: 0
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+
+    const filters: RecurringReservationListFilters = {
+      page: 0,
+      pageSize: 10,
+      courtId: 'court-1',
+      status: 'Active',
+      sort: 'createdAt:desc'
+    };
+
+    await getRecurringReservations('complex-1', filters, 'token');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/complexes/complex-1/recurring-reservations?'),
+      expect.any(Object)
+    );
+
+    const url = fetchSpy.mock.calls[0][0] as string;
+    expect(url).toContain('page=1');
+    expect(url).toContain('pageSize=10');
+    expect(url).toContain('courtId=court-1');
+    expect(url).toContain('status=Active');
+    expect(url).toContain('sort=createdAt%3Adesc');
+
+    fetchSpy.mockRestore();
+  });
+});
+
+describe('useRecurringReservations', () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          items: [],
+          page: 1,
+          pageSize: 10,
+          totalItems: 0,
+          totalPages: 0
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+  });
+
+  afterEach(() => {
+    fetchSpy.mockRestore();
+  });
+
+  it('sends a 1-based page number and filters to the recurring list endpoint', async () => {
+    const filters: RecurringReservationListFilters = {
+      page: 1,
+      pageSize: 10,
+      status: 'Active',
+      sort: 'createdAt:desc'
+    };
+
+    const { result } = renderHook(() => useRecurringReservations('complex-1', filters), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/complexes/complex-1/recurring-reservations?'),
+      expect.any(Object)
+    );
+
+    const url = fetchSpy.mock.calls[0][0] as string;
+    expect(url).toContain('page=2');
+    expect(url).toContain('status=Active');
+    expect(url).toContain('sort=createdAt%3Adesc');
+  });
+});
+
+describe('cancelRecurringReservation', () => {
+  it('sends a PATCH request to the recurring cancel endpoint', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: 'recurring-1',
+          status: 'Cancelled'
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+
+    await cancelRecurringReservation('complex-1', 'recurring-1', { reason: 'No longer needed' }, 'token');
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/complexes/complex-1/recurring-reservations/recurring-1/cancel'),
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ reason: 'No longer needed' })
+      })
+    );
+
+    fetchSpy.mockRestore();
+  });
+});
+
+describe('useCancelRecurringReservation', () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: 'recurring-1',
+          status: 'Cancelled'
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    );
+  });
+
+  afterEach(() => {
+    fetchSpy.mockRestore();
+  });
+
+  it('sends a PATCH request to the recurring cancel endpoint', async () => {
+    const { result } = renderHook(() => useCancelRecurringReservation('complex-1'), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => expect(result.current.mutateAsync).toBeTruthy());
+
+    await result.current.mutateAsync({
+      recurringReservationId: 'recurring-1',
+      request: { reason: 'No longer needed' }
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/complexes/complex-1/recurring-reservations/recurring-1/cancel'),
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ reason: 'No longer needed' })
+      })
+    );
   });
 });

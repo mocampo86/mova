@@ -50,6 +50,8 @@
     "until": "Até {{value}}",
     "lastUpdated": "Última atualização {{date}}",
     "notUpdatedYet": "Ainda não atualizado",
+    "minutes": "minutos",
+    "sort": "Ordenar",
     "validation": {
       "value": {
         "validNumber": "O valor deve ser um número válido."
@@ -426,6 +428,30 @@
       "create": "Criar reserva recorrente",
       "success": "{{count}} reservas recorrentes criadas com sucesso."
     },
+    "recurringList": {
+      "title": "Reservas recorrentes",
+      "newRecurringBooking": "Nova reserva recorrente",
+      "courtFilter": "Quadra",
+      "allCourts": "Todas as quadras",
+      "userFilter": "Cliente",
+      "allUsers": "Todos os clientes",
+      "day": "Dia",
+      "time": "Horário de início",
+      "duration": "Duração",
+      "period": "Período",
+      "empty": "Não há reservas recorrentes para este complexo.",
+      "cancelSeries": "Cancelar série",
+      "cancelDialogTitle": "Cancelar série recorrente",
+      "cancelDialogDescription": "Isso cancelará a reserva recorrente para {{court}} ({{user}}) toda {{day}} às {{startTime}} por {{duration}} minutos, de {{startDate}} a {{endDate}}. Todas as ocorrências futuras serão canceladas.",
+      "cancelDialogFallback": "Isso cancelará toda a série recorrente e todas as ocorrências futuras.",
+      "cancelDialogInline": "Esta reserva faz parte de uma série recorrente para {{court}} ({{user}}) começando em {{startAt}}. Ao cancelar, todas as ocorrências futuras da série serão canceladas.",
+      "sortCreatedAtDesc": "Criação (mais recente)",
+      "sortCreatedAtAsc": "Criação (mais antigo)",
+      "sortStartDateAsc": "Data de início (próxima)",
+      "sortStartDateDesc": "Data de início (distante)",
+      "sortCourtNameAsc": "Quadra (A-Z)",
+      "sortUserNameAsc": "Cliente (A-Z)"
+    },
     "placeholder": {
       "title": "Seção em construção",
       "subtitle": "Esta seção de administração ainda não está disponível."
@@ -450,7 +476,8 @@
     "cancelledByUser": "Cancelada pelo usuário",
     "cancelledByAdmin": "Cancelada pelo admin",
     "noShow": "Não compareceu",
-    "blocked": "Bloqueado"
+    "blocked": "Bloqueado",
+    "cancelled": "Cancelada"
   },
   "notFound": {
     "title": "404 - Página não encontrada"
