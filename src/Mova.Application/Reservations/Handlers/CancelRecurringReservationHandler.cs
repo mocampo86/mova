@@ -17,11 +17,17 @@ public sealed class CancelRecurringReservationHandler(
     {
         var recurringReservation = await recurringReservations.GetByIdAsync(command.RecurringReservationId, cancellationToken);
         if (recurringReservation is null ||
-            recurringReservation.SportsComplexId != command.SportsComplexId ||
-            recurringReservation.UserId != command.CancelledByUserId)
+            recurringReservation.SportsComplexId != command.SportsComplexId)
         {
             throw new NotFoundException("Recurring reservation not found.");
         }
+
+        if (recurringReservation.UserId != command.CancelledByUserId && !command.IsAdmin)
+        {
+            throw new NotFoundException("Recurring reservation not found.");
+        }
+
+        var cancelledByAdmin = command.IsAdmin && recurringReservation.UserId != command.CancelledByUserId;
 
         if (recurringReservation.Status != RecurringReservationStatus.Active)
         {
@@ -33,22 +39,25 @@ public sealed class CancelRecurringReservationHandler(
             DateTime.UtcNow,
             cancellationToken);
 
-        foreach (var occurrence in futureOccurrences)
+        if (!cancelledByAdmin)
         {
-            var evaluation = await cancellationPolicy.EvaluateAsync(
-                occurrence.SportsComplexId,
-                occurrence.StartAt,
-                DateTime.UtcNow,
-                cancellationToken);
-
-            if (!evaluation.AllowUserCancellation)
+            foreach (var occurrence in futureOccurrences)
             {
-                throw new UserCancellationDisabledException("User cancellation is disabled for this complex.");
-            }
+                var evaluation = await cancellationPolicy.EvaluateAsync(
+                    occurrence.SportsComplexId,
+                    occurrence.StartAt,
+                    DateTime.UtcNow,
+                    cancellationToken);
 
-            if (!evaluation.IsWithinWindow)
-            {
-                throw new CancellationDeadlineExceededException("The cancellation deadline has passed.");
+                if (!evaluation.AllowUserCancellation)
+                {
+                    throw new UserCancellationDisabledException("User cancellation is disabled for this complex.");
+                }
+
+                if (!evaluation.IsWithinWindow)
+                {
+                    throw new CancellationDeadlineExceededException("The cancellation deadline has passed.");
+                }
             }
         }
 
@@ -56,7 +65,7 @@ public sealed class CancelRecurringReservationHandler(
 
         foreach (var occurrence in futureOccurrences)
         {
-            occurrence.Cancel(command.CancelledByUserId, false, command.Reason);
+            occurrence.Cancel(command.CancelledByUserId, cancelledByAdmin, command.Reason);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

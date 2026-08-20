@@ -38,6 +38,17 @@ export interface CreateMyRecurringReservationRequest {
   notes?: string;
 }
 
+export interface CreateRecurringReservationForCustomerRequest {
+  userId: string;
+  courtId: string;
+  dayOfWeek: number;
+  startTime: string;
+  durationMinutes: number;
+  startDate: string;
+  endDate: string;
+  notes?: string;
+}
+
 export interface RecurringReservation {
   id: string;
   complexId: string;

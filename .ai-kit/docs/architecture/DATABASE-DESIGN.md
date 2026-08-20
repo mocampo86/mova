@@ -166,6 +166,7 @@ CREATE TABLE RecurringReservations (
     EndDate DATE NOT NULL,
     Status TEXT NOT NULL,
     CreatedAt TIMESTAMPTZ NOT NULL,
+    UpdatedAt TIMESTAMPTZ,
     CONSTRAINT chk_recurring_dates CHECK (StartDate <= EndDate)
 );
 ```

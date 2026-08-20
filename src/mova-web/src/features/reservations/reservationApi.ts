@@ -5,6 +5,7 @@ import type { PagedResult } from '../complexes/complexTypes';
 import type {
   CancelReservationRequest,
   CreateMyRecurringReservationRequest,
+  CreateRecurringReservationForCustomerRequest,
   CreateMyReservationRequest,
   CreateReservationRequest,
   RecurringReservation,
@@ -193,6 +194,41 @@ export function useCreateMyRecurringReservation(complexId: string) {
       queryClient.invalidateQueries({ queryKey: ['my-reservations'] });
       queryClient.invalidateQueries({ queryKey: ['reservations', complexId] });
       queryClient.invalidateQueries({ queryKey: ['court-availability', complexId] });
+    }
+  });
+}
+
+export async function createRecurringReservationForCustomer(
+  complexId: string,
+  request: CreateRecurringReservationForCustomerRequest,
+  accessToken: string
+): Promise<RecurringReservation> {
+  return apiClient<RecurringReservation>(
+    `/api/v1/complexes/${complexId}/recurring-reservations`,
+    {
+      method: 'POST',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useCreateRecurringReservationForCustomer(complexId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<RecurringReservation, Error, CreateRecurringReservationForCustomerRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to create a recurring reservation for a customer.');
+      }
+
+      return createRecurringReservationForCustomer(complexId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['court-availability', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
     }
   });
 }

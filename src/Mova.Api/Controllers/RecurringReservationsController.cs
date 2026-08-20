@@ -17,7 +17,8 @@ public sealed class RecurringReservationsController(
     IModifyRecurringReservationFutureHandler modifyFutureHandler,
     IValidator<CreateRecurringReservationCommand> createValidator,
     IValidator<CancelRecurringReservationCommand> cancelValidator,
-    IValidator<ModifyRecurringReservationFutureCommand> modifyFutureValidator) : ControllerBase
+    IValidator<ModifyRecurringReservationFutureCommand> modifyFutureValidator,
+    IAuthorizationService authorizationService) : ControllerBase
 {
     [HttpPost("me")]
     [Authorize(Policy = AuthorizationPolicies.User)]
@@ -54,9 +55,38 @@ public sealed class RecurringReservationsController(
         return Created($"/api/v1/complexes/{complexId}/recurring-reservations/{result.Id}", result);
     }
 
+    [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
+    public async Task<ActionResult<RecurringReservationInfo>> CreateRecurringReservationForCustomer(
+        Guid complexId,
+        [FromBody] CreateRecurringReservationForCustomerRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!Enum.IsDefined(typeof(DayOfWeek), request.DayOfWeek))
+        {
+            return BadRequest(new { error = new { message = "DayOfWeek is not valid." } });
+        }
+
+        var command = new CreateRecurringReservationCommand(
+            complexId,
+            request.CourtId,
+            request.UserId,
+            (DayOfWeek)request.DayOfWeek,
+            request.StartTime,
+            request.DurationMinutes,
+            request.StartDate,
+            request.EndDate,
+            request.Notes);
+
+        await createValidator.ValidateAndThrowAsync(command, cancellationToken);
+
+        var result = await createHandler.HandleAsync(command, cancellationToken);
+        return Created($"/api/v1/complexes/{complexId}/recurring-reservations/{result.Id}", result);
+    }
+
     [HttpPatch("{id:guid}/cancel")]
     [Authorize(Policy = AuthorizationPolicies.User)]
-    public async Task<ActionResult<RecurringReservationInfo>> CancelMyRecurringReservation(
+    public async Task<ActionResult<RecurringReservationInfo>> CancelRecurringReservation(
         Guid complexId,
         Guid id,
         [FromBody] CancelReservationRequest request,
@@ -68,7 +98,18 @@ public sealed class RecurringReservationsController(
             return Unauthorized();
         }
 
-        var command = new CancelRecurringReservationCommand(complexId, id, userId, request.Reason);
+        var authorizationResult = await authorizationService.AuthorizeAsync(
+            User,
+            HttpContext,
+            AuthorizationPolicies.ComplexAdmin);
+
+        var command = new CancelRecurringReservationCommand(
+            complexId,
+            id,
+            userId,
+            request.Reason,
+            authorizationResult.Succeeded);
+
         await cancelValidator.ValidateAndThrowAsync(command, cancellationToken);
 
         var result = await cancelHandler.HandleAsync(command, cancellationToken);

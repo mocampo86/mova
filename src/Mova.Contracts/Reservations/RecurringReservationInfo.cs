@@ -37,6 +37,9 @@ public sealed class RecurringReservationInfo
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
 
+    [JsonPropertyName("updatedAt")]
+    public DateTime? UpdatedAt { get; set; }
+
     [JsonPropertyName("occurrences")]
     public IReadOnlyList<ReservationInfo> Occurrences { get; set; } = [];
 }
