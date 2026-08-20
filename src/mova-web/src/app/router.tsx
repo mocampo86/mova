@@ -27,6 +27,7 @@ import UnauthorizedPage from '../pages/UnauthorizedPage';
 import UserDashboardPage from '../pages/UserDashboardPage';
 import UserHistoryPage from '../pages/UserHistoryPage';
 import UserProfilePage from '../pages/UserProfilePage';
+import AdminRecurringReservationsListPage from '../pages/AdminRecurringReservationsListPage';
 import UserRecurringReservationsPage from '../pages/UserRecurringReservationsPage';
 import UserReservationsPage from '../pages/UserReservationsPage';
 
@@ -48,7 +49,8 @@ export default function AppRouter() {
         <Route path="courts/:courtId/edit" element={<EditCourtPage />} />
         <Route path="business-hours" element={<BusinessHoursPage />} />
         <Route path="reservations" element={<ComplexReservationsPage />} />
-        <Route path="recurring" element={<AdminRecurringReservationsPage />} />
+        <Route path="recurring" element={<AdminRecurringReservationsListPage />} />
+        <Route path="recurring/new" element={<AdminRecurringReservationsPage />} />
         <Route path="users" element={<ComplexUsersPage />} />
         <Route path="configuration" element={<ConfigurationPage />} />
         <Route path="*" element={<ComplexAdminPlaceholderPage />} />

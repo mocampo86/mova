@@ -32,7 +32,9 @@ public sealed class ModifyRecurringReservationFutureHandler(
         return await unitOfWork.ExecuteInTransactionAsync(
             async token =>
             {
-                var effectiveFrom = command.EffectiveDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+                var effectiveFrom = command.EffectiveDate
+                    .ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
+                    .AddMinutes(command.UtcOffsetMinutes);
                 var oldFutureOccurrences = await reservations.GetFutureActiveByRecurringReservationIdAsync(
                     command.RecurringReservationId,
                     effectiveFrom,
@@ -48,7 +50,8 @@ public sealed class ModifyRecurringReservationFutureHandler(
                     command.DurationMinutes,
                     command.EffectiveDate,
                     command.EndDate,
-                    command.Notes);
+                    command.Notes,
+                    command.UtcOffsetMinutes);
 
                 if (newOccurrences.Count == 0)
                 {

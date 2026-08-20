@@ -48,7 +48,8 @@ vi.mock('../features/complexes/complexApi', () => ({
 }));
 
 vi.mock('../features/reservations/reservationApi', () => ({
-  useCreateMyRecurringReservation: () => createMutation
+  useCreateMyRecurringReservation: () => createMutation,
+  getUtcOffsetMinutes: () => 0
 }));
 
 import { useRecurringReservationSettings } from '../features/complexes/complexApi';

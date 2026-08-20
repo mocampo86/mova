@@ -46,7 +46,8 @@ public sealed class CreateRecurringReservationHandler(
                     command.DurationMinutes,
                     command.StartDate,
                     command.EndDate,
-                    command.Notes);
+                    command.Notes,
+                    command.UtcOffsetMinutes);
 
                 if (occurrences.Count == 0)
                 {
@@ -130,14 +131,17 @@ public sealed class CreateRecurringReservationHandler(
         int durationMinutes,
         DateOnly startDate,
         DateOnly endDate,
-        string? notes)
+        string? notes,
+        int utcOffsetMinutes = 0)
     {
         var firstDate = FirstDateOnOrAfter(startDate, dayOfWeek);
         var occurrences = new List<Reservation>();
 
         for (var date = firstDate; date <= endDate; date = date.AddDays(7))
         {
-            var startAt = date.ToDateTime(startTime, DateTimeKind.Utc);
+            var startAt = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
+                .AddMinutes(utcOffsetMinutes)
+                .Add(startTime.ToTimeSpan());
             var endAt = startAt.AddMinutes(durationMinutes);
             var reservation = Reservation.Create(
                 sportsComplexId,

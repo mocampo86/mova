@@ -37,6 +37,7 @@ import {
   useReservations,
   useUpdateReservationStatus
 } from '../features/reservations/reservationApi';
+import RecurringReservationCancelDialog from '../features/reservations/RecurringReservationCancelDialog';
 import type {
   Reservation,
   ReservationListFilters,
@@ -160,6 +161,12 @@ export default function ComplexReservationsPage() {
     reservation: null
   });
   const [cancelReason, setCancelReason] = useState('');
+
+  const [recurringCancelDialog, setRecurringCancelDialog] = useState<{
+    open: boolean;
+    recurringReservationId: string;
+    description: string;
+  }>({ open: false, recurringReservationId: '', description: '' });
 
   const [statusDialog, setStatusDialog] = useState<{ open: boolean; reservation: Reservation | null }>({
     open: false,
@@ -381,6 +388,27 @@ export default function ComplexReservationsPage() {
                         </TableCell>
                         <TableCell align="right">
                           <Stack direction="row" spacing={1} justifyContent="flex-end">
+                            {reservation.recurringReservationId && reservation.status !== 'CancelledByUser' && reservation.status !== 'CancelledByAdmin' && (
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                color="error"
+                                disabled={cancelReservation.isPending}
+                                onClick={() =>
+                                  setRecurringCancelDialog({
+                                    open: true,
+                                    recurringReservationId: reservation.recurringReservationId!,
+                                    description: t('admin.recurringList.cancelDialogInline', {
+                                      court: reservation.courtName,
+                                      user: reservation.userName,
+                                      startAt: new Date(reservation.startAt).toLocaleString()
+                                    })
+                                  })
+                                }
+                              >
+                                {t('admin.recurringList.cancelSeries')}
+                              </Button>
+                            )}
                             <Button
                               size="small"
                               variant="outlined"
@@ -535,6 +563,16 @@ export default function ComplexReservationsPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {recurringCancelDialog.open && (
+        <RecurringReservationCancelDialog
+          open={recurringCancelDialog.open}
+          onClose={() => setRecurringCancelDialog({ open: false, recurringReservationId: '', description: '' })}
+          complexId={complexId}
+          recurringReservationId={recurringCancelDialog.recurringReservationId}
+          description={recurringCancelDialog.description}
+        />
+      )}
 
       <Dialog open={statusDialog.open} onClose={() => setStatusDialog({ open: false, reservation: null })} fullWidth maxWidth="sm">
         <DialogTitle>{t('admin.reservations.updateDialogTitle')}</DialogTitle>

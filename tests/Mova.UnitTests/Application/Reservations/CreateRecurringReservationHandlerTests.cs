@@ -159,6 +159,34 @@ public sealed class CreateRecurringReservationHandlerTests
         Assert.Equal(4, result.Occurrences.Count);
     }
 
+    [Fact]
+    public async Task HandleAsync_WithUtcOffset_ConvertsLocalTimeToUtcOccurrences()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        var handler = CreateHandler();
+
+        var result = await handler.HandleAsync(new CreateRecurringReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            DayOfWeek.Friday,
+            new TimeOnly(20, 0),
+            60,
+            new DateOnly(2026, 8, 10),
+            new DateOnly(2026, 9, 6),
+            "Friday 8 PM",
+            false,
+            180));
+
+        Assert.Equal(4, result.Occurrences.Count);
+        Assert.Equal(
+            new DateTime(2026, 8, 14, 23, 0, 0, DateTimeKind.Utc),
+            result.Occurrences[0].StartAt);
+        Assert.Equal(
+            new DateTime(2026, 8, 15, 0, 0, 0, DateTimeKind.Utc),
+            result.Occurrences[0].EndAt);
+    }
+
     private async Task<(SportsComplex Complex, Court Court, User User)> CreateScenarioAsync()
     {
         var complex = SportsComplex.Create(

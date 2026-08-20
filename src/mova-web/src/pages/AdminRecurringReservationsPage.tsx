@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link as RouterLink, useParams } from 'react-router-dom';
 import {
   Alert,
   Button,
@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useActiveCourts } from '../features/complexes/complexApi';
-import { useCreateRecurringReservationForCustomer } from '../features/reservations/reservationApi';
+import { getUtcOffsetMinutes, useCreateRecurringReservationForCustomer } from '../features/reservations/reservationApi';
 import { useComplexUsers } from '../features/users/userAdminApi';
 import type { UserListFilters } from '../features/users/userAdminTypes';
 
@@ -86,7 +86,8 @@ export default function AdminRecurringReservationsPage() {
       durationMinutes: Number(durationMinutes),
       startDate,
       endDate,
-      notes: notes.trim() || undefined
+      notes: notes.trim() || undefined,
+      utcOffsetMinutes: getUtcOffsetMinutes(startDate)
     });
   };
 
@@ -243,7 +244,10 @@ export default function AdminRecurringReservationsPage() {
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <Stack direction="row" justifyContent="flex-end">
+              <Stack direction="row" justifyContent="flex-end" spacing={2}>
+                <Button component={RouterLink} to={`/admin/complex/${complexId}/recurring`} variant="outlined">
+                  {t('common.cancel')}
+                </Button>
                 <Button type="submit" variant="contained" disabled={!canSubmit}>
                   {t('admin.recurringPage.create')}
                 </Button>
