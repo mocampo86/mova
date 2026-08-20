@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useActiveCourts } from '../features/complexes/complexApi';
-import { useCreateRecurringReservationForCustomer } from '../features/reservations/reservationApi';
+import { getUtcOffsetMinutes, useCreateRecurringReservationForCustomer } from '../features/reservations/reservationApi';
 import { useComplexUsers } from '../features/users/userAdminApi';
 import type { UserListFilters } from '../features/users/userAdminTypes';
 
@@ -86,7 +86,8 @@ export default function AdminRecurringReservationsPage() {
       durationMinutes: Number(durationMinutes),
       startDate,
       endDate,
-      notes: notes.trim() || undefined
+      notes: notes.trim() || undefined,
+      utcOffsetMinutes: getUtcOffsetMinutes(startDate)
     });
   };
 

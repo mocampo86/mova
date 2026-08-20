@@ -24,4 +24,7 @@ public sealed class CreateRecurringReservationRequest
 
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }
+
+    [JsonPropertyName("utcOffsetMinutes")]
+    public int UtcOffsetMinutes { get; set; }
 }

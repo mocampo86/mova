@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useActiveComplexes, useActiveCourts, useRecurringReservationSettings } from '../features/complexes/complexApi';
-import { useCreateMyRecurringReservation } from '../features/reservations/reservationApi';
+import { getUtcOffsetMinutes, useCreateMyRecurringReservation } from '../features/reservations/reservationApi';
 
 function todayIso() {
   return new Date().toISOString().split('T')[0];
@@ -83,7 +83,8 @@ export default function UserRecurringReservationsPage() {
       durationMinutes: Number(durationMinutes),
       startDate,
       endDate,
-      notes: notes.trim() || undefined
+      notes: notes.trim() || undefined,
+      utcOffsetMinutes: getUtcOffsetMinutes(startDate)
     });
   };
 

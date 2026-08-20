@@ -15,7 +15,7 @@ import type {
   UserReservationsFilters
 } from './reservationTypes';
 
-function getUtcOffsetMinutes(date: string): number {
+export function getUtcOffsetMinutes(date: string): number {
   return new Date(`${date}T00:00`).getTimezoneOffset();
 }
 
