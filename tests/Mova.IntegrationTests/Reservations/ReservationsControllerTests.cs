@@ -1087,6 +1087,135 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         Assert.All(created.Occurrences, occurrence => Assert.Equal("Confirmed", occurrence.Status));
     }
 
+    [Fact]
+    public async Task UpdateRecurringReservationSettings_AsAdmin_UpdatesAndReturnsSetting()
+    {
+        var client = _factory.CreateClient();
+        var adminSuffix = $"settings-admin-{Guid.NewGuid()}";
+        var adminLogin = await LoginWithUserAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+
+        var adminToken = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/configuration/recurring-reservations", new UpdateRecurringReservationSettingsRequest
+        {
+            AllowUserRecurringReservations = false
+        });
+
+        Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
+        var updated = await updateResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(updated);
+        Assert.False(updated.AllowUserRecurringReservations);
+
+        var getResponse = await client.GetAsync($"/api/v1/complexes/{complex.Id}");
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        var loaded = await getResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(loaded);
+        Assert.False(loaded.AllowUserRecurringReservations);
+    }
+
+    [Fact]
+    public async Task UpdateRecurringReservationSettings_AsUser_ReturnsForbidden()
+    {
+        var client = _factory.CreateClient();
+        var adminSuffix = $"settings-unauth-admin-{Guid.NewGuid()}";
+        var adminLogin = await LoginWithUserAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+
+        var playerToken = await LoginAsync(client, $"settings-unauth-player-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", playerToken);
+
+        var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/configuration/recurring-reservations", new UpdateRecurringReservationSettingsRequest
+        {
+            AllowUserRecurringReservations = false
+        });
+
+        Assert.Equal(HttpStatusCode.Forbidden, updateResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateMyRecurringReservation_WhenDisabled_ReturnsConflict()
+    {
+        var client = _factory.CreateClient();
+        var adminSuffix = $"recurring-disabled-admin-{Guid.NewGuid()}";
+        var adminLogin = await LoginWithUserAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var adminToken = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/configuration/recurring-reservations", new UpdateRecurringReservationSettingsRequest
+        {
+            AllowUserRecurringReservations = false
+        });
+        updateResponse.EnsureSuccessStatusCode();
+
+        var playerToken = await LoginAsync(client, $"recurring-disabled-player-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", playerToken);
+
+        var response = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        {
+            CourtId = court.Id,
+            DayOfWeek = (int)DayOfWeek.Monday,
+            StartTime = new TimeOnly(14, 0),
+            DurationMinutes = 60,
+            StartDate = new DateOnly(2026, 10, 5),
+            EndDate = new DateOnly(2026, 10, 26)
+        });
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateRecurringReservation_AsAdmin_WhenDisabled_CreatesConfirmedOccurrences()
+    {
+        var client = _factory.CreateClient();
+        var adminSuffix = $"recurring-admin-disabled-{Guid.NewGuid()}";
+        var adminLogin = await LoginWithUserAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var adminToken = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/configuration/recurring-reservations", new UpdateRecurringReservationSettingsRequest
+        {
+            AllowUserRecurringReservations = false
+        });
+        updateResponse.EnsureSuccessStatusCode();
+
+        var playerLogin = await LoginWithUserAsync(client, $"recurring-admin-disabled-player-{Guid.NewGuid()}");
+
+        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations", new CreateRecurringReservationForCustomerRequest
+        {
+            UserId = playerLogin.User.Id,
+            CourtId = court.Id,
+            DayOfWeek = (int)DayOfWeek.Monday,
+            StartTime = new TimeOnly(14, 0),
+            DurationMinutes = 60,
+            StartDate = new DateOnly(2026, 10, 5),
+            EndDate = new DateOnly(2026, 10, 26)
+        });
+
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<RecurringReservationInfo>();
+        Assert.NotNull(created);
+        Assert.Equal(playerLogin.User.Id, created.UserId);
+        Assert.Equal("Active", created.Status);
+        Assert.Equal(4, created.Occurrences.Count);
+        Assert.All(created.Occurrences, occurrence => Assert.Equal("Confirmed", occurrence.Status));
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         return (await LoginWithUserAsync(client, suffix)).AccessToken;

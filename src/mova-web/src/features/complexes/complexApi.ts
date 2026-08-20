@@ -1,7 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../services/apiClient';
 import { useAuth } from '../auth/useAuth';
-import type { BusinessHours, CancellationPolicy, ComplexDashboard, Court, CourtAvailabilitySlot, PagedResult, Sport, SportsComplex, UpdateBusinessHoursRequest, UpdateCancellationPolicyRequest, UpdateComplexRequest } from './complexTypes';
+import type {
+  BusinessHours,
+  CancellationPolicy,
+  ComplexDashboard,
+  Court,
+  CourtAvailabilitySlot,
+  PagedResult,
+  Sport,
+  SportsComplex,
+  UpdateBusinessHoursRequest,
+  UpdateCancellationPolicyRequest,
+  UpdateComplexRequest,
+  UpdateRecurringReservationSettingsRequest
+} from './complexTypes';
 
 export function useActiveComplexes(search: string, page = 1) {
   const params = new URLSearchParams({ page: String(page), pageSize: '12' });
@@ -180,6 +193,45 @@ export function useUpdateCancellationPolicy(complexId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cancellation-policy', complexId] });
+    }
+  });
+}
+
+export function useRecurringReservationSettings(complexId: string) {
+  return useActiveComplex(complexId);
+}
+
+export async function updateRecurringReservationSettings(
+  complexId: string,
+  request: UpdateRecurringReservationSettingsRequest,
+  accessToken: string
+): Promise<SportsComplex> {
+  return apiClient<SportsComplex>(
+    `/api/v1/complexes/${complexId}/configuration/recurring-reservations`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(request)
+    },
+    accessToken
+  );
+}
+
+export function useUpdateRecurringReservationSettings(complexId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation<SportsComplex, Error, UpdateRecurringReservationSettingsRequest>({
+    mutationFn: async (request) => {
+      if (!accessToken) {
+        throw new Error('You must be logged in to update the recurring reservation settings.');
+      }
+
+      return updateRecurringReservationSettings(complexId, request, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['active-complex', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['active-complexes'] });
+      queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
     }
   });
 }

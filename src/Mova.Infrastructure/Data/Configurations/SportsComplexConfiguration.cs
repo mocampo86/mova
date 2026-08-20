@@ -46,6 +46,10 @@ public sealed class SportsComplexConfiguration : IEntityTypeConfiguration<Sports
             .IsRequired()
             .HasConversion<string>();
 
+        builder.Property(s => s.AllowUserRecurringReservations)
+            .IsRequired()
+            .HasDefaultValue(true);
+
         builder.Property(s => s.CreatedAt)
             .IsRequired();
 

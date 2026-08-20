@@ -396,7 +396,7 @@
     },
     "configuration": {
       "title": "Configuração",
-      "subtitle": "Configure a política de cancelamento deste complexo.",
+      "subtitle": "Configure a política de cancelamento e as opções de reservas recorrentes deste complexo.",
       "missingId": "O identificador do complexo está ausente.",
       "loading": "Carregando configuração...",
       "loadError": "Não foi possível carregar a configuração. Tente novamente mais tarde.",
@@ -405,7 +405,17 @@
       "minimumHours": "Prazo mínimo de cancelamento (horas)",
       "minimumHoursHelper": "Os usuários devem cancelar pelo menos estas horas antes do início da reserva.",
       "allowUserCancellation": "Permitir que os usuários cancelem suas reservas",
-      "save": "Salvar política"
+      "save": "Salvar política",
+      "cancellationTitle": "Política de cancelamento",
+      "recurringTitle": "Reservas recorrentes",
+      "recurringSubtitle": "Controle se os usuários regulares podem criar reservas recorrentes para este complexo. Os administradores sempre podem criar reservas recorrentes.",
+      "recurringLoading": "Carregando opções de reservas recorrentes...",
+      "recurringLoadError": "Não foi possível carregar as opções de reservas recorrentes. Tente novamente mais tarde.",
+      "recurringSuccess": "As opções de reservas recorrentes foram atualizadas com sucesso.",
+      "recurringSaveError": "Não foi possível salvar as opções de reservas recorrentes. Tente novamente mais tarde.",
+      "allowUserRecurringReservations": "Permitir que usuários regulares criem reservas recorrentes",
+      "allowUserRecurringReservationsHelper": "Quando desativado, os usuários regulares não poderão criar reservas recorrentes para este complexo. Os administradores do complexo não são afetados por esta opção.",
+      "recurringSave": "Salvar opções de reservas recorrentes"
     },
     "recurringPage": {
       "title": "Reservas recorrentes",
@@ -500,7 +510,10 @@
       "create": "Criar reserva recorrente",
       "success": "Reserva recorrente criada com {{count}} ocorrencias confirmadas.",
       "complexesError": "Nao foi possivel carregar os complexos.",
-      "courtsError": "Nao foi possivel carregar as quadras."
+      "courtsError": "Nao foi possivel carregar as quadras.",
+      "settingsError": "Nao foi possivel carregar as opcoes do complexo.",
+      "disabledForComplex": "Reservas recorrentes nao estao disponiveis para este complexo.",
+      "disabledTooltip": "Reservas recorrentes estao desativadas para este complexo."
     },
     "exploreComplexesTitle": "Buscar complexo",
     "exploreComplexesDescription": "Busque complexos esportivos ativos e consulte disponibilidade.",

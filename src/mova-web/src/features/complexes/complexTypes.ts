@@ -17,6 +17,7 @@ export interface SportsComplex {
   latitude?: number | null;
   longitude?: number | null;
   status?: string;
+  allowUserRecurringReservations: boolean;
   createdAt?: string;
   updatedAt?: string | null;
 }
@@ -111,4 +112,8 @@ export interface CancellationPolicy {
 export interface UpdateCancellationPolicyRequest {
   minimumHours: number;
   allowUserCancellation: boolean;
+}
+
+export interface UpdateRecurringReservationSettingsRequest {
+  allowUserRecurringReservations: boolean;
 }

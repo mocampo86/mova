@@ -21,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<ICompleteProfileHandler, CompleteProfileHandler>();
         services.AddScoped<ICreateComplexHandler, CreateComplexHandler>();
         services.AddScoped<IUpdateComplexHandler, UpdateComplexHandler>();
+        services.AddScoped<IUpdateRecurringReservationSettingsHandler, UpdateRecurringReservationSettingsHandler>();
         services.AddScoped<IGetActiveComplexesHandler, GetActiveComplexesHandler>();
         services.AddScoped<IGetActiveComplexByIdHandler, GetActiveComplexByIdHandler>();
         services.AddScoped<IGetAllComplexesHandler, GetAllComplexesHandler>();

@@ -38,6 +38,11 @@ public sealed class RecurringReservationsController(
             return BadRequest(new { error = new { message = "DayOfWeek is not valid." } });
         }
 
+        var authorizationResult = await authorizationService.AuthorizeAsync(
+            User,
+            HttpContext,
+            AuthorizationPolicies.ComplexAdmin);
+
         var command = new CreateRecurringReservationCommand(
             complexId,
             request.CourtId,
@@ -47,7 +52,8 @@ public sealed class RecurringReservationsController(
             request.DurationMinutes,
             request.StartDate,
             request.EndDate,
-            request.Notes);
+            request.Notes,
+            authorizationResult.Succeeded);
 
         await createValidator.ValidateAndThrowAsync(command, cancellationToken);
 
@@ -76,7 +82,8 @@ public sealed class RecurringReservationsController(
             request.DurationMinutes,
             request.StartDate,
             request.EndDate,
-            request.Notes);
+            request.Notes,
+            true);
 
         await createValidator.ValidateAndThrowAsync(command, cancellationToken);
 

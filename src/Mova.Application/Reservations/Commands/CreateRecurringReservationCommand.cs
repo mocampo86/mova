@@ -9,4 +9,5 @@ public sealed record CreateRecurringReservationCommand(
     int DurationMinutes,
     DateOnly StartDate,
     DateOnly EndDate,
-    string? Notes);
+    string? Notes,
+    bool IsAdmin);

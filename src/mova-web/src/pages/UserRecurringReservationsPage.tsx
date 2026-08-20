@@ -11,10 +11,11 @@ import {
   Select,
   Stack,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useActiveComplexes, useActiveCourts } from '../features/complexes/complexApi';
+import { useActiveComplexes, useActiveCourts, useRecurringReservationSettings } from '../features/complexes/complexApi';
 import { useCreateMyRecurringReservation } from '../features/reservations/reservationApi';
 
 function todayIso() {
@@ -40,7 +41,14 @@ export default function UserRecurringReservationsPage() {
   const [notes, setNotes] = useState('');
 
   const courts = useActiveCourts(complexId);
+  const settings = useRecurringReservationSettings(complexId);
   const createRecurring = useCreateMyRecurringReservation(complexId);
+
+  const userRecurringReservationsEnabled =
+    complexId !== '' &&
+    !settings.isLoading &&
+    !settings.isError &&
+    settings.data?.allowUserRecurringReservations !== false;
 
   const occurrencesCount = useMemo(() => {
     if (!startDate || !endDate) return 0;
@@ -64,6 +72,10 @@ export default function UserRecurringReservationsPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (!userRecurringReservationsEnabled) {
+      return;
+    }
+
     await createRecurring.mutateAsync({
       courtId,
       dayOfWeek: Number(dayOfWeek),
@@ -76,10 +88,13 @@ export default function UserRecurringReservationsPage() {
   };
 
   const canSubmit =
+    userRecurringReservationsEnabled &&
     Boolean(complexId && courtId && startTime && startDate && endDate) &&
     Number(durationMinutes) > 0 &&
     occurrencesCount > 0 &&
     !createRecurring.isPending;
+
+  const formDisabled = !userRecurringReservationsEnabled || courts.isLoading;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -95,12 +110,19 @@ export default function UserRecurringReservationsPage() {
 
         {complexes.isError && <Alert severity="error">{t('dashboard.recurringPage.complexesError')}</Alert>}
         {courts.isError && <Alert severity="error">{t('dashboard.recurringPage.courtsError')}</Alert>}
+        {settings.isError && <Alert severity="error">{t('dashboard.recurringPage.settingsError')}</Alert>}
         {createRecurring.isError && <Alert severity="error">{createRecurring.error.message}</Alert>}
         {createRecurring.isSuccess && (
           <Alert severity="success">
             {t('dashboard.recurringPage.success', {
               count: createRecurring.data.occurrences.length
             })}
+          </Alert>
+        )}
+
+        {complexId !== '' && !settings.isLoading && settings.data?.allowUserRecurringReservations === false && (
+          <Alert severity="info" variant="outlined">
+            {t('dashboard.recurringPage.disabledForComplex')}
           </Alert>
         )}
 
@@ -115,6 +137,7 @@ export default function UserRecurringReservationsPage() {
                   value={complexId}
                   onChange={(event) => setComplexId(event.target.value)}
                   disabled={complexes.isLoading}
+                  data-testid="recurring-complex-select"
                 >
                   <MenuItem value="">{t('dashboard.recurringPage.selectComplex')}</MenuItem>
                   {(complexes.data?.items ?? []).map((complex) => (
@@ -127,13 +150,14 @@ export default function UserRecurringReservationsPage() {
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <FormControl fullWidth disabled={!complexId || courts.isLoading}>
+              <FormControl fullWidth disabled={formDisabled}>
                 <InputLabel id="recurring-court-label">{t('common.court')}</InputLabel>
                 <Select
                   labelId="recurring-court-label"
                   label={t('common.court')}
                   value={courtId}
                   onChange={(event) => setCourtId(event.target.value)}
+                  data-testid="recurring-court-select"
                 >
                   <MenuItem value="">{t('dashboard.recurringPage.selectCourt')}</MenuItem>
                   {(courts.data?.items ?? []).map((court) => (
@@ -146,7 +170,7 @@ export default function UserRecurringReservationsPage() {
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth disabled={formDisabled}>
                 <InputLabel id="recurring-day-label">{t('dashboard.recurringPage.dayOfWeek')}</InputLabel>
                 <Select
                   labelId="recurring-day-label"
@@ -170,6 +194,7 @@ export default function UserRecurringReservationsPage() {
                 value={startTime}
                 onChange={(event) => setStartTime(event.target.value)}
                 fullWidth
+                disabled={formDisabled}
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
@@ -181,6 +206,7 @@ export default function UserRecurringReservationsPage() {
                 value={durationMinutes}
                 onChange={(event) => setDurationMinutes(event.target.value)}
                 fullWidth
+                disabled={formDisabled}
                 inputProps={{ min: 1, max: 1440 }}
               />
             </Grid>
@@ -192,6 +218,7 @@ export default function UserRecurringReservationsPage() {
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
                 fullWidth
+                disabled={formDisabled}
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
@@ -203,6 +230,7 @@ export default function UserRecurringReservationsPage() {
                 value={endDate}
                 onChange={(event) => setEndDate(event.target.value)}
                 fullWidth
+                disabled={formDisabled}
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
@@ -214,6 +242,7 @@ export default function UserRecurringReservationsPage() {
                 onChange={(event) => setNotes(event.target.value)}
                 fullWidth
                 multiline
+                disabled={formDisabled}
                 rows={2}
               />
             </Grid>
@@ -230,9 +259,19 @@ export default function UserRecurringReservationsPage() {
 
             <Grid size={{ xs: 12 }}>
               <Stack direction="row" justifyContent="flex-end">
-                <Button type="submit" variant="contained" disabled={!canSubmit}>
-                  {t('dashboard.recurringPage.create')}
-                </Button>
+                <Tooltip
+                  title={
+                    !userRecurringReservationsEnabled && complexId !== ''
+                      ? t('dashboard.recurringPage.disabledTooltip')
+                      : ''
+                  }
+                >
+                  <span>
+                    <Button type="submit" variant="contained" disabled={!canSubmit}>
+                      {t('dashboard.recurringPage.create')}
+                    </Button>
+                  </span>
+                </Tooltip>
               </Stack>
             </Grid>
           </Grid>

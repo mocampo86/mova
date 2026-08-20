@@ -14,6 +14,7 @@ public sealed class SportsComplex
     public string PhoneNumber { get; private set; } = null!;
     public string Email { get; private set; } = null!;
     public ComplexStatus Status { get; private set; }
+    public bool AllowUserRecurringReservations { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
@@ -48,6 +49,7 @@ public sealed class SportsComplex
             PhoneNumber = phoneNumber.Trim(),
             Email = email.Trim(),
             Status = status,
+            AllowUserRecurringReservations = true,
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -96,6 +98,12 @@ public sealed class SportsComplex
         }
 
         Status = ComplexStatus.Inactive;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateRecurringReservationSettings(bool allowUserRecurringReservations)
+    {
+        AllowUserRecurringReservations = allowUserRecurringReservations;
         UpdatedAt = DateTime.UtcNow;
     }
 
