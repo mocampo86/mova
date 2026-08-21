@@ -12,7 +12,6 @@ public class UpdateComplexCommandValidatorTests
     private static UpdateComplexCommand CreateValidCommand() =>
         new(
             Guid.NewGuid(),
-            Guid.NewGuid(),
             "Club Padel",
             "A premium padel club",
             "Av. Libertador 1234",
@@ -36,14 +35,6 @@ public class UpdateComplexCommandValidatorTests
         var command = CreateValidCommand() with { ComplexId = Guid.Empty };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.ComplexId);
-    }
-
-    [Fact]
-    public void Validate_WithUserIdEmpty_Fails()
-    {
-        var command = CreateValidCommand() with { UserId = Guid.Empty };
-        var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.UserId);
     }
 
     [Fact]

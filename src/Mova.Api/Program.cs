@@ -90,7 +90,8 @@ public class Program
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+                    RoleClaimType = "roles"
                 };
             });
 

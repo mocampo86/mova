@@ -176,15 +176,8 @@ public class ComplexesController : ControllerBase
         [FromBody] UpdateComplexRequest request,
         CancellationToken cancellationToken)
     {
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return Unauthorized();
-        }
-
         var command = new UpdateComplexCommand(
             complexId,
-            userId,
             request.Name,
             request.Description,
             request.Address,

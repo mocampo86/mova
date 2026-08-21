@@ -20,10 +20,6 @@ public sealed class UpdateComplexCommandValidator : AbstractValidator<UpdateComp
             .NotEmpty()
             .WithMessage("Complex identifier is required.");
 
-        RuleFor(x => x.UserId)
-            .NotEmpty()
-            .WithMessage("User identifier is required.");
-
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Name is required.")

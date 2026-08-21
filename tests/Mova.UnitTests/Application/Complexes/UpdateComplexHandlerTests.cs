@@ -33,7 +33,6 @@ public class UpdateComplexHandlerTests
         var handler = CreateHandler();
         var result = await handler.HandleAsync(new UpdateComplexCommand(
             sportsComplex.Id,
-            Guid.NewGuid(),
             "New Name",
             "New description",
             "New address",
@@ -76,7 +75,6 @@ public class UpdateComplexHandlerTests
         var handler = CreateHandler();
         var result = await handler.HandleAsync(new UpdateComplexCommand(
             sportsComplex.Id,
-            Guid.NewGuid(),
             "New Name",
             "New description",
             "New address",
@@ -97,7 +95,6 @@ public class UpdateComplexHandlerTests
         var handler = CreateHandler();
 
         await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(new UpdateComplexCommand(
-            Guid.NewGuid(),
             Guid.NewGuid(),
             "Name",
             "Description",
