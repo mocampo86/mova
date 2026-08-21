@@ -34,6 +34,17 @@ export function useActiveComplex(id: string) {
   });
 }
 
+export function useAdminComplex(id: string) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['admin-complex', id],
+    queryFn: () =>
+      apiClient<SportsComplex>(`/api/v1/complexes/${id}/admin`, {}, accessToken ?? undefined),
+    enabled: Boolean(id && accessToken)
+  });
+}
+
 export function useActiveCourts(complexId: string, sportId?: string) {
   const params = new URLSearchParams({ page: '1', pageSize: '100' });
   if (sportId) params.set('sportId', sportId);
@@ -107,6 +118,7 @@ export function useUpdateComplex(complexId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-complex', complexId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-complex', complexId] });
       queryClient.invalidateQueries({ queryKey: ['complex-dashboard', complexId] });
       queryClient.invalidateQueries({ queryKey: ['active-complexes'] });
     }

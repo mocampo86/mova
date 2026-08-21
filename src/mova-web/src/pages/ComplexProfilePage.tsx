@@ -15,7 +15,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useActiveComplex, useUpdateComplex } from '../features/complexes/complexApi';
+import { useAdminComplex, useUpdateComplex } from '../features/complexes/complexApi';
 
 const phoneNumberPattern = /^\+[0-9](?:\s*[0-9]){6,14}$/;
 
@@ -51,10 +51,7 @@ const schema = z.object({
     .string()
     .min(1, 'Email is required.')
     .email('Email is not valid.')
-    .max(255, 'Email must not exceed 255 characters.'),
-  status: z.enum(['Active', 'Inactive', 'Pending'], {
-    required_error: 'Status is required.'
-  })
+    .max(255, 'Email must not exceed 255 characters.')
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -68,7 +65,7 @@ function formatUpdatedAt(t: (key: string, options?: Record<string, unknown>) => 
 export default function ComplexProfilePage() {
   const { t } = useTranslation();
   const { complexId = '' } = useParams();
-  const { data, isLoading, isError } = useActiveComplex(complexId);
+  const { data, isLoading, isError } = useAdminComplex(complexId);
   const { mutate, isPending, error, isSuccess } = useUpdateComplex(complexId);
 
   const {
@@ -87,8 +84,7 @@ export default function ComplexProfilePage() {
       latitude: null,
       longitude: null,
       phoneNumber: '',
-      email: '',
-      status: 'Active'
+      email: ''
     }
   });
 
@@ -102,8 +98,7 @@ export default function ComplexProfilePage() {
         latitude: data.latitude ?? null,
         longitude: data.longitude ?? null,
         phoneNumber: data.phoneNumber,
-        email: data.email,
-        status: (data.status as FormValues['status']) ?? 'Active'
+        email: data.email
       });
     }
   }, [data, reset]);
@@ -257,12 +252,10 @@ export default function ComplexProfilePage() {
         />
 
         <TextField
-          {...register('status')}
           label={t('common.status')}
+          value={data.status ?? ''}
           fullWidth
-          inputProps={{ readOnly: true }}
-          error={Boolean(errors.status)}
-          helperText={errors.status?.message}
+          InputProps={{ readOnly: true }}
         />
 
         <Button type="submit" variant="contained" disabled={isPending} sx={{ alignSelf: 'flex-start' }}>

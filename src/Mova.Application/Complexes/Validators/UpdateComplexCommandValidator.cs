@@ -20,10 +20,6 @@ public sealed class UpdateComplexCommandValidator : AbstractValidator<UpdateComp
             .NotEmpty()
             .WithMessage("Complex identifier is required.");
 
-        RuleFor(x => x.UserId)
-            .NotEmpty()
-            .WithMessage("User identifier is required.");
-
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Name is required.")
@@ -75,9 +71,5 @@ public sealed class UpdateComplexCommandValidator : AbstractValidator<UpdateComp
             .WithMessage($"Email must not exceed {MaxEmailLength} characters.")
             .EmailAddress()
             .WithMessage("Email is not valid.");
-
-        RuleFor(x => x.Status)
-            .IsInEnum()
-            .WithMessage("Status must be a valid value.");
     }
 }

@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IGetActiveComplexesHandler, GetActiveComplexesHandler>();
         services.AddScoped<IGetActiveComplexByIdHandler, GetActiveComplexByIdHandler>();
         services.AddScoped<IGetAllComplexesHandler, GetAllComplexesHandler>();
+        services.AddScoped<IGetComplexByIdForAdminHandler, GetComplexByIdForAdminHandler>();
         services.AddScoped<IGetComplexDashboardHandler, GetComplexDashboardHandler>();
         services.AddScoped<IUpdateComplexStatusHandler, UpdateComplexStatusHandler>();
         services.AddScoped<ICreateCourtHandler, CreateCourtHandler>();

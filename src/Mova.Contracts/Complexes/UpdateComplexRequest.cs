@@ -29,7 +29,4 @@ public sealed class UpdateComplexRequest
 
     [JsonPropertyName("email")]
     public string Email { get; set; } = string.Empty;
-
-    [JsonPropertyName("status")]
-    public string Status { get; set; } = string.Empty;
 }

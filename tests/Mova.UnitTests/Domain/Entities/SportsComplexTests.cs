@@ -98,7 +98,7 @@ public class SportsComplexTests
     }
 
     [Fact]
-    public void Update_WithValidData_SetsUpdatedAt()
+    public void Update_WithValidData_SetsUpdatedAtAndPreservesStatus()
     {
         var sportsComplex = SportsComplex.Create(
             "Old Name",
@@ -118,8 +118,7 @@ public class SportsComplexTests
             -34.6m,
             -58.3m,
             "+54 11 9999 9999",
-            "new@test.com",
-            ComplexStatus.Inactive);
+            "new@test.com");
 
         Assert.Equal("New Name", sportsComplex.Name);
         Assert.Equal("New description", sportsComplex.Description);
@@ -129,7 +128,7 @@ public class SportsComplexTests
         Assert.Equal(-58.3m, sportsComplex.Longitude);
         Assert.Equal("+54 11 9999 9999", sportsComplex.PhoneNumber);
         Assert.Equal("new@test.com", sportsComplex.Email);
-        Assert.Equal(ComplexStatus.Inactive, sportsComplex.Status);
+        Assert.Equal(ComplexStatus.Active, sportsComplex.Status);
         Assert.NotNull(sportsComplex.UpdatedAt);
     }
 
