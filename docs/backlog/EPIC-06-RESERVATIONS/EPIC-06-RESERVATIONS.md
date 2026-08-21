@@ -34,6 +34,7 @@ Allow users to make, view, and cancel reservations, while administrators can man
 | [US-035](US-035.md) | As an administrator, I want to cancel a reservation if necessary. |
 | [US-036](US-036.md) | As an administrator, I want to mark a reservation as completed or no-show. |
 | [US-073](US-073.md) | As a complex administrator, I want to view reservations in a daily calendar with color-coded slots. |
+| [US-079](US-079.md) | As an administrator, I want to search and select a user when creating a manual reservation. |
 
 ## Acceptance criteria
 

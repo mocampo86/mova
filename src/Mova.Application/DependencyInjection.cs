@@ -59,6 +59,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblyContaining<CreateReservationCommandValidator>();
 
         services.AddScoped<IGetUsersByComplexHandler, GetUsersByComplexHandler>();
+        services.AddScoped<ISearchUsersHandler, SearchUsersHandler>();
         services.AddScoped<IGetUserDashboardHandler, GetUserDashboardHandler>();
         services.AddScoped<IBlockUserHandler, BlockUserHandler>();
         services.AddScoped<IUnblockUserHandler, UnblockUserHandler>();

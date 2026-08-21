@@ -10,6 +10,30 @@ import type {
   UserReservationListResult
 } from './userAdminTypes';
 
+export function useSearchUsers(complexId: string, filters: UserListFilters, enabled = true) {
+  const { accessToken } = useAuth();
+  const params = new URLSearchParams({
+    page: String(filters.page + 1),
+    pageSize: String(filters.pageSize),
+    sort: filters.sort
+  });
+
+  if (filters.search.trim()) {
+    params.set('search', filters.search.trim());
+  }
+
+  return useQuery({
+    queryKey: ['search-users', complexId, filters],
+    queryFn: () =>
+      apiClient<ComplexUserListResult>(
+        `/api/v1/complexes/${complexId}/users/search?${params}`,
+        {},
+        accessToken ?? undefined
+      ),
+    enabled: Boolean(complexId && accessToken) && enabled
+  });
+}
+
 export function useComplexUsers(complexId: string, filters: UserListFilters) {
   const { accessToken } = useAuth();
   const params = new URLSearchParams({
