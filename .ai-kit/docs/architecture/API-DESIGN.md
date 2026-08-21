@@ -23,6 +23,7 @@
 ```text
 GET    /api/v1/complexes
 GET    /api/v1/complexes/{id}
+GET    /api/v1/complexes/{id}/admin
 POST   /api/v1/complexes
 PUT    /api/v1/complexes/{id}
 PATCH  /api/v1/complexes/{id}/status

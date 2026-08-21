@@ -31,7 +31,6 @@ export interface UpdateComplexRequest {
   email: string;
   latitude?: number | null;
   longitude?: number | null;
-  status: string;
 }
 
 export interface Court {

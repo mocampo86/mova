@@ -26,6 +26,7 @@ public class ComplexesController : ControllerBase
     private readonly IUpdateRecurringReservationSettingsHandler _updateRecurringReservationSettingsHandler;
     private readonly IGetActiveComplexesHandler _getActiveComplexesHandler;
     private readonly IGetActiveComplexByIdHandler _getActiveComplexByIdHandler;
+    private readonly IGetComplexByIdForAdminHandler _getComplexByIdForAdminHandler;
     private readonly IUpdateComplexStatusHandler _updateComplexStatusHandler;
     private readonly IGetCourtAvailabilityHandler _getCourtAvailabilityHandler;
     private readonly IGetComplexDashboardHandler _getComplexDashboardHandler;
@@ -41,6 +42,7 @@ public class ComplexesController : ControllerBase
         IUpdateRecurringReservationSettingsHandler updateRecurringReservationSettingsHandler,
         IGetActiveComplexesHandler getActiveComplexesHandler,
         IGetActiveComplexByIdHandler getActiveComplexByIdHandler,
+        IGetComplexByIdForAdminHandler getComplexByIdForAdminHandler,
         IUpdateComplexStatusHandler updateComplexStatusHandler,
         IGetCourtAvailabilityHandler getCourtAvailabilityHandler,
         IGetComplexDashboardHandler getComplexDashboardHandler,
@@ -55,6 +57,7 @@ public class ComplexesController : ControllerBase
         _updateRecurringReservationSettingsHandler = updateRecurringReservationSettingsHandler;
         _getActiveComplexesHandler = getActiveComplexesHandler;
         _getActiveComplexByIdHandler = getActiveComplexByIdHandler;
+        _getComplexByIdForAdminHandler = getComplexByIdForAdminHandler;
         _updateComplexStatusHandler = updateComplexStatusHandler;
         _getCourtAvailabilityHandler = getCourtAvailabilityHandler;
         _getComplexDashboardHandler = getComplexDashboardHandler;
@@ -93,6 +96,24 @@ public class ComplexesController : ControllerBase
     {
         var result = await _getActiveComplexByIdHandler.HandleAsync(
             new GetActiveComplexByIdQuery(complexId),
+            cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("{complexId:guid}/admin")]
+    [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
+    public async Task<ActionResult<SportsComplexInfo>> GetByIdForAdmin(
+        Guid complexId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _getComplexByIdForAdminHandler.HandleAsync(
+            new GetComplexByIdForAdminQuery(complexId),
             cancellationToken);
 
         if (result is null)
@@ -161,11 +182,6 @@ public class ComplexesController : ControllerBase
             return Unauthorized();
         }
 
-        if (!Enum.TryParse<ComplexStatus>(request.Status, out var status))
-        {
-            return BadRequest(new { error = new { message = "Status is not valid." } });
-        }
-
         var command = new UpdateComplexCommand(
             complexId,
             userId,
@@ -176,8 +192,7 @@ public class ComplexesController : ControllerBase
             request.Latitude,
             request.Longitude,
             request.PhoneNumber,
-            request.Email,
-            status);
+            request.Email);
 
         await _updateValidator.ValidateAndThrowAsync(command, cancellationToken);
 

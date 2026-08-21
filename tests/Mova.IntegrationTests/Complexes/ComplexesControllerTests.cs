@@ -120,6 +120,66 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
     }
 
     [Fact]
+    public async Task GetActiveList_WithBypassParameter_IgnoresItAndReturnsOnlyActive()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"list-bypass-{Guid.NewGuid()}";
+
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var createResponse = await client.PostAsJsonAsync("/api/v1/complexes", CreateValidRequest());
+        createResponse.EnsureSuccessStatusCode();
+        var created = await createResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(created);
+
+        var deactivateResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{created.Id}/status", new UpdateComplexStatusRequest { Status = "Inactive" });
+        deactivateResponse.EnsureSuccessStatusCode();
+
+        client.DefaultRequestHeaders.Authorization = null;
+
+        var listResponse = await client.GetAsync("/api/v1/complexes?includePending=true&includeInactive=true");
+        listResponse.EnsureSuccessStatusCode();
+
+        var result = await listResponse.Content.ReadFromJsonAsync<PagedResult<SportsComplexInfo>>();
+        Assert.NotNull(result);
+        Assert.All(result.Items, item => Assert.Equal("Active", item.Status));
+        Assert.DoesNotContain(result.Items, item => item.Id == created.Id);
+    }
+
+    [Fact]
+    public async Task GetActiveById_WithPendingComplex_ReturnsNotFound()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"get-pending-admin-{Guid.NewGuid()}";
+
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var completeResponse = await client.PostAsJsonAsync("/api/v1/auth/complete-complex-admin", new CompleteComplexAdminRequest
+        {
+            PhoneNumber = "+54 11 1234 5678",
+            Name = "Pending Club",
+            Description = "A pending club",
+            Address = "Av. Libertador 1234",
+            City = "Buenos Aires",
+            Latitude = -34.6m,
+            Longitude = -58.3m,
+            ComplexPhoneNumber = "+54 11 1234 5678",
+            ComplexEmail = "pending@clubpadel.com"
+        });
+        completeResponse.EnsureSuccessStatusCode();
+
+        var completed = await completeResponse.Content.ReadFromJsonAsync<CompleteComplexAdminResponse>();
+        Assert.NotNull(completed);
+
+        client.DefaultRequestHeaders.Authorization = null;
+
+        var getResponse = await client.GetAsync($"/api/v1/complexes/{completed.ComplexId}?includePending=true");
+        Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+    }
+
+    [Fact]
     public async Task GetActiveById_WithActiveComplex_ReturnsComplex()
     {
         var client = _factory.CreateClient();
@@ -171,6 +231,66 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
     }
 
     [Fact]
+    public async Task GetByIdForAdmin_AsComplexAdmin_ReturnsPendingComplex()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"admin-pending-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var completeResponse = await client.PostAsJsonAsync("/api/v1/auth/complete-complex-admin", new CompleteComplexAdminRequest
+        {
+            PhoneNumber = "+54 11 1234 5678",
+            Name = "Pending Club",
+            Description = "A pending club",
+            Address = "Av. Libertador 1234",
+            City = "Buenos Aires",
+            Latitude = -34.6m,
+            Longitude = -58.3m,
+            ComplexPhoneNumber = "+54 11 1234 5678",
+            ComplexEmail = "pending@clubpadel.com"
+        });
+        completeResponse.EnsureSuccessStatusCode();
+
+        var completed = await completeResponse.Content.ReadFromJsonAsync<CompleteComplexAdminResponse>();
+        Assert.NotNull(completed);
+        Assert.NotEqual(Guid.Empty, completed.ComplexId);
+
+        var adminToken = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{completed.ComplexId}/admin");
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(result);
+        Assert.Equal(completed.ComplexId, result.Id);
+        Assert.Equal("Pending", result.Status);
+    }
+
+    [Fact]
+    public async Task GetByIdForAdmin_AsNonAdmin_ReturnsForbidden()
+    {
+        var client = _factory.CreateClient();
+        var adminSuffix = $"admin-owner-{Guid.NewGuid()}";
+        var otherSuffix = $"admin-other-{Guid.NewGuid()}";
+
+        var adminToken = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var createResponse = await client.PostAsJsonAsync("/api/v1/complexes", CreateValidRequest());
+        createResponse.EnsureSuccessStatusCode();
+        var created = await createResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(created);
+
+        var otherToken = await LoginAsync(client, otherSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", otherToken);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{created.Id}/admin");
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Update_AsComplexAdmin_ReturnsUpdatedComplex()
     {
         var client = _factory.CreateClient();
@@ -196,8 +316,7 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Latitude = -33m,
             Longitude = -60m,
             PhoneNumber = "+54 11 9999 9999",
-            Email = "updated@clubpadel.com",
-            Status = "Inactive"
+            Email = "updated@clubpadel.com"
         };
 
         var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{created.Id}", updateRequest);
@@ -214,7 +333,7 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
         Assert.Equal(-60m, result.Longitude);
         Assert.Equal("+54 11 9999 9999", result.PhoneNumber);
         Assert.Equal("updated@clubpadel.com", result.Email);
-        Assert.Equal("Inactive", result.Status);
+        Assert.Equal("Active", result.Status);
         Assert.NotNull(result.UpdatedAt);
     }
 
@@ -239,8 +358,7 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Address = "Updated address",
             City = "Updated city",
             PhoneNumber = "+54 11 9999 9999",
-            Email = "updated@clubpadel.com",
-            Status = "Active"
+            Email = "updated@clubpadel.com"
         };
 
         var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{created.Id}", updateRequest);
@@ -250,6 +368,56 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
         Assert.NotNull(result);
         Assert.Equal(created.Id, result.Id);
         Assert.Equal("Updated Club", result.Name);
+    }
+
+    [Fact]
+    public async Task Update_AsComplexAdmin_OnPendingComplex_UpdatesAndPreservesPendingStatus()
+    {
+        var client = _factory.CreateClient();
+        var suffix = $"update-pending-{Guid.NewGuid()}";
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var completeResponse = await client.PostAsJsonAsync("/api/v1/auth/complete-complex-admin", new CompleteComplexAdminRequest
+        {
+            PhoneNumber = "+54 11 1234 5678",
+            Name = "Pending Club",
+            Description = "A pending club",
+            Address = "Av. Libertador 1234",
+            City = "Buenos Aires",
+            Latitude = -34.6m,
+            Longitude = -58.3m,
+            ComplexPhoneNumber = "+54 11 1234 5678",
+            ComplexEmail = "pending@clubpadel.com"
+        });
+        completeResponse.EnsureSuccessStatusCode();
+
+        var completed = await completeResponse.Content.ReadFromJsonAsync<CompleteComplexAdminResponse>();
+        Assert.NotNull(completed);
+        Assert.NotEqual(Guid.Empty, completed.ComplexId);
+
+        var adminToken = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        var updateRequest = new UpdateComplexRequest
+        {
+            Name = "Updated Pending Club",
+            Description = "Updated description",
+            Address = "Updated address",
+            City = "Updated city",
+            PhoneNumber = "+54 11 9999 9999",
+            Email = "updated@clubpadel.com"
+        };
+
+        var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{completed.ComplexId}", updateRequest);
+        updateResponse.EnsureSuccessStatusCode();
+
+        var result = await updateResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
+        Assert.NotNull(result);
+        Assert.Equal(completed.ComplexId, result.Id);
+        Assert.Equal("Updated Pending Club", result.Name);
+        Assert.Equal("Pending", result.Status);
+        Assert.NotNull(result.UpdatedAt);
     }
 
     [Fact]
@@ -278,8 +446,7 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Address = "Updated address",
             City = "Updated city",
             PhoneNumber = "+54 11 9999 9999",
-            Email = "updated@clubpadel.com",
-            Status = "Active"
+            Email = "updated@clubpadel.com"
         };
 
         var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{created.Id}", updateRequest);

@@ -30,8 +30,7 @@ public sealed class UpdateComplexHandler : IUpdateComplexHandler
             command.Latitude,
             command.Longitude,
             command.PhoneNumber,
-            command.Email,
-            command.Status);
+            command.Email);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

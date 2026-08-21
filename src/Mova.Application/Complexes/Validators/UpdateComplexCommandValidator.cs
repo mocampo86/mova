@@ -75,9 +75,5 @@ public sealed class UpdateComplexCommandValidator : AbstractValidator<UpdateComp
             .WithMessage($"Email must not exceed {MaxEmailLength} characters.")
             .EmailAddress()
             .WithMessage("Email is not valid.");
-
-        RuleFor(x => x.Status)
-            .IsInEnum()
-            .WithMessage("Status must be a valid value.");
     }
 }

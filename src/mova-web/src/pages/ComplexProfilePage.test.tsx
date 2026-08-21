@@ -2,7 +2,7 @@ import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { Routes, Route } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ComplexProfilePage from './ComplexProfilePage';
-import { useActiveComplex, useUpdateComplex } from '../features/complexes/complexApi';
+import { useAdminComplex, useUpdateComplex } from '../features/complexes/complexApi';
 import { renderWithAuth } from '../test-utils';
 
 vi.mock('../features/complexes/complexApi');
@@ -36,11 +36,11 @@ describe('ComplexProfilePage', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.mocked(useActiveComplex).mockReturnValue({
+    vi.mocked(useAdminComplex).mockReturnValue({
       data: mockComplex,
       isLoading: false,
       isError: false
-    } as unknown as ReturnType<typeof useActiveComplex>);
+    } as unknown as ReturnType<typeof useAdminComplex>);
     vi.mocked(useUpdateComplex).mockReturnValue({
       mutate: mutateMock,
       isPending: false,
@@ -107,18 +107,17 @@ describe('ComplexProfilePage', () => {
         phoneNumber: '+54 11 1234 5678',
         email: 'test@complex.com',
         latitude: -34.6,
-        longitude: -58.4,
-        status: 'Active'
+        longitude: -58.4
       });
     });
   });
 
   it('renders loading state while the complex is loading', () => {
-    vi.mocked(useActiveComplex).mockReturnValue({
+    vi.mocked(useAdminComplex).mockReturnValue({
       data: undefined,
       isLoading: true,
       isError: false
-    } as unknown as ReturnType<typeof useActiveComplex>);
+    } as unknown as ReturnType<typeof useAdminComplex>);
 
     renderPage();
 
@@ -126,11 +125,11 @@ describe('ComplexProfilePage', () => {
   });
 
   it('renders error state when the complex cannot be loaded', () => {
-    vi.mocked(useActiveComplex).mockReturnValue({
+    vi.mocked(useAdminComplex).mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: true
-    } as unknown as ReturnType<typeof useActiveComplex>);
+    } as unknown as ReturnType<typeof useAdminComplex>);
 
     renderPage();
 
