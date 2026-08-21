@@ -132,6 +132,40 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
     }
 
     [Fact]
+    public async Task ComplexUsers_Search_ReturnsAllActiveUsers()
+    {
+        var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+            var otherUser = User.CreateFromGoogle(
+                Guid.NewGuid(),
+                $"sub-search-{Guid.NewGuid()}",
+                $"searchable-{Guid.NewGuid()}@test.com",
+                "Searchable User");
+            otherUser.CompleteProfile("+54 11 1234 5678");
+            await context.Users.AddAsync(otherUser);
+            await context.SaveChangesAsync();
+        }
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complexId}/users/search?search=Searchable&pageSize=10");
+
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ComplexUserInfo>>();
+
+        Assert.NotNull(result);
+        Assert.Single(result!.Items);
+        Assert.Equal("Searchable User", result.Items[0].FullName);
+        Assert.Equal("+54 11 1234 5678", result.Items[0].PhoneNumber);
+        Assert.False(result.Items[0].IsBlocked);
+    }
+
+    [Fact]
     public async Task ComplexUsers_GetReservations_ReturnsUserHistory()
     {
         var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();

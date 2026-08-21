@@ -14,5 +14,11 @@ public interface IUserRepository
         string? search = null,
         string? sort = null,
         CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<User> Items, int TotalItems)> SearchUsersAsync(
+        string? search,
+        int page,
+        int pageSize,
+        string? sort = null,
+        CancellationToken cancellationToken = default);
     Task AddAsync(User user, CancellationToken cancellationToken = default);
 }

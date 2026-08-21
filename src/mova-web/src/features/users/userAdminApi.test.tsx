@@ -7,6 +7,7 @@ import type { AuthState } from '../auth/authTypes';
 import {
   useBlockUser,
   useComplexUsers,
+  useSearchUsers,
   useUnblockUser,
   useUserReservations
 } from './userAdminApi';
@@ -80,6 +81,58 @@ describe('useComplexUsers', () => {
       expect.stringContaining('/api/v1/complexes/complex-1/users?page=1'),
       expect.any(Object)
     );
+  });
+});
+
+describe('useSearchUsers', () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify(emptyPagedResult), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    );
+  });
+
+  afterEach(() => {
+    fetchSpy.mockRestore();
+  });
+
+  it('fetches the user search endpoint with a 1-based page number', async () => {
+    const filters: UserListFilters = {
+      page: 0,
+      pageSize: 10,
+      search: 'test',
+      sort: 'fullName:asc'
+    };
+
+    const { result } = renderHook(() => useSearchUsers('complex-1', filters, true), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/complexes/complex-1/users/search?page=1&pageSize=10&sort=fullName%3Aasc&search=test'),
+      expect.any(Object)
+    );
+  });
+
+  it('does not fetch when disabled', async () => {
+    const filters: UserListFilters = {
+      page: 0,
+      pageSize: 10,
+      search: 'test',
+      sort: 'fullName:asc'
+    };
+
+    renderHook(() => useSearchUsers('complex-1', filters, false), {
+      wrapper: createWrapper()
+    });
+
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
 

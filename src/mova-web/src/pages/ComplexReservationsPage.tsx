@@ -31,6 +31,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useCourts } from '../features/courts/courtApi';
 import type { CourtListFilters } from '../features/courts/courtTypes';
+import UserAutocomplete from '../features/users/UserAutocomplete';
+import type { ComplexUser } from '../features/users/userAdminTypes';
 import {
   useCancelReservation,
   useCreateReservation,
@@ -155,6 +157,7 @@ export default function ComplexReservationsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState(initialCreateForm);
   const [createFormError, setCreateFormError] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<ComplexUser | null>(null);
 
   const [cancelDialog, setCancelDialog] = useState<{ open: boolean; reservation: Reservation | null }>({
     open: false,
@@ -220,6 +223,7 @@ export default function ComplexReservationsPage() {
       });
       setCreateOpen(false);
       setCreateForm(initialCreateForm());
+      setSelectedUser(null);
     } catch {
       // Error is surfaced via mutation state
     }
@@ -480,13 +484,14 @@ export default function ComplexReservationsPage() {
                 ))}
               </Select>
             </FormControl>
-            <TextField
-              label={t('admin.reservations.userIdLabel')}
-              value={createForm.userId}
-              onChange={(event) =>
-                setCreateForm((prev) => ({ ...prev, userId: event.target.value }))
-              }
-              fullWidth
+            <UserAutocomplete
+              complexId={complexId}
+              value={selectedUser}
+              onChange={(user) => {
+                setSelectedUser(user);
+                setCreateForm((prev) => ({ ...prev, userId: user?.id ?? '' }));
+              }}
+              required
             />
             <TextField
               label={t('admin.reservations.startLabel')}

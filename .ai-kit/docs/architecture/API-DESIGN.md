@@ -56,6 +56,7 @@ GET    /api/v1/users/me/reservations/history
 PATCH  /api/v1/users/me/reservations/{id}/cancel
 
 GET    /api/v1/complexes/{complexId}/users
+GET    /api/v1/complexes/{complexId}/users/search
 GET    /api/v1/complexes/{complexId}/users/{userId}/reservations
 
 GET    /api/v1/complexes/{complexId}/recurring-reservations
