@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Routes, Route } from 'react-router-dom';
 import ComplexReservationsPage from './ComplexReservationsPage';
@@ -250,5 +250,46 @@ describe('ComplexReservationsPage', () => {
     await waitFor(() => {
       expect(screen.getByRole('dialog', { name: 'Create manual reservation' })).toBeTruthy();
     });
+  });
+
+  it('resets the create reservation form when the dialog is cancelled', async () => {
+    setupMocks();
+
+    renderWithAuth(
+      <Routes>
+        <Route path="/admin/complex/:complexId/reservations" element={<ComplexReservationsPage />} />
+      </Routes>,
+      { initialRoute: '/admin/complex/complex-1/reservations' }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Reservations' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create reservation' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create manual reservation' })).toBeTruthy();
+    });
+
+    const dialog = screen.getByRole('dialog', { name: 'Create manual reservation' });
+    const notesInput = within(dialog).getByLabelText('Notes') as HTMLInputElement;
+    fireEvent.change(notesInput, { target: { value: 'cancelled notes' } });
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Create manual reservation' })).toBeNull();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create reservation' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create manual reservation' })).toBeTruthy();
+    });
+
+    const reopenedDialog = screen.getByRole('dialog', { name: 'Create manual reservation' });
+    const reopenedNotesInput = within(reopenedDialog).getByLabelText('Notes') as HTMLInputElement;
+    expect(reopenedNotesInput.value).toBe('');
   });
 });

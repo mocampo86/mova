@@ -203,6 +203,17 @@ export default function ComplexReservationsPage() {
     setFilters((prev) => ({ ...prev, pageSize: parseInt(event.target.value, 10), page: 0 }));
   };
 
+  const resetCreateForm = () => {
+    setCreateForm(initialCreateForm());
+    setCreateFormError(null);
+    setSelectedUser(null);
+  };
+
+  const handleCreateClose = () => {
+    setCreateOpen(false);
+    resetCreateForm();
+  };
+
   const handleCreateSubmit = async () => {
     setCreateFormError(null);
     const startAt = new Date(createForm.startAt).toISOString();
@@ -221,9 +232,7 @@ export default function ComplexReservationsPage() {
         endAt,
         notes: createForm.notes || undefined
       });
-      setCreateOpen(false);
-      setCreateForm(initialCreateForm());
-      setSelectedUser(null);
+      handleCreateClose();
     } catch {
       // Error is surfaced via mutation state
     }
@@ -461,7 +470,7 @@ export default function ComplexReservationsPage() {
         )}
       </Stack>
 
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
+      <Dialog open={createOpen} onClose={handleCreateClose} fullWidth maxWidth="sm">
         <DialogTitle>{t('admin.reservations.createDialogTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
@@ -526,7 +535,7 @@ export default function ComplexReservationsPage() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
+          <Button onClick={handleCreateClose}>{t('common.cancel')}</Button>
           <Button
             variant="contained"
             onClick={handleCreateSubmit}
