@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import {
   Autocomplete,
   Box,
-  Button,
   CircularProgress,
+  IconButton,
+  Stack,
   TextField,
   Typography
 } from '@mui/material';
@@ -11,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchUsers } from './userAdminApi';
 import type { ComplexUser } from './userAdminTypes';
 import UserSearchDialog from './UserSearchDialog';
+import searchUserIcon from '../../assets/icons/search-user.svg?url';
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -98,62 +100,77 @@ export default function UserAutocomplete({
 
   return (
     <Box>
-      <Autocomplete
-        freeSolo={false}
-        disabled={disabled}
-        options={query.data?.items ?? []}
-        getOptionLabel={(option) => `${option.fullName} (${option.email})`}
-        renderOption={(props, option) => (
-          <Box component="li" {...props}>
-            <Box>
-              <Typography variant="body1">{option.fullName}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {option.email}
-                {option.phoneNumber ? ` · ${option.phoneNumber}` : ''}
-              </Typography>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Autocomplete
+          freeSolo={false}
+          disabled={disabled}
+          fullWidth
+          options={query.data?.items ?? []}
+          getOptionLabel={(option) => `${option.fullName} (${option.email})`}
+          renderOption={(props, option) => (
+            <Box component="li" {...props}>
+              <Box>
+                <Typography variant="body1">{option.fullName}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {option.email}
+                  {option.phoneNumber ? ` · ${option.phoneNumber}` : ''}
+                </Typography>
+              </Box>
             </Box>
-          </Box>
-        )}
-        value={value}
-        onChange={handleChange}
-        inputValue={inputValue}
-        onInputChange={handleInputChange}
-        loading={query.isLoading}
-        noOptionsText={
-          debouncedSearch.length >= minSearchLength
-            ? t('admin.users.empty')
-            : t('admin.users.searchBy')
-        }
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            required={required}
-            label={label ?? t('admin.reservations.userIdLabel')}
-            error={error}
-            helperText={helperText}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {query.isLoading ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
-            }}
+          )}
+          value={value}
+          onChange={handleChange}
+          inputValue={inputValue}
+          onInputChange={handleInputChange}
+          loading={query.isLoading}
+          noOptionsText={
+            debouncedSearch.length >= minSearchLength
+              ? t('admin.users.empty')
+              : t('admin.users.searchBy')
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              required={required}
+              label={label ?? t('common.user')}
+              error={error}
+              helperText={helperText}
+              fullWidth
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {query.isLoading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                )
+              }}
+            />
+          )}
+        />
+        <IconButton
+          onClick={() => setDialogOpen(true)}
+          disabled={disabled}
+          aria-label={t('common.search')}
+          sx={{
+            height: 56,
+            width: 56,
+            flexShrink: 0,
+            border: 1,
+            borderColor: 'primary.main',
+            borderRadius: 1
+          }}
+        >
+          <img
+            src={searchUserIcon}
+            alt={t('common.search')}
+            width={28}
+            height={28}
           />
-        )}
-      />
-      <Button
-        variant="outlined"
-        size="small"
-        onClick={() => setDialogOpen(true)}
-        disabled={disabled}
-        sx={{ mt: 1 }}
-      >
-        {t('common.search')}
-      </Button>
+        </IconButton>
+      </Stack>
       <UserSearchDialog
         complexId={complexId}
         open={dialogOpen}
