@@ -2,6 +2,7 @@ using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Mova.Api.Authorization;
 using Mova.Application.Reservations.Handlers;
 using Mova.Application.Reservations.Queries;
@@ -58,6 +59,7 @@ public sealed class ComplexUsersController : ControllerBase
     }
 
     [HttpGet("search")]
+    [EnableRateLimiting("search")]
     public async Task<ActionResult<PagedResult<ComplexUserInfo>>> Search(
         Guid complexId,
         [FromQuery] string? search,

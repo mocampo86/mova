@@ -107,6 +107,7 @@ export default function UserAutocomplete({
           fullWidth
           options={query.data?.items ?? []}
           getOptionLabel={(option) => `${option.fullName} (${option.email})`}
+          getOptionDisabled={(option) => option.isBlocked}
           renderOption={(props, option) => (
             <Box component="li" {...props}>
               <Box>

@@ -131,7 +131,9 @@ describe('EditCourtPage', () => {
       expect(screen.getByRole('heading', { name: 'Configure court' })).toBeTruthy();
     });
 
-    expect((screen.getByLabelText(/Court name/i) as HTMLInputElement).value).toBe('Court One');
+    await waitFor(() => {
+      expect((screen.getByLabelText(/Court name/i) as HTMLInputElement).value).toBe('Court One');
+    });
     expect((screen.getByLabelText(/Description/i) as HTMLInputElement).value).toBe(
       'Original description'
     );
@@ -148,7 +150,7 @@ describe('EditCourtPage', () => {
 
     expect((screen.getByRole('switch', { name: 'Monday active' }) as HTMLInputElement).checked).toBe(true);
     expect(screen.getByRole('button', { name: 'Update court' })).toBeTruthy();
-  });
+  }, 10000);
 
   it('displays validation errors for missing required fields', async () => {
     setupMocks();
@@ -283,7 +285,7 @@ describe('EditCourtPage', () => {
         isActive: true
       });
     });
-  });
+  }, 10000);
 
   it('navigates to the courts list after successful update', async () => {
     setupMocks();

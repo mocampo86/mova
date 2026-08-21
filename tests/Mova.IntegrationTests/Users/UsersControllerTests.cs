@@ -136,14 +136,18 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
     {
         var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();
 
+        var suffix = Guid.NewGuid();
+        var fullName = $"Searchable User {suffix}";
+        var email = $"searchable-{suffix}@test.com";
+
         using (var scope = _factory.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
             var otherUser = User.CreateFromGoogle(
                 Guid.NewGuid(),
-                $"sub-search-{Guid.NewGuid()}",
-                $"searchable-{Guid.NewGuid()}@test.com",
-                "Searchable User");
+                $"sub-search-{suffix}",
+                email,
+                fullName);
             otherUser.CompleteProfile("+54 11 1234 5678");
             await context.Users.AddAsync(otherUser);
             await context.SaveChangesAsync();
@@ -153,16 +157,54 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         var token = await LoginAsync(client, adminSuffix);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await client.GetAsync($"/api/v1/complexes/{complexId}/users/search?search=Searchable&pageSize=10");
+        var response = await client.GetAsync($"/api/v1/complexes/{complexId}/users/search?search={Uri.EscapeDataString(fullName)}&pageSize=10");
 
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<PagedResult<ComplexUserInfo>>();
 
         Assert.NotNull(result);
         Assert.Single(result!.Items);
-        Assert.Equal("Searchable User", result.Items[0].FullName);
+        Assert.Equal(fullName, result.Items[0].FullName);
         Assert.Equal("+54 11 1234 5678", result.Items[0].PhoneNumber);
         Assert.False(result.Items[0].IsBlocked);
+    }
+
+    [Fact]
+    public async Task ComplexUsers_Search_WithNormalizedPhoneDigits_ReturnsMatchingUser()
+    {
+        var (adminSuffix, complexId, _, _) = await SeedScenarioAsync();
+
+        var suffix = new Random().Next(10000000, 99999999);
+        var fullName = $"Phone User {suffix}";
+        var phone = $"+54 {suffix}";
+        var searchDigits = new string(phone.Where(char.IsDigit).ToArray());
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+            var otherUser = User.CreateFromGoogle(
+                Guid.NewGuid(),
+                $"sub-phone-{suffix}",
+                $"phone-{suffix}@test.com",
+                fullName);
+            otherUser.CompleteProfile(phone);
+            await context.Users.AddAsync(otherUser);
+            await context.SaveChangesAsync();
+        }
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/complexes/{complexId}/users/search?search={Uri.EscapeDataString(searchDigits)}&pageSize=10");
+
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ComplexUserInfo>>();
+
+        Assert.NotNull(result);
+        Assert.Single(result!.Items);
+        Assert.Equal(fullName, result.Items[0].FullName);
+        Assert.Equal(phone, result.Items[0].PhoneNumber);
     }
 
     [Fact]

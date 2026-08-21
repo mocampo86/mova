@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.RegularExpressions;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
@@ -87,10 +89,14 @@ public sealed class FakeUserRepository : IUserRepository
         if (!string.IsNullOrWhiteSpace(search))
         {
             var term = search.Trim().ToLowerInvariant();
+            var normalizedDigits = new string(term.Where(char.IsDigit).ToArray());
+            var phonePattern = normalizedDigits.Length >= 3 ? BuildNormalizedPhonePattern(normalizedDigits) : null;
+
             query = query.Where(u =>
                 (u.FullName ?? string.Empty).ToLowerInvariant().Contains(term)
                 || (u.Email ?? string.Empty).ToLowerInvariant().Contains(term)
-                || (u.PhoneNumber ?? string.Empty).ToLowerInvariant().Contains(term));
+                || (u.PhoneNumber ?? string.Empty).ToLowerInvariant().Contains(term)
+                || (phonePattern != null && u.PhoneNumber != null && Regex.IsMatch(u.PhoneNumber, phonePattern, RegexOptions.IgnoreCase)));
         }
 
         var sortBy = sort?.Split(':', StringSplitOptions.RemoveEmptyEntries) ?? [];
@@ -117,6 +123,26 @@ public sealed class FakeUserRepository : IUserRepository
             .ToList();
 
         return Task.FromResult<(IReadOnlyList<User> Items, int TotalItems)>((items, totalItems));
+    }
+
+    private static string BuildNormalizedPhonePattern(string digits)
+    {
+        if (string.IsNullOrEmpty(digits))
+        {
+            return string.Empty;
+        }
+
+        var pattern = new StringBuilder(digits.Length * 9);
+        for (var i = 0; i < digits.Length; i++)
+        {
+            pattern.Append(digits[i]);
+            if (i < digits.Length - 1)
+            {
+                pattern.Append("[^0-9]*");
+            }
+        }
+
+        return pattern.ToString();
     }
 
     public Task AddAsync(User user, CancellationToken cancellationToken = default)

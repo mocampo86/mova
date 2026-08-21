@@ -77,6 +77,25 @@ public sealed class SearchUsersHandlerTests
     }
 
     [Fact]
+    public async Task HandleAsync_WithNormalizedPhoneDigits_ReturnsMatchingUser()
+    {
+        var complex = SportsComplex.Create("Complex", "Description", "Address", "Montevideo", null, null, "+598 99 123 456", "complex@example.com");
+        await _sportsComplexRepository.AddAsync(complex);
+
+        var user = User.CreateFromGoogle(Guid.NewGuid(), $"sub-{Guid.NewGuid()}", $"user-{Guid.NewGuid()}@example.com", "Searchable User");
+        user.CompleteProfile("+54 11 1234 5678");
+        await _userRepository.AddAsync(user);
+
+        var handler = CreateHandler();
+        var result = await handler.HandleAsync(new SearchUsersQuery(complex.Id, "541112345678", 1, 10));
+
+        Assert.Equal(1, result.TotalItems);
+        Assert.Single(result.Items);
+        Assert.Equal(user.Id, result.Items[0].Id);
+        Assert.Equal("+54 11 1234 5678", result.Items[0].PhoneNumber);
+    }
+
+    [Fact]
     public async Task HandleAsync_WithNonExistentComplex_ThrowsNotFoundException()
     {
         var handler = CreateHandler();
