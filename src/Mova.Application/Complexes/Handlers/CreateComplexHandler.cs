@@ -30,14 +30,14 @@ public sealed class CreateComplexHandler : ICreateComplexHandler
         _unitOfWork = unitOfWork;
     }
 
-    public Task<SportsComplexInfo> HandleAsync(CreateComplexCommand command, CancellationToken cancellationToken = default)
+    public async Task<SportsComplexInfo> HandleAsync(CreateComplexCommand command, CancellationToken cancellationToken = default)
     {
-        return _unitOfWork.ExecuteInTransactionAsync(
+        var user = await _userRepository.GetByIdAsync(command.UserId, cancellationToken)
+            ?? throw new NotFoundException("User not found.");
+
+        return await _unitOfWork.ExecuteInTransactionAsync(
             async token =>
             {
-                var user = await _userRepository.GetByIdAsync(command.UserId, token)
-                    ?? throw new NotFoundException("User not found.");
-
                 var sportsComplex = SportsComplex.Create(
                     command.Name,
                     command.Description,

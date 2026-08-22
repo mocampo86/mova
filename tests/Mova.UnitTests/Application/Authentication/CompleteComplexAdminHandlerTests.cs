@@ -96,7 +96,7 @@ public class CompleteComplexAdminHandlerTests
             "+54 11 1234 5678",
             "email@test.com")));
 
-        Assert.Equal(1, _unitOfWork.TransactionCallCount);
+        Assert.Equal(0, _unitOfWork.TransactionCallCount);
         Assert.Equal(0, _unitOfWork.SaveChangesCallCount);
     }
 

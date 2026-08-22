@@ -133,6 +133,8 @@ public class AtomicOnboardingIntegrationTests : IClassFixture<MovaWebApplication
 
         var admin = await context.ComplexAdministrators.FirstOrDefaultAsync(a => a.UserId == user.Id);
         Assert.Null(admin);
+
+        Assert.False(await context.BusinessHours.AnyAsync(b => b.SportsComplex!.Email == request.ComplexEmail));
     }
 
     [Fact]

@@ -36,16 +36,16 @@ public sealed class CompleteComplexAdminHandler : ICompleteComplexAdminHandler
         _unitOfWork = unitOfWork;
     }
 
-    public Task<CompleteComplexAdminResponse> HandleAsync(
+    public async Task<CompleteComplexAdminResponse> HandleAsync(
         CompleteComplexAdminCommand command,
         CancellationToken cancellationToken = default)
     {
-        return _unitOfWork.ExecuteInTransactionAsync(
+        var user = await _userRepository.GetByIdAsync(command.UserId, cancellationToken)
+            ?? throw new NotFoundException("User not found.");
+
+        var sportsComplexId = await _unitOfWork.ExecuteInTransactionAsync(
             async token =>
             {
-                var user = await _userRepository.GetByIdAsync(command.UserId, token)
-                    ?? throw new NotFoundException("User not found.");
-
                 user.CompleteProfile(command.PhoneNumber);
                 user.AddRole(Role.ComplexAdmin);
 
@@ -68,31 +68,33 @@ public sealed class CompleteComplexAdminHandler : ICompleteComplexAdminHandler
 
                 await _unitOfWork.SaveChangesAsync(token);
 
-                var roles = user.Roles.Select(r => r.ToString()).ToList();
-                var associations = (await _complexAdministratorRepository.GetByUserIdAsync(user.Id, token))
-                    .Select(a => new UserComplexAssociation(a.SportsComplexId, a.Role.ToString()))
-                    .ToList();
-
-                var authToken = await _jwtTokenService.GenerateAsync(user, roles, associations, token);
-
-                return new CompleteComplexAdminResponse
-                {
-                    AccessToken = authToken.AccessToken,
-                    ExpiresAt = authToken.ExpiresAt,
-                    User = new UserInfo
-                    {
-                        Id = user.Id,
-                        Email = user.Email,
-                        FullName = user.FullName,
-                        PhoneNumber = user.PhoneNumber,
-                        PhoneVerified = user.PhoneVerified
-                    },
-                    ComplexId = sportsComplex.Id,
-                    RequiresProfileCompletion = false
-                };
+                return sportsComplex.Id;
             },
             IsolationLevel.ReadCommitted,
             cancellationToken);
+
+        var roles = user.Roles.Select(r => r.ToString()).ToList();
+        var associations = (await _complexAdministratorRepository.GetByUserIdAsync(user.Id, cancellationToken))
+            .Select(a => new UserComplexAssociation(a.SportsComplexId, a.Role.ToString()))
+            .ToList();
+
+        var authToken = await _jwtTokenService.GenerateAsync(user, roles, associations, cancellationToken);
+
+        return new CompleteComplexAdminResponse
+        {
+            AccessToken = authToken.AccessToken,
+            ExpiresAt = authToken.ExpiresAt,
+            User = new UserInfo
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FullName = user.FullName,
+                PhoneNumber = user.PhoneNumber,
+                PhoneVerified = user.PhoneVerified
+            },
+            ComplexId = sportsComplexId,
+            RequiresProfileCompletion = false
+        };
     }
 
     private async Task CreateDefaultBusinessHoursAsync(Guid sportsComplexId, CancellationToken token)
