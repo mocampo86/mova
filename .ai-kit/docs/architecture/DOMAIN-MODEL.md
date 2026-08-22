@@ -121,7 +121,7 @@ Defines when a court is available and how long each slot lasts.
 | Id | Guid | |
 | CourtId | Guid | |
 | DayOfWeek | int | |
-| StartTime | TimeSpan | |
+| StartTime | TimeSpan | May be later than EndTime to represent overnight ranges |
 | EndTime | TimeSpan | |
 | SlotDurationMinutes | int | Default 60 |
 | IsActive | bool | |

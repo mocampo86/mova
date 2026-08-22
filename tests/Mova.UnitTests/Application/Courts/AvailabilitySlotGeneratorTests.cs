@@ -146,4 +146,32 @@ public sealed class AvailabilitySlotGeneratorTests
         Assert.Equal(new DateTime(2026, 8, 10, 12, 0, 0, DateTimeKind.Utc), slots[0].EndAt);
         Assert.Equal(new DateTime(2026, 8, 10, 15, 0, 0, DateTimeKind.Utc), slots[3].EndAt);
     }
+
+    [Fact]
+    public void GenerateSlots_WithOvernightRuleAndEarlierClosing_ReturnsEmpty()
+    {
+        var courtId = Guid.NewGuid();
+        var date = new DateOnly(2026, 8, 10); // Monday
+        var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(2), 60, true);
+        var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(20), TimeSpan.FromHours(22), false);
+
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], []);
+
+        Assert.Empty(slots);
+    }
+
+    [Fact]
+    public void GenerateSlots_WithOvernightRuleAndOvernightBusinessHours_ReturnsIntersectedSlots()
+    {
+        var courtId = Guid.NewGuid();
+        var date = new DateOnly(2026, 8, 10); // Monday
+        var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(2), 60, true);
+        var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(23), TimeSpan.FromHours(3), false);
+
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], []).ToList();
+
+        Assert.Equal(3, slots.Count);
+        Assert.Equal(new DateTime(2026, 8, 10, 23, 0, 0, DateTimeKind.Utc), slots[0].StartAt);
+        Assert.Equal(new DateTime(2026, 8, 11, 2, 0, 0, DateTimeKind.Utc), slots[2].EndAt);
+    }
 }

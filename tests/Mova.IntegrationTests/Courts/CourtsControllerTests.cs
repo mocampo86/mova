@@ -419,6 +419,66 @@ public sealed class CourtsControllerTests : IClassFixture<MovaWebApplicationFact
         Assert.Equal(DayOfWeek.Tuesday, result[0].DayOfWeek);
     }
 
+    [Fact]
+    public async Task UpdateAvailability_WithOvernightRange_ReturnsUpdatedRules()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"availability-overnight-admin-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/courts/{court.Id}/availability", new UpdateCourtAvailabilityRulesRequest
+        {
+            Rules =
+            [
+                new CreateCourtAvailabilityRuleRequest
+                {
+                    DayOfWeek = DayOfWeek.Monday,
+                    StartTime = TimeSpan.FromHours(22),
+                    EndTime = TimeSpan.FromHours(2),
+                    SlotDurationMinutes = 60,
+                    IsActive = true
+                }
+            ]
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<List<CourtAvailabilityRuleInfo>>();
+        Assert.NotNull(result);
+        Assert.Single(result);
+        Assert.Equal(DayOfWeek.Monday, result[0].DayOfWeek);
+        Assert.Equal(TimeSpan.FromHours(22), result[0].StartTime);
+        Assert.Equal(TimeSpan.FromHours(2), result[0].EndTime);
+    }
+
+    [Fact]
+    public async Task UpdateAvailability_WithStartTimeEqualToEndTime_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"availability-equal-admin-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/courts/{court.Id}/availability", new UpdateCourtAvailabilityRulesRequest
+        {
+            Rules =
+            [
+                new CreateCourtAvailabilityRuleRequest
+                {
+                    DayOfWeek = DayOfWeek.Monday,
+                    StartTime = TimeSpan.FromHours(12),
+                    EndTime = TimeSpan.FromHours(12),
+                    SlotDurationMinutes = 60,
+                    IsActive = true
+                }
+            ]
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         var response = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" });

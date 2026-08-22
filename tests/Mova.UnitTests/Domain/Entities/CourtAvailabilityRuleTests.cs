@@ -53,4 +53,33 @@ public sealed class CourtAvailabilityRuleTests
         Assert.Equal(30, rule.SlotDurationMinutes);
         Assert.False(rule.IsActive);
     }
+
+    [Fact]
+    public void Create_WithOvernightRangeAndSlotDurationFitting_Succeeds()
+    {
+        var courtId = Guid.NewGuid();
+        var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(2), 60, true);
+
+        Assert.Equal(TimeSpan.FromHours(22), rule.StartTime);
+        Assert.Equal(TimeSpan.FromHours(2), rule.EndTime);
+    }
+
+    [Fact]
+    public void Create_WithOvernightRangeAndSlotDurationNotFitting_Throws()
+    {
+        var courtId = Guid.NewGuid();
+        Assert.Throws<ArgumentException>(() => CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(2), 50, true));
+    }
+
+    [Fact]
+    public void Update_WithOvernightRange_Succeeds()
+    {
+        var courtId = Guid.NewGuid();
+        var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(12), 60, true);
+
+        rule.Update(TimeSpan.FromHours(22), TimeSpan.FromHours(2), 60, true);
+
+        Assert.Equal(TimeSpan.FromHours(22), rule.StartTime);
+        Assert.Equal(TimeSpan.FromHours(2), rule.EndTime);
+    }
 }

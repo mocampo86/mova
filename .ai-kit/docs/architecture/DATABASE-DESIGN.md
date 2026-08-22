@@ -125,7 +125,7 @@ CREATE TABLE CourtAvailabilityRules (
     EndTime TIME NOT NULL,
     SlotDurationMinutes INT NOT NULL DEFAULT 60,
     IsActive BOOLEAN NOT NULL DEFAULT TRUE,
-    CONSTRAINT chk_time_order CHECK (StartTime < EndTime)
+    CONSTRAINT chk_time_order CHECK (StartTime <> EndTime)
 );
 ```
 
