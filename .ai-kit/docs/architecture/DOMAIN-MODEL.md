@@ -109,7 +109,7 @@ Opening hours of a complex by day of week.
 | SportsComplexId | Guid | |
 | DayOfWeek | int | 0 = Sunday |
 | OpeningTime | TimeSpan | |
-| ClosingTime | TimeSpan | |
+| ClosingTime | TimeSpan | May be earlier than OpeningTime to represent overnight hours |
 | IsClosed | bool | |
 
 ### CourtAvailabilityRule

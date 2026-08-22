@@ -479,6 +479,60 @@ public sealed class CourtsControllerTests : IClassFixture<MovaWebApplicationFact
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task UpdateAvailability_WithDayOfWeekOutsideRange_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"availability-dayofweek-admin-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/courts/{court.Id}/availability", new UpdateCourtAvailabilityRulesRequest
+        {
+            Rules =
+            [
+                new CreateCourtAvailabilityRuleRequest
+                {
+                    DayOfWeek = (DayOfWeek)7,
+                    StartTime = TimeSpan.FromHours(8),
+                    EndTime = TimeSpan.FromHours(12),
+                    SlotDurationMinutes = 60,
+                    IsActive = true
+                }
+            ]
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateAvailability_WithStartTimeOutsideDay_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"availability-outofday-admin-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complex.Id}/courts/{court.Id}/availability", new UpdateCourtAvailabilityRulesRequest
+        {
+            Rules =
+            [
+                new CreateCourtAvailabilityRuleRequest
+                {
+                    DayOfWeek = DayOfWeek.Monday,
+                    StartTime = TimeSpan.FromHours(25),
+                    EndTime = TimeSpan.FromHours(2),
+                    SlotDurationMinutes = 60,
+                    IsActive = true
+                }
+            ]
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         var response = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" });

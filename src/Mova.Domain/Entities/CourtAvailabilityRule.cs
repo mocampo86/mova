@@ -13,9 +13,13 @@ public sealed class CourtAvailabilityRule
 
     private CourtAvailabilityRule() { }
 
+    private static readonly TimeSpan Day = TimeSpan.FromHours(24);
+
     public static CourtAvailabilityRule Create(Guid courtId, DayOfWeek dayOfWeek, TimeSpan startTime, TimeSpan endTime, int slotDurationMinutes, bool isActive)
     {
         if (courtId == Guid.Empty) throw new ArgumentException("CourtId cannot be empty.", nameof(courtId));
+        ValidateTimeOfDay(startTime, nameof(startTime));
+        ValidateTimeOfDay(endTime, nameof(endTime));
         if (startTime == endTime)
             throw new ArgumentException("Start and end times cannot be the same.", nameof(startTime));
         if (slotDurationMinutes <= 0)
@@ -37,6 +41,8 @@ public sealed class CourtAvailabilityRule
 
     public void Update(TimeSpan startTime, TimeSpan endTime, int slotDurationMinutes, bool isActive)
     {
+        ValidateTimeOfDay(startTime, nameof(startTime));
+        ValidateTimeOfDay(endTime, nameof(endTime));
         if (startTime == endTime)
             throw new ArgumentException("Start and end times cannot be the same.", nameof(startTime));
         if (slotDurationMinutes <= 0)
@@ -50,12 +56,21 @@ public sealed class CourtAvailabilityRule
         IsActive = isActive;
     }
 
-    private static bool FitsSlotDuration(TimeSpan startTime, TimeSpan endTime, int slotDurationMinutes)
+    public static bool FitsSlotDuration(TimeSpan startTime, TimeSpan endTime, int slotDurationMinutes)
     {
+        if (slotDurationMinutes <= 0)
+            return false;
+
         var duration = endTime - startTime;
         if (duration <= TimeSpan.Zero)
-            duration += TimeSpan.FromHours(24);
+            duration += Day;
 
         return duration.TotalMinutes % slotDurationMinutes == 0;
+    }
+
+    private static void ValidateTimeOfDay(TimeSpan time, string paramName)
+    {
+        if (time < TimeSpan.Zero || time >= Day)
+            throw new ArgumentException("Time must be within a 24-hour day.", paramName);
     }
 }

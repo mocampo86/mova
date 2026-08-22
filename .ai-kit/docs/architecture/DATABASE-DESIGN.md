@@ -102,6 +102,8 @@ CREATE TABLE CourtSports (
 
 ### BusinessHours
 
+Opening and closing times may wrap past midnight (e.g. 22:00–02:00). The table does not enforce `OpeningTime < ClosingTime` so overnight hours are supported.
+
 ```sql
 CREATE TABLE BusinessHours (
     Id UUID PRIMARY KEY,

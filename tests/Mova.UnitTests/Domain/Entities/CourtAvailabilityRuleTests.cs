@@ -82,4 +82,27 @@ public sealed class CourtAvailabilityRuleTests
         Assert.Equal(TimeSpan.FromHours(22), rule.StartTime);
         Assert.Equal(TimeSpan.FromHours(2), rule.EndTime);
     }
+
+    [Fact]
+    public void Create_WithStartTimeOutsideDay_Throws()
+    {
+        var courtId = Guid.NewGuid();
+        Assert.Throws<ArgumentException>(() => CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(25), TimeSpan.FromHours(2), 60, true));
+    }
+
+    [Fact]
+    public void Create_WithEndTimeOutsideDay_Throws()
+    {
+        var courtId = Guid.NewGuid();
+        Assert.Throws<ArgumentException>(() => CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(24), 60, true));
+    }
+
+    [Fact]
+    public void Update_WithTimeOutsideDay_Throws()
+    {
+        var courtId = Guid.NewGuid();
+        var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(12), 60, true);
+
+        Assert.Throws<ArgumentException>(() => rule.Update(TimeSpan.FromHours(-1), TimeSpan.FromHours(2), 60, true));
+    }
 }
