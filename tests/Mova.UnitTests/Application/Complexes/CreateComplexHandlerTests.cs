@@ -52,6 +52,9 @@ public class CreateComplexHandlerTests
 
         var hours = await _businessHours.GetBySportsComplexIdAsync(result.Id);
         Assert.Equal(7, hours.Count);
+
+        Assert.Equal(1, _unitOfWork.TransactionCallCount);
+        Assert.Equal(1, _unitOfWork.SaveChangesCallCount);
     }
 
     [Fact]
@@ -69,5 +72,66 @@ public class CreateComplexHandlerTests
             null,
             "+54 11 1234 5678",
             "email@test.com")));
+
+        Assert.Equal(0, _unitOfWork.TransactionCallCount);
+        Assert.Equal(0, _unitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenBusinessHoursRepositoryThrows_DoesNotCallSaveChangesAndThrows()
+    {
+        var user = User.CreateFromGoogle(Guid.NewGuid(), "google-subject", "user@test.com", "John Doe");
+        await _userRepository.AddAsync(user);
+
+        var unitOfWork = new FakeUnitOfWork();
+        var handler = new CreateComplexHandler(
+            _userRepository,
+            _sportsComplexRepository,
+            _complexAdministratorRepository,
+            new ThrowingBusinessHoursRepository(),
+            unitOfWork);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(new CreateComplexCommand(
+            user.Id,
+            "Club Padel",
+            "A premium padel club",
+            "Av. Libertador 1234",
+            "Buenos Aires",
+            -34.6m,
+            -58.3m,
+            "+54 11 1234 5678",
+            "contact@clubpadel.com")));
+
+        Assert.Equal(1, unitOfWork.TransactionCallCount);
+        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenComplexAdministratorRepositoryThrows_DoesNotCallSaveChangesAndThrows()
+    {
+        var user = User.CreateFromGoogle(Guid.NewGuid(), "google-subject", "user@test.com", "John Doe");
+        await _userRepository.AddAsync(user);
+
+        var unitOfWork = new FakeUnitOfWork();
+        var handler = new CreateComplexHandler(
+            _userRepository,
+            _sportsComplexRepository,
+            new ThrowingComplexAdministratorRepository(),
+            _businessHours,
+            unitOfWork);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(new CreateComplexCommand(
+            user.Id,
+            "Club Padel",
+            "A premium padel club",
+            "Av. Libertador 1234",
+            "Buenos Aires",
+            -34.6m,
+            -58.3m,
+            "+54 11 1234 5678",
+            "contact@clubpadel.com")));
+
+        Assert.Equal(1, unitOfWork.TransactionCallCount);
+        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
     }
 }
