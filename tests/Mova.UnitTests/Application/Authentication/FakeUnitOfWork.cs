@@ -5,8 +5,13 @@ namespace Mova.UnitTests.Application.Authentication;
 
 public sealed class FakeUnitOfWork : IUnitOfWork
 {
+    public int SaveChangesCallCount { get; private set; }
+
+    public int TransactionCallCount { get; private set; }
+
     public Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        SaveChangesCallCount++;
         return Task.CompletedTask;
     }
 
@@ -15,6 +20,7 @@ public sealed class FakeUnitOfWork : IUnitOfWork
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default)
     {
+        TransactionCallCount++;
         return action(cancellationToken);
     }
 
@@ -23,6 +29,7 @@ public sealed class FakeUnitOfWork : IUnitOfWork
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default)
     {
+        TransactionCallCount++;
         return action(cancellationToken);
     }
 }

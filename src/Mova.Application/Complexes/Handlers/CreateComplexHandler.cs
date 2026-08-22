@@ -1,3 +1,4 @@
+using System.Data;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Complexes.Commands;
@@ -29,37 +30,46 @@ public sealed class CreateComplexHandler : ICreateComplexHandler
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<SportsComplexInfo> HandleAsync(CreateComplexCommand command, CancellationToken cancellationToken = default)
+    public Task<SportsComplexInfo> HandleAsync(CreateComplexCommand command, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(command.UserId, cancellationToken)
-            ?? throw new NotFoundException("User not found.");
+        return _unitOfWork.ExecuteInTransactionAsync(
+            async token =>
+            {
+                var user = await _userRepository.GetByIdAsync(command.UserId, token)
+                    ?? throw new NotFoundException("User not found.");
 
-        var sportsComplex = SportsComplex.Create(
-            command.Name,
-            command.Description,
-            command.Address,
-            command.City,
-            command.Latitude,
-            command.Longitude,
-            command.PhoneNumber,
-            command.Email);
+                var sportsComplex = SportsComplex.Create(
+                    command.Name,
+                    command.Description,
+                    command.Address,
+                    command.City,
+                    command.Latitude,
+                    command.Longitude,
+                    command.PhoneNumber,
+                    command.Email);
 
-        var administrator = ComplexAdministrator.Create(sportsComplex.Id, user.Id, Role.ComplexAdmin);
+                var administrator = ComplexAdministrator.Create(sportsComplex.Id, user.Id, Role.ComplexAdmin);
 
-        user.AddRole(Role.ComplexAdmin);
+                user.AddRole(Role.ComplexAdmin);
 
-        await _sportsComplexRepository.AddAsync(sportsComplex, cancellationToken);
-        await _complexAdministratorRepository.AddAsync(administrator, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _sportsComplexRepository.AddAsync(sportsComplex, token);
+                await _complexAdministratorRepository.AddAsync(administrator, token);
+                await CreateDefaultBusinessHoursAsync(sportsComplex.Id, token);
 
+                await _unitOfWork.SaveChangesAsync(token);
+
+                return SportsComplexInfoMapper.ToInfo(sportsComplex);
+            },
+            IsolationLevel.ReadCommitted,
+            cancellationToken);
+    }
+
+    private async Task CreateDefaultBusinessHoursAsync(Guid sportsComplexId, CancellationToken token)
+    {
         foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
         {
-            var hours = BusinessHours.Create(sportsComplex.Id, day, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
-            await _businessHours.AddAsync(hours, cancellationToken);
+            var hours = BusinessHours.Create(sportsComplexId, day, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
+            await _businessHours.AddAsync(hours, token);
         }
-
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return SportsComplexInfoMapper.ToInfo(sportsComplex);
     }
 }

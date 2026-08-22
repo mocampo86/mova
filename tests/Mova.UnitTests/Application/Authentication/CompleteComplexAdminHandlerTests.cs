@@ -13,6 +13,7 @@ public class CompleteComplexAdminHandlerTests
     private readonly FakeUserRepository _userRepository = new();
     private readonly FakeSportsComplexRepository _sportsComplexRepository = new();
     private readonly FakeComplexAdministratorRepository _complexAdministratorRepository = new();
+    private readonly FakeBusinessHoursRepository _businessHours = new();
     private readonly FakeJwtTokenService _jwtTokenService = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
@@ -21,6 +22,7 @@ public class CompleteComplexAdminHandlerTests
             _userRepository,
             _sportsComplexRepository,
             _complexAdministratorRepository,
+            _businessHours,
             _jwtTokenService,
             _unitOfWork);
 
@@ -69,6 +71,12 @@ public class CompleteComplexAdminHandlerTests
         Assert.Contains(
             _jwtTokenService.LastComplexAssociations,
             a => a.ComplexId == complex.Id && a.Role == Role.ComplexAdmin.ToString());
+
+        var hours = await _businessHours.GetBySportsComplexIdAsync(complex.Id);
+        Assert.Equal(7, hours.Count);
+
+        Assert.Equal(1, _unitOfWork.TransactionCallCount);
+        Assert.Equal(1, _unitOfWork.SaveChangesCallCount);
     }
 
     [Fact]
@@ -87,6 +95,71 @@ public class CompleteComplexAdminHandlerTests
             null,
             "+54 11 1234 5678",
             "email@test.com")));
+
+        Assert.Equal(1, _unitOfWork.TransactionCallCount);
+        Assert.Equal(0, _unitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenBusinessHoursRepositoryThrows_DoesNotCallSaveChangesAndThrows()
+    {
+        var user = User.CreateFromGoogle(Guid.NewGuid(), "google-subject", "admin@test.com", "Admin User");
+        await _userRepository.AddAsync(user);
+
+        var unitOfWork = new FakeUnitOfWork();
+        var handler = new CompleteComplexAdminHandler(
+            _userRepository,
+            _sportsComplexRepository,
+            _complexAdministratorRepository,
+            new ThrowingBusinessHoursRepository(),
+            _jwtTokenService,
+            unitOfWork);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(new CompleteComplexAdminCommand(
+            user.Id,
+            "+54 11 1234 5678",
+            "Club Padel",
+            "A premium padel club",
+            "Av. Libertador 1234",
+            "Buenos Aires",
+            -34.6m,
+            -58.3m,
+            "+54 11 1234 5678",
+            "contact@clubpadel.com")));
+
+        Assert.Equal(1, unitOfWork.TransactionCallCount);
+        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenComplexAdministratorRepositoryThrows_DoesNotCallSaveChangesAndThrows()
+    {
+        var user = User.CreateFromGoogle(Guid.NewGuid(), "google-subject", "admin@test.com", "Admin User");
+        await _userRepository.AddAsync(user);
+
+        var unitOfWork = new FakeUnitOfWork();
+        var handler = new CompleteComplexAdminHandler(
+            _userRepository,
+            _sportsComplexRepository,
+            new ThrowingComplexAdministratorRepository(),
+            _businessHours,
+            _jwtTokenService,
+            unitOfWork);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(new CompleteComplexAdminCommand(
+            user.Id,
+            "+54 11 1234 5678",
+            "Club Padel",
+            "A premium padel club",
+            "Av. Libertador 1234",
+            "Buenos Aires",
+            -34.6m,
+            -58.3m,
+            "+54 11 1234 5678",
+            "contact@clubpadel.com")));
+
+        Assert.Equal(1, unitOfWork.TransactionCallCount);
+        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
     }
 
     [Fact]
