@@ -287,6 +287,63 @@ describe('EditCourtPage', () => {
     });
   }, 10000);
 
+  it('submits an overnight availability rule successfully', async () => {
+    setupMocks();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByLabelText('Start time').length).toBeGreaterThan(0);
+    });
+
+    const startTimeInputs = screen.getAllByLabelText('Start time');
+    const endTimeInputs = screen.getAllByLabelText('End time');
+
+    fireEvent.change(startTimeInputs[0], { target: { value: '22:00' } });
+    fireEvent.change(endTimeInputs[0], { target: { value: '02:00' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Update court' }));
+
+    await waitFor(() => {
+      expect(updateAvailabilityMutateAsync).toHaveBeenCalledOnce();
+      const availabilityCall = updateAvailabilityMutateAsync.mock.calls[0][0];
+      const mondayRule = availabilityCall.rules.find((rule: { dayOfWeek: number }) => rule.dayOfWeek === 1);
+      expect(mondayRule).toEqual({
+        dayOfWeek: 1,
+        startTime: '22:00:00',
+        endTime: '02:00:00',
+        slotDurationMinutes: 60,
+        isActive: true
+      });
+    });
+  }, 10000);
+
+  it('displays an existing overnight availability rule correctly', async () => {
+    setupMocks({}, {}, {
+      data: [
+        {
+          id: 'rule-overnight',
+          courtId: 'court-1',
+          dayOfWeek: 1,
+          startTime: '22:00:00',
+          endTime: '02:00:00',
+          slotDurationMinutes: 60,
+          isActive: true
+        }
+      ]
+    });
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByLabelText('Start time').length).toBeGreaterThan(0);
+    });
+
+    const startTimeInputs = screen.getAllByLabelText('Start time');
+    const endTimeInputs = screen.getAllByLabelText('End time');
+
+    expect((startTimeInputs[0] as HTMLInputElement).value).toBe('22:00');
+    expect((endTimeInputs[0] as HTMLInputElement).value).toBe('02:00');
+  }, 10000);
+
   it('navigates to the courts list after successful update', async () => {
     setupMocks();
     renderPage();

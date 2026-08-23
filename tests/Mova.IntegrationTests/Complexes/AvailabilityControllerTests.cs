@@ -135,6 +135,29 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task GetAvailability_WithOvernightRuleAndBusinessHours_ReturnsSlotsAcrossMidnight()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"availability-overnight-admin-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+        await SetOvernightBusinessHoursAsync(client, complex.Id);
+        await SetOvernightAvailabilityRuleAsync(client, complex.Id, court.Id);
+
+        client.DefaultRequestHeaders.Authorization = null;
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/availability?courtId={court.Id}&date=2026-08-10");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<List<CourtAvailabilitySlotInfo>>();
+        Assert.NotNull(result);
+        Assert.Equal(4, result.Count);
+        Assert.Equal(new DateTime(2026, 8, 10, 22, 0, 0, DateTimeKind.Utc), result[0].StartAt);
+        Assert.Equal(new DateTime(2026, 8, 11, 2, 0, 0, DateTimeKind.Utc), result[3].EndAt);
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         var response = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" });
@@ -253,6 +276,43 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
                 IsActive = true
             })
             .ToList()
+        });
+        response.EnsureSuccessStatusCode();
+    }
+
+    private static async Task SetOvernightBusinessHoursAsync(HttpClient client, Guid complexId)
+    {
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complexId}/business-hours", new UpdateBusinessHoursRequest
+        {
+            Hours =
+            [
+                new BusinessHoursRequest
+                {
+                    DayOfWeek = DayOfWeek.Monday,
+                    OpeningTime = TimeSpan.FromHours(22),
+                    ClosingTime = TimeSpan.FromHours(2),
+                    IsClosed = false
+                }
+            ]
+        });
+        response.EnsureSuccessStatusCode();
+    }
+
+    private static async Task SetOvernightAvailabilityRuleAsync(HttpClient client, Guid complexId, Guid courtId)
+    {
+        var response = await client.PutAsJsonAsync($"/api/v1/complexes/{complexId}/courts/{courtId}/availability", new UpdateCourtAvailabilityRulesRequest
+        {
+            Rules =
+            [
+                new CreateCourtAvailabilityRuleRequest
+                {
+                    DayOfWeek = DayOfWeek.Monday,
+                    StartTime = TimeSpan.FromHours(22),
+                    EndTime = TimeSpan.FromHours(2),
+                    SlotDurationMinutes = 60,
+                    IsActive = true
+                }
+            ]
         });
         response.EnsureSuccessStatusCode();
     }

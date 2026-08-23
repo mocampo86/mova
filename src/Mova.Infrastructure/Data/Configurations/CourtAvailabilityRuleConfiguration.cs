@@ -18,6 +18,10 @@ public sealed class CourtAvailabilityRuleConfiguration : IEntityTypeConfiguratio
         builder.Property(x => x.IsActive).IsRequired();
         builder.HasOne(x => x.Court).WithMany().HasForeignKey(x => x.CourtId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(x => new { x.CourtId, x.DayOfWeek });
-        builder.ToTable(t => t.HasCheckConstraint("chk_court_availability_time", "\"StartTime\" < \"EndTime\""));
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("chk_court_availability_time", "\"StartTime\" <> \"EndTime\"");
+            t.HasCheckConstraint("chk_court_availability_day_of_week", "\"DayOfWeek\" BETWEEN 0 AND 6");
+        });
     }
 }
