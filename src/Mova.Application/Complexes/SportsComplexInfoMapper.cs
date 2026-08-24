@@ -20,8 +20,16 @@ public static class SportsComplexInfoMapper
             Email = sportsComplex.Email,
             Status = sportsComplex.Status.ToString(),
             AllowUserRecurringReservations = sportsComplex.AllowUserRecurringReservations,
+            UtcOffsetMinutes = sportsComplex.UtcOffsetMinutes,
             CreatedAt = sportsComplex.CreatedAt,
             UpdatedAt = sportsComplex.UpdatedAt
         };
+    }
+
+    public static SportsComplexInfo ToPublicInfo(SportsComplex sportsComplex)
+    {
+        var info = ToInfo(sportsComplex);
+        info.Status = null;
+        return info;
     }
 }

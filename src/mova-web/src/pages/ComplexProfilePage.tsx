@@ -51,7 +51,12 @@ const schema = z.object({
     .string()
     .min(1, 'Email is required.')
     .email('Email is not valid.')
-    .max(255, 'Email must not exceed 255 characters.')
+    .max(255, 'Email must not exceed 255 characters.'),
+  utcOffsetMinutes: z
+    .number()
+    .int('UTC offset must be an integer.')
+    .min(-840, 'UTC offset must be between -840 and 840 minutes.')
+    .max(840, 'UTC offset must be between -840 and 840 minutes.')
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -84,7 +89,8 @@ export default function ComplexProfilePage() {
       latitude: null,
       longitude: null,
       phoneNumber: '',
-      email: ''
+      email: '',
+      utcOffsetMinutes: 0
     }
   });
 
@@ -98,7 +104,8 @@ export default function ComplexProfilePage() {
         latitude: data.latitude ?? null,
         longitude: data.longitude ?? null,
         phoneNumber: data.phoneNumber,
-        email: data.email
+        email: data.email,
+        utcOffsetMinutes: data.utcOffsetMinutes ?? 0
       });
     }
   }, [data, reset]);
@@ -249,6 +256,15 @@ export default function ComplexProfilePage() {
           fullWidth
           error={Boolean(errors.email)}
           helperText={errors.email?.message}
+        />
+
+        <TextField
+          {...register('utcOffsetMinutes', { valueAsNumber: true })}
+          label={t('admin.profile.utcOffsetMinutes')}
+          type="number"
+          fullWidth
+          error={Boolean(errors.utcOffsetMinutes)}
+          helperText={errors.utcOffsetMinutes?.message}
         />
 
         <TextField

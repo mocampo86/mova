@@ -12,7 +12,8 @@ public static class AvailabilitySlotGenerator
         BusinessHours businessHours,
         IEnumerable<Reservation> reservations,
         IEnumerable<CourtBlock> blocks,
-        int utcOffsetMinutes = 0)
+        int utcOffsetMinutes = 0,
+        DateTime? referenceTime = null)
     {
         if (rule.DayOfWeek != date.DayOfWeek || businessHours.DayOfWeek != date.DayOfWeek || businessHours.IsClosed)
         {
@@ -37,10 +38,16 @@ public static class AvailabilitySlotGenerator
         var activeReservations = reservations.Where(r => r.IsActiveForAvailability()).ToArray();
         var activeBlocks = blocks.ToArray();
         var slots = new List<CourtAvailabilitySlotInfo>();
+        var now = referenceTime ?? DateTime.MinValue;
 
         for (var slotStart = intervalStart; slotStart.Add(slotDuration) <= intervalEnd; slotStart = slotStart.Add(slotDuration))
         {
             var slotEnd = slotStart.Add(slotDuration);
+
+            if (slotStart < now)
+            {
+                continue;
+            }
 
             if (IsOverlapping(slotStart, slotEnd, activeReservations, activeBlocks))
             {

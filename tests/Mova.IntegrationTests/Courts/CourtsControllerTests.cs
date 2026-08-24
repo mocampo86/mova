@@ -122,7 +122,7 @@ public sealed class CourtsControllerTests : IClassFixture<MovaWebApplicationFact
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<PagedResult<CourtInfo>>();
         Assert.NotNull(result);
-        Assert.All(result.Items, item => Assert.Equal("Active", item.Status));
+        Assert.All(result.Items, item => Assert.Null(item.Status));
         Assert.Contains(result.Items, item => item.Id == activeCourt.Id);
         Assert.DoesNotContain(result.Items, item => item.Id == inactiveCourt.Id);
     }
@@ -227,7 +227,7 @@ public sealed class CourtsControllerTests : IClassFixture<MovaWebApplicationFact
         var result = await response.Content.ReadFromJsonAsync<CourtInfo>();
         Assert.NotNull(result);
         Assert.Equal(court.Id, result.Id);
-        Assert.Equal("Active", result.Status);
+        Assert.Null(result.Status);
     }
 
     [Fact]

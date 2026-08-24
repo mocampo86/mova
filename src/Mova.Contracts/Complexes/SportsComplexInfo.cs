@@ -34,10 +34,14 @@ public sealed class SportsComplexInfo
     public string Email { get; set; } = string.Empty;
 
     [JsonPropertyName("status")]
-    public string Status { get; set; } = string.Empty;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Status { get; set; }
 
     [JsonPropertyName("allowUserRecurringReservations")]
     public bool AllowUserRecurringReservations { get; set; }
+
+    [JsonPropertyName("utcOffsetMinutes")]
+    public int UtcOffsetMinutes { get; set; }
 
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }

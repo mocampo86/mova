@@ -31,7 +31,7 @@ public class GetActiveComplexByIdHandlerTests
 
         Assert.NotNull(result);
         Assert.Equal(complex.Id, result.Id);
-        Assert.Equal("Active", result.Status);
+        Assert.Null(result.Status);
     }
 
     [Fact]

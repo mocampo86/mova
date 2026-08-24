@@ -50,6 +50,10 @@ public sealed class SportsComplexConfiguration : IEntityTypeConfiguration<Sports
             .IsRequired()
             .HasDefaultValue(true);
 
+        builder.Property(s => s.UtcOffsetMinutes)
+            .IsRequired()
+            .HasDefaultValue(0);
+
         builder.Property(s => s.CreatedAt)
             .IsRequired();
 

@@ -29,4 +29,7 @@ public sealed class CreateComplexRequest
 
     [JsonPropertyName("email")]
     public string Email { get; set; } = string.Empty;
+
+    [JsonPropertyName("utcOffsetMinutes")]
+    public int UtcOffsetMinutes { get; set; }
 }

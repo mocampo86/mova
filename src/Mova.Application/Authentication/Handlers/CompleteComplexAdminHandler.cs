@@ -58,7 +58,8 @@ public sealed class CompleteComplexAdminHandler : ICompleteComplexAdminHandler
                     command.Longitude,
                     command.ComplexPhoneNumber,
                     command.ComplexEmail,
-                    ComplexStatus.Pending);
+                    utcOffsetMinutes: 0,
+                    status: ComplexStatus.Pending);
 
                 var administrator = ComplexAdministrator.Create(sportsComplex.Id, user.Id, Role.ComplexAdmin);
 

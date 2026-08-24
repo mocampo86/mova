@@ -174,4 +174,20 @@ public sealed class AvailabilitySlotGeneratorTests
         Assert.Equal(new DateTime(2026, 8, 10, 23, 0, 0, DateTimeKind.Utc), slots[0].StartAt);
         Assert.Equal(new DateTime(2026, 8, 11, 2, 0, 0, DateTimeKind.Utc), slots[2].EndAt);
     }
+
+    [Fact]
+    public void GenerateSlots_WithReferenceTimeInTheDay_FiltersPastSlots()
+    {
+        var courtId = Guid.NewGuid();
+        var date = new DateOnly(2026, 8, 10); // Monday
+        var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(12), 60, true);
+        var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
+
+        var referenceTime = new DateTime(2026, 8, 10, 9, 30, 0, DateTimeKind.Utc);
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], 0, referenceTime).ToList();
+
+        Assert.Equal(2, slots.Count);
+        Assert.Equal(new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc), slots[0].StartAt);
+        Assert.Equal(new DateTime(2026, 8, 10, 12, 0, 0, DateTimeKind.Utc), slots[1].EndAt);
+    }
 }

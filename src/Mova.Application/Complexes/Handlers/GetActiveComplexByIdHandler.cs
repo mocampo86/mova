@@ -23,6 +23,6 @@ public sealed class GetActiveComplexByIdHandler : IGetActiveComplexByIdHandler
             return null;
         }
 
-        return SportsComplexInfoMapper.ToInfo(sportsComplex);
+        return SportsComplexInfoMapper.ToPublicInfo(sportsComplex);
     }
 }

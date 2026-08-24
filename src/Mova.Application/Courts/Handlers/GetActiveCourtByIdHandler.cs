@@ -10,6 +10,6 @@ public sealed class GetActiveCourtByIdHandler(
     public async Task<CourtInfo?> HandleAsync(GetActiveCourtByIdQuery query, CancellationToken cancellationToken = default)
     {
         var court = await courts.GetActiveByIdAsync(query.CourtId, cancellationToken);
-        return court is null ? null : CourtMapper.ToInfo(court);
+        return court is null ? null : CourtMapper.ToPublicInfo(court);
     }
 }

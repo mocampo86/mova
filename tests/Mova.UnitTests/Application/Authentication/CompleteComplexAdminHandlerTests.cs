@@ -180,7 +180,8 @@ public class CompleteComplexAdminHandlerTests
             null,
             "+54 11 0000 0000",
             "existing@test.com",
-            ComplexStatus.Pending);
+            utcOffsetMinutes: 0,
+            status: ComplexStatus.Pending);
         await _sportsComplexRepository.AddAsync(existingComplex);
         await _complexAdministratorRepository.AddAsync(
             ComplexAdministrator.Create(existingComplex.Id, user.Id, Role.ComplexAdmin));
