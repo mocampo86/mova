@@ -15,28 +15,32 @@ test.describe('EPIC-05 Public Availability and Discovery', () => {
 
     const searchInput = page.getByLabel('Search complexes');
     await searchInput.fill('Mova');
+    const responsePromise = page.waitForResponse(/\/api\/v1\/complexes/);
     await page.getByRole('button', { name: 'Search' }).click();
+    await responsePromise;
 
-    const complexCount = await page.getByRole('link', { name: 'View courts' }).count();
+    const viewLink = page.getByRole('link', { name: 'View' });
+    const complexCount = await viewLink.count();
 
     if (complexCount === 0) {
       await expect(page.getByText('No active complexes match your search.')).toBeVisible();
       return;
     }
 
-    await page.getByRole('link', { name: 'View courts' }).first().click();
+    await viewLink.first().click();
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
   test('complex detail can filter courts by sport and view availability', async ({ page }) => {
     await page.goto('/complexes');
+    await page.waitForResponse(/\/api\/v1\/complexes/);
 
-    const viewCourtsLinks = page.getByRole('link', { name: 'View courts' });
-    const complexCount = await viewCourtsLinks.count();
+    const viewLink = page.getByRole('link', { name: 'View' });
+    const complexCount = await viewLink.count();
 
     test.skip(complexCount === 0, 'No active complexes are available in the test environment.');
 
-    await viewCourtsLinks.first().click();
+    await viewLink.first().click();
 
     const courtSelect = page.getByLabel('Court');
     const dateInput = page.getByLabel('Date');
