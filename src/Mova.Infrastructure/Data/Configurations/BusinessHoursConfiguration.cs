@@ -17,5 +17,12 @@ public sealed class BusinessHoursConfiguration : IEntityTypeConfiguration<Busine
         builder.Property(x => x.IsClosed).IsRequired();
         builder.HasIndex(x => new { x.SportsComplexId, x.DayOfWeek }).IsUnique();
         builder.HasOne(x => x.SportsComplex).WithMany().HasForeignKey(x => x.SportsComplexId).OnDelete(DeleteBehavior.Cascade);
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("chk_business_hours_day_of_week", "\"DayOfWeek\" BETWEEN 0 AND 6");
+            t.HasCheckConstraint("chk_business_hours_opening_time", "\"OpeningTime\" >= '00:00:00' AND \"OpeningTime\" < '24:00:00'");
+            t.HasCheckConstraint("chk_business_hours_closing_time", "\"ClosingTime\" >= '00:00:00' AND \"ClosingTime\" < '24:00:00'");
+            t.HasCheckConstraint("chk_business_hours_not_closed", "\"IsClosed\" = TRUE OR \"OpeningTime\" <> \"ClosingTime\"");
+        });
     }
 }

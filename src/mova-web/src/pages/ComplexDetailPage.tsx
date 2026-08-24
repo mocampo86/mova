@@ -41,8 +41,8 @@ function formatLocalDate(isoString: string) {
   return date.toLocaleDateString();
 }
 
-function todayIso() {
-  return new Date().toISOString().split('T')[0];
+function todayIso(offsetMinutes: number = 0) {
+  return new Date(Date.now() + offsetMinutes * 60 * 1000).toISOString().split('T')[0];
 }
 
 interface BookingDialogProps {
@@ -120,7 +120,7 @@ export default function ComplexDetailPage() {
 
   const [selectedSportId, setSelectedSportId] = useState('');
   const [selectedCourtId, setSelectedCourtId] = useState('');
-  const [selectedDate, setSelectedDate] = useState(todayIso);
+  const [selectedDate, setSelectedDate] = useState(todayIso(0));
   const [selectedSlot, setSelectedSlot] = useState<CourtAvailabilitySlot | null>(null);
   const [bookingNotes, setBookingNotes] = useState('');
 
@@ -129,7 +129,13 @@ export default function ComplexDetailPage() {
   const sports = useSports();
   const createMyReservation = useCreateMyReservation(complexId);
 
-  const availability = useCourtAvailability(complexId, selectedCourtId, selectedDate);
+  useEffect(() => {
+    if (complex.data) {
+      setSelectedDate(todayIso(complex.data.utcOffsetMinutes));
+    }
+  }, [complex.data]);
+
+  const availability = useCourtAvailability(complexId, selectedCourtId, selectedDate, complex.data?.utcOffsetMinutes ?? 0);
 
   useEffect(() => {
     setSelectedCourtId('');
@@ -264,6 +270,7 @@ export default function ComplexDetailPage() {
               value={selectedDate}
               onChange={(event) => setSelectedDate(event.target.value)}
               InputLabelProps={{ shrink: true }}
+              inputProps={{ min: todayIso(complex.data?.utcOffsetMinutes ?? 0) }}
               sx={{ minWidth: 160 }}
             />
           </Stack>

@@ -15,6 +15,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        services.AddSingleton(TimeProvider.System);
         services.AddValidatorsFromAssemblyContaining<GoogleLoginCommandValidator>();
         services.AddScoped<IGoogleLoginHandler, GoogleLoginHandler>();
         services.AddScoped<ICompleteComplexAdminHandler, CompleteComplexAdminHandler>();

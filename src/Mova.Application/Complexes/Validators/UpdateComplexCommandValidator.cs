@@ -71,5 +71,9 @@ public sealed class UpdateComplexCommandValidator : AbstractValidator<UpdateComp
             .WithMessage($"Email must not exceed {MaxEmailLength} characters.")
             .EmailAddress()
             .WithMessage("Email is not valid.");
+
+        RuleFor(x => x.UtcOffsetMinutes)
+            .InclusiveBetween(-840, 840)
+            .WithMessage("UTC offset must be between -840 and 840 minutes.");
     }
 }

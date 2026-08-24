@@ -46,7 +46,8 @@ public sealed class CreateComplexHandler : ICreateComplexHandler
                     command.Latitude,
                     command.Longitude,
                     command.PhoneNumber,
-                    command.Email);
+                    command.Email,
+                    command.UtcOffsetMinutes);
 
                 var administrator = ComplexAdministrator.Create(sportsComplex.Id, user.Id, Role.ComplexAdmin);
 

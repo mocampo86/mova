@@ -204,7 +204,7 @@ export default function ComplexCourtsPage() {
                         <TableCell>
                           <Chip
                             label={court.status === 'Active' ? t('status.active') : t('status.inactive')}
-                            color={statusColor(court.status)}
+                            color={statusColor(court.status ?? 'Inactive')}
                             size="small"
                           />
                         </TableCell>

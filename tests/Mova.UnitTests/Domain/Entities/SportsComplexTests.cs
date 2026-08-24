@@ -118,7 +118,8 @@ public class SportsComplexTests
             -34.6m,
             -58.3m,
             "+54 11 9999 9999",
-            "new@test.com");
+            "new@test.com",
+            0);
 
         Assert.Equal("New Name", sportsComplex.Name);
         Assert.Equal("New description", sportsComplex.Description);

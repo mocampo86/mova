@@ -40,7 +40,8 @@ public class UpdateComplexHandlerTests
             -34.6m,
             -58.3m,
             "+54 11 9999 9999",
-            "new@test.com"));
+            "new@test.com",
+            0));
 
         Assert.NotNull(result);
         Assert.Equal("New Name", result.Name);
@@ -69,7 +70,8 @@ public class UpdateComplexHandlerTests
             null,
             "+54 11 1111 1111",
             "old@test.com",
-            status);
+            utcOffsetMinutes: 0,
+            status: status);
         await _sportsComplexRepository.AddAsync(sportsComplex);
 
         var handler = CreateHandler();
@@ -82,7 +84,8 @@ public class UpdateComplexHandlerTests
             -34.6m,
             -58.3m,
             "+54 11 9999 9999",
-            "new@test.com"));
+            "new@test.com",
+            0));
 
         Assert.NotNull(result);
         Assert.Equal(status.ToString(), result.Status);
@@ -103,6 +106,7 @@ public class UpdateComplexHandlerTests
             null,
             null,
             "+54 11 1234 5678",
-            "email@test.com")));
+            "email@test.com",
+            0)));
     }
 }

@@ -9,4 +9,5 @@ public sealed record CreateComplexCommand(
     decimal? Latitude,
     decimal? Longitude,
     string PhoneNumber,
-    string Email);
+    string Email,
+    int UtcOffsetMinutes = 0);

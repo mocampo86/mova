@@ -22,7 +22,7 @@ public sealed class GetActiveComplexesHandler : IGetActiveComplexesHandler
             query.Search,
             cancellationToken);
 
-        var mappedItems = items.Select(SportsComplexInfoMapper.ToInfo).ToList();
+        var mappedItems = items.Select(SportsComplexInfoMapper.ToPublicInfo).ToList();
 
         return PagedResult<SportsComplexInfo>.Create(mappedItems, query.Page, query.PageSize, totalItems);
     }

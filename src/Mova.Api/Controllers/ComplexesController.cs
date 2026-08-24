@@ -161,7 +161,8 @@ public class ComplexesController : ControllerBase
             request.Latitude,
             request.Longitude,
             request.PhoneNumber,
-            request.Email);
+            request.Email,
+            request.UtcOffsetMinutes);
 
         await _createValidator.ValidateAndThrowAsync(command, cancellationToken);
 
@@ -185,7 +186,8 @@ public class ComplexesController : ControllerBase
             request.Latitude,
             request.Longitude,
             request.PhoneNumber,
-            request.Email);
+            request.Email,
+            request.UtcOffsetMinutes);
 
         await _updateValidator.ValidateAndThrowAsync(command, cancellationToken);
 

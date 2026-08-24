@@ -49,6 +49,7 @@ public sealed class MovaWebApplicationFactory : WebApplicationFactory<Program>, 
         builder.ConfigureServices(services =>
         {
             services.Replace(ServiceDescriptor.Scoped<IGoogleTokenValidator, FakeGoogleTokenValidator>());
+            services.Replace(ServiceDescriptor.Singleton<TimeProvider>(new FixedTimeProvider(new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero))));
         });
     }
 

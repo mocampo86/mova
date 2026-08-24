@@ -63,8 +63,7 @@ export function useSports() {
   });
 }
 
-export function useCourtAvailability(complexId: string, courtId: string, date: string) {
-  const utcOffsetMinutes = new Date(`${date}T00:00`).getTimezoneOffset();
+export function useCourtAvailability(complexId: string, courtId: string, date: string, utcOffsetMinutes: number = 0) {
   const params = new URLSearchParams({
     courtId,
     date,

@@ -54,4 +54,27 @@ public sealed class BusinessHoursTests
 
         Assert.Throws<ArgumentException>(() => hours.Update(TimeSpan.FromHours(10), TimeSpan.FromHours(10), false));
     }
+
+    [Fact]
+    public void Create_WithOpeningTimeOutsideDay_Throws()
+    {
+        var complexId = Guid.NewGuid();
+        Assert.Throws<ArgumentException>(() => BusinessHours.Create(complexId, DayOfWeek.Monday, TimeSpan.FromHours(25), TimeSpan.FromHours(2), false));
+    }
+
+    [Fact]
+    public void Create_WithClosingTimeOutsideDay_Throws()
+    {
+        var complexId = Guid.NewGuid();
+        Assert.Throws<ArgumentException>(() => BusinessHours.Create(complexId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(24), false));
+    }
+
+    [Fact]
+    public void Update_WithClosingTimeOutsideDay_Throws()
+    {
+        var complexId = Guid.NewGuid();
+        var hours = BusinessHours.Create(complexId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
+
+        Assert.Throws<ArgumentException>(() => hours.Update(TimeSpan.FromHours(8), TimeSpan.FromHours(24), false));
+    }
 }

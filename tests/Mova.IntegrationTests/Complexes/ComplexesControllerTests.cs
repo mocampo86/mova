@@ -114,7 +114,7 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
 
         var result = await listResponse.Content.ReadFromJsonAsync<PagedResult<SportsComplexInfo>>();
         Assert.NotNull(result);
-        Assert.All(result.Items, item => Assert.Equal("Active", item.Status));
+        Assert.All(result.Items, item => Assert.Null(item.Status));
         Assert.Contains(result.Items, item => item.Id == active.Id);
         Assert.DoesNotContain(result.Items, item => item.Id == inactive.Id);
     }
@@ -143,7 +143,7 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
 
         var result = await listResponse.Content.ReadFromJsonAsync<PagedResult<SportsComplexInfo>>();
         Assert.NotNull(result);
-        Assert.All(result.Items, item => Assert.Equal("Active", item.Status));
+        Assert.All(result.Items, item => Assert.Null(item.Status));
         Assert.DoesNotContain(result.Items, item => item.Id == created.Id);
     }
 
@@ -200,7 +200,7 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
         var result = await getResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
         Assert.NotNull(result);
         Assert.Equal(created.Id, result.Id);
-        Assert.Equal("Active", result.Status);
+        Assert.Null(result.Status);
     }
 
     [Fact]

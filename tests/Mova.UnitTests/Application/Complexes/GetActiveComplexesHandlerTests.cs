@@ -46,7 +46,7 @@ public class GetActiveComplexesHandlerTests
         Assert.NotNull(result);
         Assert.Single(result.Items);
         Assert.Equal("Active Club", result.Items[0].Name);
-        Assert.Equal("Active", result.Items[0].Status);
+        Assert.Null(result.Items[0].Status);
         Assert.Equal(1, result.TotalItems);
         Assert.Equal(1, result.TotalPages);
     }

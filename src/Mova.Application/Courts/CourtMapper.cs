@@ -12,4 +12,11 @@ public static class CourtMapper
         Status = court.Status.ToString(), CreatedAt = court.CreatedAt, UpdatedAt = court.UpdatedAt,
         SportIds = court.CourtSports.Select(x => x.SportId).ToArray()
     };
+
+    public static CourtInfo ToPublicInfo(Court court)
+    {
+        var info = ToInfo(court);
+        info.Status = null;
+        return info;
+    }
 }

@@ -18,6 +18,8 @@ const mockComplex = {
   latitude: -34.6,
   longitude: -58.4,
   status: 'Active',
+  allowUserRecurringReservations: false,
+  utcOffsetMinutes: 0,
   createdAt: '2026-08-01T12:00:00Z',
   updatedAt: '2026-08-06T12:00:00Z'
 };
@@ -107,7 +109,8 @@ describe('ComplexProfilePage', () => {
         phoneNumber: '+54 11 1234 5678',
         email: 'test@complex.com',
         latitude: -34.6,
-        longitude: -58.4
+        longitude: -58.4,
+        utcOffsetMinutes: 0
       });
     });
   });

@@ -19,7 +19,9 @@ const mockComplex = {
   address: 'Test Address',
   city: 'Test City',
   phoneNumber: '+1234567890',
-  email: 'test@complex.com'
+  email: 'test@complex.com',
+  allowUserRecurringReservations: false,
+  utcOffsetMinutes: 0
 };
 
 const mockCourts = {

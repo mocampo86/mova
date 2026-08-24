@@ -19,7 +19,8 @@ public class UpdateComplexCommandValidatorTests
             -34.6m,
             -58.3m,
             "+54 11 1234 5678",
-            "contact@clubpadel.com");
+            "contact@clubpadel.com",
+            0);
 
     [Fact]
     public void Validate_WithValidCommand_Passes()
@@ -76,5 +77,13 @@ public class UpdateComplexCommandValidatorTests
         var command = CreateValidCommand() with { PhoneNumber = "" };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.PhoneNumber);
+    }
+
+    [Fact]
+    public void Validate_WithInvalidUtcOffset_Fails()
+    {
+        var command = CreateValidCommand() with { UtcOffsetMinutes = 1000 };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.UtcOffsetMinutes);
     }
 }

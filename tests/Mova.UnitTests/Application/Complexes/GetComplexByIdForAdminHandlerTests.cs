@@ -28,7 +28,8 @@ public class GetComplexByIdForAdminHandlerTests
             null,
             "+54 11 1234 5678",
             "test@test.com",
-            status);
+            utcOffsetMinutes: 0,
+            status: status);
         await _sportsComplexRepository.AddAsync(complex);
 
         var handler = CreateHandler();

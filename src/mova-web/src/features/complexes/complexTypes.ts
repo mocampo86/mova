@@ -18,6 +18,7 @@ export interface SportsComplex {
   longitude?: number | null;
   status?: string;
   allowUserRecurringReservations: boolean;
+  utcOffsetMinutes: number;
   createdAt?: string;
   updatedAt?: string | null;
 }
@@ -31,6 +32,7 @@ export interface UpdateComplexRequest {
   email: string;
   latitude?: number | null;
   longitude?: number | null;
+  utcOffsetMinutes: number;
 }
 
 export interface Court {
@@ -40,7 +42,7 @@ export interface Court {
   description: string;
   surfaceType: string;
   indoor: boolean;
-  status: string;
+  status?: string;
   sportIds: string[];
   createdAt?: string;
   updatedAt?: string | null;

@@ -15,6 +15,7 @@ public sealed class SportsComplex
     public string Email { get; private set; } = null!;
     public ComplexStatus Status { get; private set; }
     public bool AllowUserRecurringReservations { get; private set; }
+    public int UtcOffsetMinutes { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
@@ -33,9 +34,10 @@ public sealed class SportsComplex
         decimal? longitude,
         string phoneNumber,
         string email,
+        int utcOffsetMinutes = 0,
         ComplexStatus status = ComplexStatus.Active)
     {
-        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email);
+        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, utcOffsetMinutes);
 
         return new SportsComplex
         {
@@ -50,6 +52,7 @@ public sealed class SportsComplex
             Email = email.Trim(),
             Status = status,
             AllowUserRecurringReservations = true,
+            UtcOffsetMinutes = utcOffsetMinutes,
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -62,9 +65,10 @@ public sealed class SportsComplex
         decimal? latitude,
         decimal? longitude,
         string phoneNumber,
-        string email)
+        string email,
+        int utcOffsetMinutes)
     {
-        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email);
+        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, utcOffsetMinutes);
 
         Name = name.Trim();
         Description = description.Trim();
@@ -74,6 +78,7 @@ public sealed class SportsComplex
         Longitude = longitude;
         PhoneNumber = phoneNumber.Trim();
         Email = email.Trim();
+        UtcOffsetMinutes = utcOffsetMinutes;
         UpdatedAt = DateTime.UtcNow;
     }
 
@@ -113,7 +118,8 @@ public sealed class SportsComplex
         decimal? latitude,
         decimal? longitude,
         string phoneNumber,
-        string email)
+        string email,
+        int utcOffsetMinutes)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(description);
@@ -160,6 +166,11 @@ public sealed class SportsComplex
         if (email.Length > 255)
         {
             throw new ArgumentException("Email must not exceed 255 characters.", nameof(email));
+        }
+
+        if (utcOffsetMinutes < -840 || utcOffsetMinutes > 840)
+        {
+            throw new ArgumentException("UTC offset must be between -840 and 840 minutes.", nameof(utcOffsetMinutes));
         }
     }
 }
