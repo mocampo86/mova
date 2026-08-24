@@ -9,5 +9,4 @@ public sealed record ModifyRecurringReservationFutureCommand(
     TimeOnly StartTime,
     int DurationMinutes,
     DateOnly EndDate,
-    string? Notes,
-    int UtcOffsetMinutes = 0);
+    string? Notes);

@@ -1,5 +1,6 @@
 using Mova.Contracts.Courts;
 using Mova.Domain.Entities;
+using Mova.Domain.Helpers;
 
 namespace Mova.Application.Courts;
 
@@ -12,7 +13,7 @@ public static class AvailabilitySlotGenerator
         BusinessHours businessHours,
         IEnumerable<Reservation> reservations,
         IEnumerable<CourtBlock> blocks,
-        int utcOffsetMinutes = 0,
+        TimeZoneInfo timeZone,
         DateTime? referenceTime = null)
     {
         if (rule.DayOfWeek != date.DayOfWeek || businessHours.DayOfWeek != date.DayOfWeek || businessHours.IsClosed)
@@ -20,19 +21,32 @@ public static class AvailabilitySlotGenerator
             return [];
         }
 
-        var dayStart = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc).AddMinutes(utcOffsetMinutes);
-        var ruleStart = dayStart.Add(rule.StartTime);
-        var ruleEnd = dayStart.AddDays(rule.StartTime > rule.EndTime ? 1 : 0).Add(rule.EndTime);
-        var businessStart = dayStart.Add(businessHours.OpeningTime);
-        var businessEnd = dayStart.AddDays(businessHours.OpeningTime > businessHours.ClosingTime ? 1 : 0).Add(businessHours.ClosingTime);
+        var ruleStartLocal = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.FromTimeSpan(rule.StartTime)), DateTimeKind.Unspecified);
+        var ruleEndDate = date.AddDays(rule.StartTime > rule.EndTime ? 1 : 0);
+        var ruleEndLocal = DateTime.SpecifyKind(ruleEndDate.ToDateTime(TimeOnly.FromTimeSpan(rule.EndTime)), DateTimeKind.Unspecified);
 
-        var intervalStart = ruleStart > businessStart ? ruleStart : businessStart;
-        var intervalEnd = ruleEnd < businessEnd ? ruleEnd : businessEnd;
+        var businessStartLocal = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.FromTimeSpan(businessHours.OpeningTime)), DateTimeKind.Unspecified);
+        var businessEndDate = date.AddDays(businessHours.OpeningTime > businessHours.ClosingTime ? 1 : 0);
+        var businessEndLocal = DateTime.SpecifyKind(businessEndDate.ToDateTime(TimeOnly.FromTimeSpan(businessHours.ClosingTime)), DateTimeKind.Unspecified);
 
-        if (intervalStart >= intervalEnd)
+        if (!TimeZoneConverter.TryGetUtc(ruleStartLocal, timeZone, out var ruleStartUtc) ||
+            !TimeZoneConverter.TryGetUtc(ruleEndLocal, timeZone, out var ruleEndUtc) ||
+            !TimeZoneConverter.TryGetUtc(businessStartLocal, timeZone, out var businessStartUtc) ||
+            !TimeZoneConverter.TryGetUtc(businessEndLocal, timeZone, out var businessEndUtc))
         {
             return [];
         }
+
+        var intervalStartUtc = ruleStartUtc > businessStartUtc ? ruleStartUtc : businessStartUtc;
+        var intervalEndUtc = ruleEndUtc < businessEndUtc ? ruleEndUtc : businessEndUtc;
+
+        if (intervalStartUtc >= intervalEndUtc)
+        {
+            return [];
+        }
+
+        var intervalStartLocal = ruleStartLocal > businessStartLocal ? ruleStartLocal : businessStartLocal;
+        var intervalEndLocal = ruleEndLocal < businessEndLocal ? ruleEndLocal : businessEndLocal;
 
         var slotDuration = TimeSpan.FromMinutes(rule.SlotDurationMinutes);
         var activeReservations = reservations.Where(r => r.IsActiveForAvailability()).ToArray();
@@ -40,16 +54,28 @@ public static class AvailabilitySlotGenerator
         var slots = new List<CourtAvailabilitySlotInfo>();
         var now = referenceTime ?? DateTime.MinValue;
 
-        for (var slotStart = intervalStart; slotStart.Add(slotDuration) <= intervalEnd; slotStart = slotStart.Add(slotDuration))
+        for (var i = 0; ; i++)
         {
-            var slotEnd = slotStart.Add(slotDuration);
+            var slotStartLocal = intervalStartLocal.Add(TimeSpan.FromMinutes(i * rule.SlotDurationMinutes));
+            var slotEndLocal = slotStartLocal.Add(slotDuration);
 
-            if (slotStart < now)
+            if (slotStartLocal >= intervalEndLocal || slotEndLocal > intervalEndLocal)
+            {
+                break;
+            }
+
+            if (!TimeZoneConverter.TryGetUtc(slotStartLocal, timeZone, out var slotStartUtc) ||
+                !TimeZoneConverter.TryGetUtc(slotEndLocal, timeZone, out var slotEndUtc))
             {
                 continue;
             }
 
-            if (IsOverlapping(slotStart, slotEnd, activeReservations, activeBlocks))
+            if (slotStartUtc < now)
+            {
+                continue;
+            }
+
+            if (IsOverlapping(slotStartUtc, slotEndUtc, activeReservations, activeBlocks))
             {
                 continue;
             }
@@ -57,8 +83,8 @@ public static class AvailabilitySlotGenerator
             slots.Add(new CourtAvailabilitySlotInfo
             {
                 CourtId = courtId,
-                StartAt = slotStart,
-                EndAt = slotEnd
+                StartAt = slotStartUtc,
+                EndAt = slotEndUtc
             });
         }
 

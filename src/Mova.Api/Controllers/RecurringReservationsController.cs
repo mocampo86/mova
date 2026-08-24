@@ -76,8 +76,7 @@ public sealed class RecurringReservationsController(
             request.StartDate,
             request.EndDate,
             request.Notes,
-            authorizationResult.Succeeded,
-            request.UtcOffsetMinutes);
+            authorizationResult.Succeeded);
 
         await createValidator.ValidateAndThrowAsync(command, cancellationToken);
 
@@ -107,8 +106,7 @@ public sealed class RecurringReservationsController(
             request.StartDate,
             request.EndDate,
             request.Notes,
-            true,
-            request.UtcOffsetMinutes);
+            true);
 
         await createValidator.ValidateAndThrowAsync(command, cancellationToken);
 
@@ -176,8 +174,7 @@ public sealed class RecurringReservationsController(
             request.StartTime,
             request.DurationMinutes,
             request.EndDate,
-            request.Notes,
-            request.UtcOffsetMinutes);
+            request.Notes);
 
         await modifyFutureValidator.ValidateAndThrowAsync(command, cancellationToken);
 

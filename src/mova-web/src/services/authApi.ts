@@ -27,6 +27,7 @@ export interface CompleteComplexAdminRequest {
   longitude?: number | null;
   complexPhoneNumber: string;
   complexEmail: string;
+  timeZoneId: string;
 }
 
 export interface CompleteComplexAdminResponse {

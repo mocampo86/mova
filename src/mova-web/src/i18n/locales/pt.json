@@ -229,6 +229,8 @@
     "complexPhone": "Telefone do complexo",
     "complexPhonePlaceholder": "+54 11 1234 5678",
     "complexEmail": "E-mail do complexo",
+    "timeZone": "Fuso horário",
+    "timeZoneHelper": "Selecione o fuso horário deste complexo.",
     "submit": "Enviar para revisão"
   },
   "admin": {
@@ -362,6 +364,8 @@
       "phone": "Número de telefone",
       "phonePlaceholder": "+54 11 1234 5678",
       "email": "E-mail",
+      "timeZone": "Fuso horário",
+      "timeZoneHelper": "Selecione o fuso horário deste complexo.",
       "status": "Status",
       "success": "O perfil do complexo foi atualizado com sucesso.",
       "save": "Salvar alterações"

@@ -63,15 +63,14 @@ export function useSports() {
   });
 }
 
-export function useCourtAvailability(complexId: string, courtId: string, date: string, utcOffsetMinutes: number = 0) {
+export function useCourtAvailability(complexId: string, courtId: string, date: string) {
   const params = new URLSearchParams({
     courtId,
-    date,
-    utcOffsetMinutes: utcOffsetMinutes.toString()
+    date
   });
 
   return useQuery({
-    queryKey: ['court-availability', complexId, courtId, date, utcOffsetMinutes],
+    queryKey: ['court-availability', complexId, courtId, date],
     queryFn: () => apiClient<CourtAvailabilitySlot[]>(`/api/v1/complexes/${complexId}/availability?${params}`),
     enabled: Boolean(complexId && courtId && date)
   });

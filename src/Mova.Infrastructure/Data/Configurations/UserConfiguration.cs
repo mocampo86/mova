@@ -45,6 +45,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasColumnType("text[]")
             .HasDefaultValueSql("ARRAY[]::text[]")
+            .HasField("_roles")
             .HasConversion(
                 roles => roles.Select(r => r.ToString()).ToList(),
                 values => values.Select(v => Enum.Parse<Role>(v)).ToList())

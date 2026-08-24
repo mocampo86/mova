@@ -30,4 +30,7 @@ public sealed class CompleteComplexAdminRequest
 
     [JsonPropertyName("complexEmail")]
     public string ComplexEmail { get; set; } = string.Empty;
+
+    [JsonPropertyName("timeZoneId")]
+    public string TimeZoneId { get; set; } = string.Empty;
 }

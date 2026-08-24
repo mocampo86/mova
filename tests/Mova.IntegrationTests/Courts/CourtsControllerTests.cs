@@ -27,7 +27,9 @@ public sealed class CourtsControllerTests : IClassFixture<MovaWebApplicationFact
         var complexResponse = await client.PostAsJsonAsync("/api/v1/complexes", new CreateComplexRequest
         {
             Name = "Court Complex", Description = "Complex", Address = "Address", City = "Montevideo",
-            PhoneNumber = "+598 99 123 456", Email = $"court-{Guid.NewGuid()}@test.com"
+            PhoneNumber = "+598 99 123 456",
+            Email = $"court-{Guid.NewGuid()}@test.com",
+            TimeZoneId = "America/Montevideo"
         });
         var complex = await complexResponse.Content.ReadFromJsonAsync<SportsComplexInfo>();
         Assert.NotNull(complex);
@@ -549,7 +551,8 @@ public sealed class CourtsControllerTests : IClassFixture<MovaWebApplicationFact
             Address = "Address",
             City = "Montevideo",
             PhoneNumber = "+598 99 123 456",
-            Email = $"availability-{Guid.NewGuid()}@test.com"
+            Email = $"availability-{Guid.NewGuid()}@test.com",
+            TimeZoneId = "America/Montevideo"
         });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<SportsComplexInfo>())!;

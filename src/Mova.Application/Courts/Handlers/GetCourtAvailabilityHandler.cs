@@ -4,6 +4,8 @@ using Mova.Application.Courts.Queries;
 using Mova.Contracts.Courts;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.Domain.Exceptions;
+using Mova.Domain.Helpers;
 
 namespace Mova.Application.Courts.Handlers;
 
@@ -33,6 +35,11 @@ public sealed class GetCourtAvailabilityHandler(
             throw new NotFoundException("Sports complex not found.");
         }
 
+        if (!TimeZoneConverter.TryGetTimeZone(sportsComplex.TimeZoneId, out var timeZone))
+        {
+            throw new UnresolvedTimeZoneException();
+        }
+
         var dayOfWeek = query.Date.DayOfWeek;
         var rulesForCourt = await rules.GetByCourtIdAsync(query.CourtId, cancellationToken);
         var rule = rulesForCourt.FirstOrDefault(r => r.DayOfWeek == dayOfWeek && r.IsActive);
@@ -50,12 +57,12 @@ public sealed class GetCourtAvailabilityHandler(
             return [];
         }
 
-        var dayStart = query.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc).AddMinutes(sportsComplex.UtcOffsetMinutes);
+        var dayStart = TimeZoneConverter.GetDayStartUtc(query.Date, timeZone);
         var queryEnd = dayStart.AddDays(2);
 
         var courtReservations = await reservations.GetActiveForCourtAsync(query.CourtId, dayStart, queryEnd, cancellationToken);
         var courtBlocks = await blocks.GetForCourtAsync(query.CourtId, dayStart, queryEnd, cancellationToken);
 
-        return AvailabilitySlotGenerator.GenerateSlots(query.CourtId, query.Date, rule, businessHour, courtReservations, courtBlocks, sportsComplex.UtcOffsetMinutes, timeProvider.GetUtcNow().UtcDateTime);
+        return AvailabilitySlotGenerator.GenerateSlots(query.CourtId, query.Date, rule, businessHour, courtReservations, courtBlocks, timeZone, timeProvider.GetUtcNow().UtcDateTime);
     }
 }

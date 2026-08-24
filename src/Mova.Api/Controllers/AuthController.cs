@@ -64,7 +64,8 @@ public class AuthController : ControllerBase
             request.Latitude,
             request.Longitude,
             request.ComplexPhoneNumber,
-            request.ComplexEmail);
+            request.ComplexEmail,
+            request.TimeZoneId);
 
         await _completeComplexAdminValidator.ValidateAndThrowAsync(command, cancellationToken);
 

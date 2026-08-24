@@ -31,7 +31,7 @@ public sealed class UpdateComplexHandler : IUpdateComplexHandler
             command.Longitude,
             command.PhoneNumber,
             command.Email,
-            command.UtcOffsetMinutes);
+            command.TimeZoneId);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

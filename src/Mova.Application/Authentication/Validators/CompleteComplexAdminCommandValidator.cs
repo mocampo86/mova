@@ -1,5 +1,6 @@
 using FluentValidation;
 using Mova.Application.Authentication.Commands;
+using Mova.Domain.Helpers;
 
 namespace Mova.Application.Authentication.Validators;
 
@@ -13,6 +14,7 @@ public sealed class CompleteComplexAdminCommandValidator : AbstractValidator<Com
     private const int MaxAddressLength = 255;
     private const int MaxCityLength = 255;
     private const int MaxEmailLength = 255;
+    private const int MaxTimeZoneIdLength = 100;
 
     public CompleteComplexAdminCommandValidator()
     {
@@ -81,5 +83,13 @@ public sealed class CompleteComplexAdminCommandValidator : AbstractValidator<Com
             .WithMessage($"Complex email must not exceed {MaxEmailLength} characters.")
             .EmailAddress()
             .WithMessage("Complex email is not valid.");
+
+        RuleFor(x => x.TimeZoneId)
+            .NotEmpty()
+            .WithMessage("Time zone is required.")
+            .MaximumLength(MaxTimeZoneIdLength)
+            .WithMessage($"Time zone must not exceed {MaxTimeZoneIdLength} characters.")
+            .Must(TimeZoneConverter.IsValidTimeZoneId)
+            .WithMessage("Time zone is not supported by the runtime.");
     }
 }

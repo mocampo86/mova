@@ -214,7 +214,8 @@ public class AtomicOnboardingIntegrationTests : IClassFixture<MovaWebApplication
             Latitude = -34.6m,
             Longitude = -58.3m,
             PhoneNumber = "+54 11 1234 5678",
-            Email = $"contact-{suffix}@clubpadel.com"
+            Email = $"contact-{suffix}@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         };
 
     private static CompleteComplexAdminRequest CreateUniqueCompleteRequest(string suffix) =>
@@ -228,7 +229,8 @@ public class AtomicOnboardingIntegrationTests : IClassFixture<MovaWebApplication
             Latitude = -34.6m,
             Longitude = -58.3m,
             ComplexPhoneNumber = "+54 11 1234 5678",
-            ComplexEmail = $"contact-{suffix}@clubpadel.com"
+            ComplexEmail = $"contact-{suffix}@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         };
 
     private static async Task<string> LoginAsync(HttpClient client, string suffix)

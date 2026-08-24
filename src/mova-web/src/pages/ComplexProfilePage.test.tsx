@@ -19,7 +19,7 @@ const mockComplex = {
   longitude: -58.4,
   status: 'Active',
   allowUserRecurringReservations: false,
-  utcOffsetMinutes: 0,
+  timeZoneId: 'America/Montevideo',
   createdAt: '2026-08-01T12:00:00Z',
   updatedAt: '2026-08-06T12:00:00Z'
 };
@@ -110,7 +110,7 @@ describe('ComplexProfilePage', () => {
         email: 'test@complex.com',
         latitude: -34.6,
         longitude: -58.4,
-        utcOffsetMinutes: 0
+        timeZoneId: 'America/Montevideo'
       });
     });
   });

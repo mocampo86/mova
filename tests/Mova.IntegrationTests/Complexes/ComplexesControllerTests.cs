@@ -166,7 +166,8 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Latitude = -34.6m,
             Longitude = -58.3m,
             ComplexPhoneNumber = "+54 11 1234 5678",
-            ComplexEmail = "pending@clubpadel.com"
+            ComplexEmail = "pending@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         });
         completeResponse.EnsureSuccessStatusCode();
 
@@ -248,7 +249,8 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Latitude = -34.6m,
             Longitude = -58.3m,
             ComplexPhoneNumber = "+54 11 1234 5678",
-            ComplexEmail = "pending@clubpadel.com"
+            ComplexEmail = "pending@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         });
         completeResponse.EnsureSuccessStatusCode();
 
@@ -316,7 +318,8 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Latitude = -33m,
             Longitude = -60m,
             PhoneNumber = "+54 11 9999 9999",
-            Email = "updated@clubpadel.com"
+            Email = "updated@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         };
 
         var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{created.Id}", updateRequest);
@@ -358,7 +361,8 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Address = "Updated address",
             City = "Updated city",
             PhoneNumber = "+54 11 9999 9999",
-            Email = "updated@clubpadel.com"
+            Email = "updated@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         };
 
         var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{created.Id}", updateRequest);
@@ -388,7 +392,8 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Latitude = -34.6m,
             Longitude = -58.3m,
             ComplexPhoneNumber = "+54 11 1234 5678",
-            ComplexEmail = "pending@clubpadel.com"
+            ComplexEmail = "pending@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         });
         completeResponse.EnsureSuccessStatusCode();
 
@@ -406,7 +411,8 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Address = "Updated address",
             City = "Updated city",
             PhoneNumber = "+54 11 9999 9999",
-            Email = "updated@clubpadel.com"
+            Email = "updated@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         };
 
         var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{completed.ComplexId}", updateRequest);
@@ -446,7 +452,8 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Address = "Updated address",
             City = "Updated city",
             PhoneNumber = "+54 11 9999 9999",
-            Email = "updated@clubpadel.com"
+            Email = "updated@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         };
 
         var updateResponse = await client.PutAsJsonAsync($"/api/v1/complexes/{created.Id}", updateRequest);
@@ -641,7 +648,8 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
             Latitude = -34.6m,
             Longitude = -58.3m,
             PhoneNumber = "+54 11 1234 5678",
-            Email = "contact@clubpadel.com"
+            Email = "contact@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         };
 
     private static async Task<string> LoginAsync(HttpClient client, string suffix)

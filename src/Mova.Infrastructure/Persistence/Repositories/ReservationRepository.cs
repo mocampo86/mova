@@ -38,10 +38,10 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
         int pageSize,
         Guid? courtId = null,
         ReservationStatus? status = null,
-        DateTime? date = null,
+        DateTime? dayStart = null,
+        DateTime? dayEnd = null,
         string? sort = null,
         Guid? userId = null,
-        int utcOffsetMinutes = 0,
         CancellationToken cancellationToken = default)
     {
         page = page < 1 ? 1 : page;
@@ -64,11 +64,9 @@ public sealed class ReservationRepository(MovaDbContext context) : IReservationR
             query = query.Where(r => r.Status == status.Value);
         }
 
-        if (date.HasValue)
+        if (dayStart.HasValue && dayEnd.HasValue)
         {
-            var dayStart = date.Value.Date.AddMinutes(utcOffsetMinutes);
-            var dayEnd = dayStart.AddDays(1);
-            query = query.Where(r => r.StartAt >= dayStart && r.StartAt < dayEnd);
+            query = query.Where(r => r.StartAt >= dayStart.Value && r.StartAt < dayEnd.Value);
         }
 
         if (userId.HasValue)

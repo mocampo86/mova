@@ -3,6 +3,7 @@ using Mova.Application.Reservations.Commands;
 using Mova.Application.Reservations.Handlers;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.Domain.Helpers;
 using Mova.UnitTests.Application.Authentication;
 using Mova.UnitTests.Application.Complexes;
 using Xunit;
@@ -14,6 +15,7 @@ public sealed class RecurringReservationMutationHandlerTests
     private readonly FakeRecurringReservationRepository _recurringReservationRepository = new();
     private readonly FakeReservationRepository _reservationRepository = new();
     private readonly FakeCourtBlockRepository _courtBlockRepository = new();
+    private readonly FakeSportsComplexRepository _sportsComplexRepository = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     [Fact]
@@ -155,6 +157,7 @@ public sealed class RecurringReservationMutationHandlerTests
             _recurringReservationRepository,
             _reservationRepository,
             _courtBlockRepository,
+            _sportsComplexRepository,
             _unitOfWork);
 
         var result = await handler.HandleAsync(new ModifyRecurringReservationFutureCommand(
@@ -171,11 +174,14 @@ public sealed class RecurringReservationMutationHandlerTests
         Assert.Equal(DayOfWeek.Tuesday, (DayOfWeek)result.DayOfWeek);
         Assert.Equal(new TimeOnly(16, 0), result.StartTime);
         Assert.Equal(2, result.Occurrences.Count);
+
+        var timeZone = TimeZoneConverter.GetTimeZone("America/Montevideo");
         Assert.All(result.Occurrences, occurrence =>
         {
             Assert.Equal("Confirmed", occurrence.Status);
             Assert.Equal("Recurring", occurrence.Source);
-            Assert.Equal(TimeOnly.FromDateTime(occurrence.StartAt), new TimeOnly(16, 0));
+            var localStart = TimeZoneInfo.ConvertTimeFromUtc(occurrence.StartAt, timeZone);
+            Assert.Equal(new TimeOnly(16, 0), TimeOnly.FromDateTime(localStart));
         });
 
         var oldFuture = await _reservationRepository.GetFutureActiveByRecurringReservationIdAsync(
@@ -186,11 +192,22 @@ public sealed class RecurringReservationMutationHandlerTests
 
     private async Task<RecurringReservation> CreateSeriesWithOccurrencesAsync(DateOnly startDate, DateOnly endDate)
     {
-        var complexId = Guid.NewGuid();
         var courtId = Guid.NewGuid();
         var userId = Guid.NewGuid();
+
+        var sportsComplex = SportsComplex.Create(
+            "Test Complex",
+            "Description",
+            "Address",
+            "Montevideo",
+            null,
+            null,
+            "+598 99 123 456",
+            $"test-{Guid.NewGuid()}@example.com");
+        await _sportsComplexRepository.AddAsync(sportsComplex);
+
         var series = RecurringReservation.Create(
-            complexId,
+            sportsComplex.Id,
             courtId,
             userId,
             DayOfWeek.Monday,
@@ -203,7 +220,7 @@ public sealed class RecurringReservationMutationHandlerTests
 
         var occurrences = CreateRecurringReservationHandler.GenerateOccurrences(
             series.Id,
-            complexId,
+            sportsComplex.Id,
             courtId,
             userId,
             DayOfWeek.Monday,
@@ -211,7 +228,8 @@ public sealed class RecurringReservationMutationHandlerTests
             60,
             startDate,
             endDate,
-            null);
+            null,
+            TimeZoneConverter.GetTimeZone(sportsComplex.TimeZoneId!));
 
         await _reservationRepository.AddRangeAsync(occurrences);
         return series;

@@ -10,4 +10,4 @@ public sealed record UpdateComplexCommand(
     decimal? Longitude,
     string PhoneNumber,
     string Email,
-    int UtcOffsetMinutes);
+    string TimeZoneId);

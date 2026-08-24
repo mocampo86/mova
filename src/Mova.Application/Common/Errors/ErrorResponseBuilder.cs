@@ -60,6 +60,12 @@ public static class ErrorResponseBuilder
                 message = exception.Message;
                 break;
 
+            case UnresolvedTimeZoneException:
+                statusCode = 422;
+                code = "TIMEZONE_NOT_CONFIGURED";
+                message = exception.Message;
+                break;
+
             case ConflictException:
                 statusCode = 409;
                 code = "CONFLICT";

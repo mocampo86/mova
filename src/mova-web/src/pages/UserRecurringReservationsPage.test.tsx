@@ -11,7 +11,8 @@ const mockComplex = {
   city: 'City',
   phoneNumber: '+1 234 567',
   email: 'test@example.com',
-  allowUserRecurringReservations: true
+  allowUserRecurringReservations: true,
+  timeZoneId: 'America/Montevideo'
 };
 
 const createMutation = {
@@ -48,8 +49,7 @@ vi.mock('../features/complexes/complexApi', () => ({
 }));
 
 vi.mock('../features/reservations/reservationApi', () => ({
-  useCreateMyRecurringReservation: () => createMutation,
-  getUtcOffsetMinutes: () => 0
+  useCreateMyRecurringReservation: () => createMutation
 }));
 
 import { useRecurringReservationSettings } from '../features/complexes/complexApi';

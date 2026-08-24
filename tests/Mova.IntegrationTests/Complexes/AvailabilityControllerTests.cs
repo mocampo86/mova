@@ -51,7 +51,7 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
         var court = await CreateCourtAsync(client, complex.Id);
         await SetBusinessHoursAsync(client, complex.Id);
         await SetAvailabilityRuleAsync(client, complex.Id, court.Id);
-        await SeedReservationAsync(complex.Id, court.Id, new DateTime(2026, 8, 10, 9, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc));
+        await SeedReservationAsync(complex.Id, court.Id, new DateTime(2026, 8, 10, 12, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 10, 13, 0, 0, DateTimeKind.Utc));
 
         client.DefaultRequestHeaders.Authorization = null;
         var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/availability?courtId={court.Id}&date=2026-08-10");
@@ -60,7 +60,7 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
         var result = await response.Content.ReadFromJsonAsync<List<CourtAvailabilitySlotInfo>>();
         Assert.NotNull(result);
         Assert.Equal(3, result.Count);
-        Assert.DoesNotContain(result, s => s.StartAt == new DateTime(2026, 8, 10, 9, 0, 0, DateTimeKind.Utc));
+        Assert.DoesNotContain(result, s => s.StartAt == new DateTime(2026, 8, 10, 12, 0, 0, DateTimeKind.Utc));
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
         var court = await CreateCourtAsync(client, complex.Id);
         await SetBusinessHoursAsync(client, complex.Id);
         await SetAvailabilityRuleAsync(client, complex.Id, court.Id);
-        await SeedCourtBlockAsync(complex.Id, court.Id, new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 10, 11, 0, 0, DateTimeKind.Utc));
+        await SeedCourtBlockAsync(complex.Id, court.Id, new DateTime(2026, 8, 10, 12, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 10, 13, 0, 0, DateTimeKind.Utc));
 
         client.DefaultRequestHeaders.Authorization = null;
         var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/availability?courtId={court.Id}&date=2026-08-10");
@@ -83,7 +83,7 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
         var result = await response.Content.ReadFromJsonAsync<List<CourtAvailabilitySlotInfo>>();
         Assert.NotNull(result);
         Assert.Equal(3, result.Count);
-        Assert.DoesNotContain(result, s => s.StartAt == new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc));
+        Assert.DoesNotContain(result, s => s.StartAt == new DateTime(2026, 8, 10, 12, 0, 0, DateTimeKind.Utc));
     }
 
     [Fact]
@@ -154,8 +154,8 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
         var result = await response.Content.ReadFromJsonAsync<List<CourtAvailabilitySlotInfo>>();
         Assert.NotNull(result);
         Assert.Equal(4, result.Count);
-        Assert.Equal(new DateTime(2026, 8, 10, 22, 0, 0, DateTimeKind.Utc), result[0].StartAt);
-        Assert.Equal(new DateTime(2026, 8, 11, 2, 0, 0, DateTimeKind.Utc), result[3].EndAt);
+        Assert.Equal(new DateTime(2026, 8, 11, 1, 0, 0, DateTimeKind.Utc), result[0].StartAt);
+        Assert.Equal(new DateTime(2026, 8, 11, 5, 0, 0, DateTimeKind.Utc), result[3].EndAt);
     }
 
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
@@ -181,7 +181,8 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
             Address = "Address",
             City = "Montevideo",
             PhoneNumber = "+598 99 123 456",
-            Email = $"availability-{Guid.NewGuid()}@test.com"
+            Email = $"availability-{Guid.NewGuid()}@test.com",
+            TimeZoneId = "America/Montevideo"
         });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<SportsComplexInfo>())!;

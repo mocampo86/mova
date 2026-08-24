@@ -119,7 +119,7 @@ public class SportsComplexTests
             -58.3m,
             "+54 11 9999 9999",
             "new@test.com",
-            0);
+            "America/Montevideo");
 
         Assert.Equal("New Name", sportsComplex.Name);
         Assert.Equal("New description", sportsComplex.Description);

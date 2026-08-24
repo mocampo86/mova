@@ -1,5 +1,6 @@
 using FluentValidation;
 using Mova.Application.Complexes.Commands;
+using Mova.Domain.Helpers;
 
 namespace Mova.Application.Complexes.Validators;
 
@@ -13,6 +14,7 @@ public sealed class UpdateComplexCommandValidator : AbstractValidator<UpdateComp
     private const int MaxAddressLength = 255;
     private const int MaxCityLength = 255;
     private const int MaxEmailLength = 255;
+    private const int MaxTimeZoneIdLength = 100;
 
     public UpdateComplexCommandValidator()
     {
@@ -72,8 +74,12 @@ public sealed class UpdateComplexCommandValidator : AbstractValidator<UpdateComp
             .EmailAddress()
             .WithMessage("Email is not valid.");
 
-        RuleFor(x => x.UtcOffsetMinutes)
-            .InclusiveBetween(-840, 840)
-            .WithMessage("UTC offset must be between -840 and 840 minutes.");
+        RuleFor(x => x.TimeZoneId)
+            .NotEmpty()
+            .WithMessage("Time zone is required.")
+            .MaximumLength(MaxTimeZoneIdLength)
+            .WithMessage($"Time zone must not exceed {MaxTimeZoneIdLength} characters.")
+            .Must(TimeZoneConverter.IsValidTimeZoneId)
+            .WithMessage("Time zone is not supported by the runtime.");
     }
 }

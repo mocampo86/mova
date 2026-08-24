@@ -90,5 +90,6 @@ describe('CompleteComplexAdminPage', () => {
     expect(screen.getByLabelText('Complex email')).toBeTruthy();
     expect(screen.getByLabelText('Latitude (optional)')).toBeTruthy();
     expect(screen.getByLabelText('Longitude (optional)')).toBeTruthy();
+    expect(screen.getByLabelText(/Time zone/i)).toBeTruthy();
   });
 });

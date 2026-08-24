@@ -2,15 +2,10 @@ import { useQueries } from '@tanstack/react-query';
 import { apiClient } from '../../services/apiClient';
 import type { CourtAvailabilitySlot } from '../complexes/complexTypes';
 
-function getUtcOffsetMinutes(date: string): number {
-  return new Date(`${date}T00:00`).getTimezoneOffset();
-}
-
-function buildAvailabilityUrl(complexId: string, courtId: string, date: string, utcOffsetMinutes: number): string {
+function buildAvailabilityUrl(complexId: string, courtId: string, date: string): string {
   const params = new URLSearchParams({
     courtId,
-    date,
-    utcOffsetMinutes: utcOffsetMinutes.toString()
+    date
   });
 
   return `/api/v1/complexes/${complexId}/availability?${params}`;
@@ -22,15 +17,13 @@ export function useCourtAvailabilityForCourts(
   courtIds: string[],
   enabled: boolean
 ) {
-  const utcOffsetMinutes = getUtcOffsetMinutes(date);
-
   return useQueries({
     queries: enabled
       ? courtIds.map((courtId) => ({
-          queryKey: ['court-availability', complexId, courtId, date, utcOffsetMinutes] as const,
+          queryKey: ['court-availability', complexId, courtId, date] as const,
           queryFn: () =>
             apiClient<CourtAvailabilitySlot[]>(
-              buildAvailabilityUrl(complexId, courtId, date, utcOffsetMinutes)
+              buildAvailabilityUrl(complexId, courtId, date)
             ),
           enabled: Boolean(complexId && date && courtId)
         }))

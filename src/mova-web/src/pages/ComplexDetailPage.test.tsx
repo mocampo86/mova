@@ -21,7 +21,7 @@ const mockComplex = {
   phoneNumber: '+1234567890',
   email: 'test@complex.com',
   allowUserRecurringReservations: false,
-  utcOffsetMinutes: 0
+  timeZoneId: 'America/Montevideo'
 };
 
 const mockCourts = {

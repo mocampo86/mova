@@ -10,6 +10,5 @@ public sealed class GetCourtAvailabilityQueryValidator : AbstractValidator<GetCo
         RuleFor(x => x.SportsComplexId).NotEmpty();
         RuleFor(x => x.CourtId).NotEmpty();
         RuleFor(x => x.Date).NotEmpty();
-        RuleFor(x => x.UtcOffsetMinutes).InclusiveBetween(-840, 840);
     }
 }

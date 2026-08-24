@@ -19,7 +19,8 @@ public class CreateComplexCommandValidatorTests
             -34.6m,
             -58.3m,
             "+54 11 1234 5678",
-            "contact@clubpadel.com");
+            "contact@clubpadel.com",
+            "America/Montevideo");
 
     [Fact]
     public void Validate_WithValidCommand_Passes()

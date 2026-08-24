@@ -6,6 +6,7 @@ using Mova.Contracts.Reservations;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
 using Mova.Domain.Exceptions;
+using Mova.Domain.Helpers;
 
 namespace Mova.Application.Reservations.Handlers;
 
@@ -21,7 +22,12 @@ public sealed class CreateRecurringReservationHandler(
 {
     public async Task<RecurringReservationInfo> HandleAsync(CreateRecurringReservationCommand command, CancellationToken cancellationToken = default)
     {
-        await ValidateContextAsync(command.SportsComplexId, command.CourtId, command.UserId, command.IsAdmin, cancellationToken);
+        var complex = await ValidateContextAsync(command.SportsComplexId, command.CourtId, command.UserId, command.IsAdmin, cancellationToken);
+
+        if (!TimeZoneConverter.TryGetTimeZone(complex.TimeZoneId, out var timeZone))
+        {
+            throw new UnresolvedTimeZoneException();
+        }
 
         return await unitOfWork.ExecuteInTransactionAsync(
             async token =>
@@ -47,7 +53,7 @@ public sealed class CreateRecurringReservationHandler(
                     command.StartDate,
                     command.EndDate,
                     command.Notes,
-                    command.UtcOffsetMinutes);
+                    timeZone);
 
                 if (occurrences.Count == 0)
                 {
@@ -66,7 +72,7 @@ public sealed class CreateRecurringReservationHandler(
             cancellationToken);
     }
 
-    private async Task ValidateContextAsync(Guid sportsComplexId, Guid courtId, Guid userId, bool isAdmin, CancellationToken cancellationToken)
+    private async Task<SportsComplex> ValidateContextAsync(Guid sportsComplexId, Guid courtId, Guid userId, bool isAdmin, CancellationToken cancellationToken)
     {
         var complex = await sportsComplexes.GetByIdAsync(sportsComplexId, cancellationToken)
             ?? throw new NotFoundException("Sports complex not found.");
@@ -102,6 +108,8 @@ public sealed class CreateRecurringReservationHandler(
         {
             throw new UserBlockedException();
         }
+
+        return complex;
     }
 
     private async Task EnsureAvailableAsync(Guid courtId, IReadOnlyList<Reservation> occurrences, Guid? excludeRecurringReservationId, CancellationToken cancellationToken)
@@ -132,17 +140,22 @@ public sealed class CreateRecurringReservationHandler(
         DateOnly startDate,
         DateOnly endDate,
         string? notes,
-        int utcOffsetMinutes = 0)
+        TimeZoneInfo timeZone)
     {
         var firstDate = FirstDateOnOrAfter(startDate, dayOfWeek);
         var occurrences = new List<Reservation>();
 
         for (var date = firstDate; date <= endDate; date = date.AddDays(7))
         {
-            var startAt = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
-                .AddMinutes(utcOffsetMinutes)
-                .Add(startTime.ToTimeSpan());
-            var endAt = startAt.AddMinutes(durationMinutes);
+            var localStart = DateTime.SpecifyKind(date.ToDateTime(startTime), DateTimeKind.Unspecified);
+            var localEnd = localStart.AddMinutes(durationMinutes);
+
+            if (!TimeZoneConverter.TryGetUtc(localStart, timeZone, out var startAt) ||
+                !TimeZoneConverter.TryGetUtc(localEnd, timeZone, out var endAt))
+            {
+                continue;
+            }
+
             var reservation = Reservation.Create(
                 sportsComplexId,
                 courtId,

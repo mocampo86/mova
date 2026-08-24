@@ -108,8 +108,7 @@ describe('useReservations', () => {
     expect(url).toContain('courtId=court-1');
     expect(url).toContain('status=Confirmed');
     expect(url).toContain('date=2026-08-10');
-    const expectedOffset = new Date('2026-08-10T00:00').getTimezoneOffset();
-    expect(url).toContain(`utcOffsetMinutes=${expectedOffset}`);
+    expect(url).not.toContain('utcOffsetMinutes');
     expect(url).toContain('sort=startAt%3Adesc');
   });
 });
