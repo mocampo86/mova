@@ -48,6 +48,7 @@ A sports facility that owns courts and reservations.
 | Email | string? | |
 | Status | enum | Active / Inactive |
 | AllowUserRecurringReservations | bool | Default `true`; controls regular user recurring bookings |
+| TimeZoneId | string? | IANA time zone identifier (e.g. `America/Montevideo`); `null` for unresolved legacy complexes |
 | CreatedAt | DateTime | UTC |
 | UpdatedAt | DateTime? | UTC |
 
@@ -243,7 +244,7 @@ Record of administrative actions.
 4. A blocked user cannot create reservations in the blocking complex.
 5. A recurring reservation must define an end date and a maximum number of weeks.
 6. Cancellation must be allowed only before a configurable minimum notice period, and can be disabled entirely.
-7. All date/time values are stored in UTC and converted to local time in the frontend.
+7. All date/time values are stored in UTC and converted to local time in the frontend using the sports complex's configured IANA time zone.
 
 ## Future domain extensions
 

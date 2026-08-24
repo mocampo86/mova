@@ -114,3 +114,143 @@ export function todayInTimeZone(timeZoneId?: string | null): string {
     return `${year}-${month}-${day}`;
   }
 }
+
+function pad(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+function getTimeZoneOffsetMinutes(timeZoneId: string | undefined | null, date: Date): number {
+  if (!timeZoneId) {
+    return -date.getTimezoneOffset();
+  }
+
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timeZoneId,
+      timeZoneName: 'longOffset'
+    });
+    const parts = formatter.formatToParts(date);
+    const timeZoneName = parts.find((part) => part.type === 'timeZoneName')?.value;
+
+    if (timeZoneName) {
+      const normalized = timeZoneName.replace('GMT', 'UTC').trim();
+      const sign = normalized.includes('-') ? -1 : 1;
+      const numbers = normalized.replace(/[^0-9:]/g, '').split(':').map(Number);
+      const hours = numbers[0] || 0;
+      const minutes = numbers[1] || 0;
+      return sign * (hours * 60 + minutes);
+    }
+  } catch {
+    // Fall back to the browser local offset.
+  }
+
+  return -date.getTimezoneOffset();
+}
+
+function parseDateTimeInput(value: string): { year: number; month: number; day: number; hour: number; minute: number; second: number } {
+  const [datePart, timePart = '00:00'] = value.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute, second = 0] = timePart.split(':').map(Number);
+  return { year, month, day, hour, minute, second };
+}
+
+function naiveUtcMillis(value: string): number {
+  const { year, month, day, hour, minute, second } = parseDateTimeInput(value);
+  return Date.UTC(year, month - 1, day, hour, minute, second);
+}
+
+export function localDateTimeToUtc(timeZoneId: string | undefined | null, localDateTime: string): string {
+  const localMillis = naiveUtcMillis(localDateTime);
+  let candidateUtcMillis = localMillis;
+
+  for (let i = 0; i < 5; i++) {
+    const offsetMinutes = getTimeZoneOffsetMinutes(timeZoneId, new Date(candidateUtcMillis));
+    const adjustedUtcMillis = localMillis - offsetMinutes * 60 * 1000;
+
+    if (Math.abs(adjustedUtcMillis - candidateUtcMillis) < 1000) {
+      return new Date(adjustedUtcMillis).toISOString();
+    }
+
+    candidateUtcMillis = adjustedUtcMillis;
+  }
+
+  return new Date(candidateUtcMillis).toISOString();
+}
+
+export function utcToLocalDateTime(timeZoneId: string | undefined | null, utcIso: string): string {
+  const date = new Date(utcIso);
+
+  if (!timeZoneId) {
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timeZoneId,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    const parts = formatter.formatToParts(date);
+    const part = (type: string) => parts.find((p) => p.type === type)?.value ?? '00';
+    const year = part('year');
+    const month = part('month');
+    const day = part('day');
+    const hour = part('hour');
+    const minute = part('minute');
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  } catch {
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+}
+
+export function nowInTimeZone(timeZoneId?: string | null): string {
+  if (!timeZoneId) {
+    const now = new Date();
+    const rounded = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
+    const nextHour = new Date(rounded.getTime() + 60 * 60 * 1000);
+    const year = nextHour.getFullYear();
+    const month = pad(nextHour.getMonth() + 1);
+    const day = pad(nextHour.getDate());
+    const hours = pad(nextHour.getHours());
+    const minutes = pad(nextHour.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  try {
+    const now = new Date();
+    const rounded = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
+    const nextHour = new Date(rounded.getTime() + 60 * 60 * 1000);
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timeZoneId,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).formatToParts(nextHour);
+    const part = (type: string) => parts.find((p) => p.type === type)?.value ?? '00';
+    const year = part('year');
+    const month = part('month');
+    const day = part('day');
+    const hour = part('hour');
+    const minute = part('minute');
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  } catch {
+    return nowInTimeZone();
+  }
+}

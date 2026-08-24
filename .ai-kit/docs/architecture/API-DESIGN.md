@@ -5,6 +5,8 @@
 - **Base path**: `/api/v1`
 - **Resources** are expressed in plural English nouns: `/complexes`, `/courts`, `/reservations`.
 - **Dates and times** are in ISO-8601 UTC in request/response bodies.
+- **Business hours** and **court availability rules** represent local wall-clock values for the complex's configured time zone.
+- **Availability** is derived from the complex's IANA `timeZoneId` and a complex-local `date` query parameter; `utcOffsetMinutes` is no longer used.
 - **Pagination** is applied to all list endpoints that may return more than one page of results.
 - **Idempotency** must be supported for reservation creation and mutation endpoints.
 
@@ -37,7 +39,7 @@ GET    /api/v1/complexes/{complexId}/courts/{courtId}
 PUT    /api/v1/complexes/{complexId}/courts/{courtId}
 PATCH  /api/v1/complexes/{complexId}/courts/{courtId}/status
 
-GET    /api/v1/complexes/{complexId}/availability?courtId=&date=
+GET    /api/v1/complexes/{complexId}/availability?courtId=&date=   # date is local to the complex's TimeZoneId
 
 PUT    /api/v1/complexes/{complexId}/courts/{courtId}/availability
 GET    /api/v1/complexes/{complexId}/courts/{courtId}/availability
@@ -75,6 +77,58 @@ POST   /api/v1/complexes/{complexId}/court-blocks
 ```
 
 ## Request / response examples
+
+### Create complex
+
+```http
+POST /api/v1/complexes HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer <jwt>
+
+{
+  "name": "Club Padel",
+  "description": "A premium padel club",
+  "address": "Av. Libertador 1234",
+  "city": "Buenos Aires",
+  "latitude": -34.6,
+  "longitude": -58.3,
+  "phoneNumber": "+54 11 1234 5678",
+  "email": "contact@clubpadel.com",
+  "timeZoneId": "America/Argentina/Buenos_Aires"
+}
+```
+
+`timeZoneId` is a required IANA identifier. A complex created or updated with a missing or invalid `timeZoneId` is rejected.
+
+### Update complex
+
+```http
+PUT /api/v1/complexes/{complexId} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer <jwt>
+
+{
+  "name": "Club Padel",
+  "description": "Updated description",
+  "address": "Av. Libertador 1234",
+  "city": "Buenos Aires",
+  "latitude": -34.6,
+  "longitude": -58.3,
+  "phoneNumber": "+54 11 1234 5678",
+  "email": "contact@clubpadel.com",
+  "timeZoneId": "America/Argentina/Buenos_Aires"
+}
+```
+
+### Get availability
+
+The `date` query parameter is a local date in the complex's configured time zone. The response contains UTC slot instants.
+
+```http
+GET /api/v1/complexes/{complexId}/availability?courtId={courtId}&date=2026-08-10 HTTP/1.1
+```
+
+If the complex has no configured time zone, the endpoint returns `422 Unprocessable Entity` with the error code `TIMEZONE_NOT_CONFIGURED`.
 
 ### Create reservation
 

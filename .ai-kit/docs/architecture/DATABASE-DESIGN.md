@@ -45,6 +45,7 @@ CREATE TABLE SportsComplexes (
     Email TEXT,
     Status TEXT NOT NULL,
     AllowUserRecurringReservations BOOLEAN NOT NULL DEFAULT TRUE,
+    TimeZoneId TEXT,
     CreatedAt TIMESTAMPTZ NOT NULL,
     UpdatedAt TIMESTAMPTZ
 );

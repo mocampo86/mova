@@ -158,6 +158,35 @@ public sealed class AvailabilityControllerTests : IClassFixture<MovaWebApplicati
         Assert.Equal(new DateTime(2026, 8, 11, 5, 0, 0, DateTimeKind.Utc), result[3].EndAt);
     }
 
+    [Fact]
+    public async Task GetAvailability_WithUnresolvedTimeZone_ReturnsTimeZoneNotConfigured()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, $"availability-unresolved-admin-{Guid.NewGuid()}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var complex = await CreateComplexAsync(client);
+        var court = await CreateCourtAsync(client, complex.Id);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+            var persisted = await context.SportsComplexes.FindAsync(complex.Id);
+            if (persisted is not null)
+            {
+                context.Entry(persisted).Property(c => c.TimeZoneId).CurrentValue = null;
+                await context.SaveChangesAsync();
+            }
+        }
+
+        client.DefaultRequestHeaders.Authorization = null;
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/availability?courtId={court.Id}&date=2026-08-10");
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("TIMEZONE_NOT_CONFIGURED", content);
+    }
+
     private static async Task<string> LoginAsync(HttpClient client, string suffix)
     {
         var response = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" });

@@ -67,6 +67,10 @@ Do not commit `.env` or `secrets.json`.
 - **Application Insights** for distributed tracing, request logging, and exceptions.
 - **Log Analytics** for log queries and alerts.
 
+### Time zone data
+
+The API resolves IANA time zone identifiers using .NET `TimeZoneInfo`, which depends on the host's IANA time zone database (`tzdata`). When running on Linux containers or App Service, ensure `tzdata` is installed and up to date. Windows 10/11 and recent Windows Server builds have native IANA support; older versions may require the ICU time zone data to be present. If `TimeZoneInfo.TryFindSystemTimeZoneById` cannot resolve a configured `TimeZoneId`, all time zone-dependent operations fail with `TIMEZONE_NOT_CONFIGURED`.
+
 ### Networking
 
 - HTTPS only.

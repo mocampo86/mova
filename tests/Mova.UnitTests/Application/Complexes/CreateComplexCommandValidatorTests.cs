@@ -131,4 +131,22 @@ public class CreateComplexCommandValidatorTests
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.UserId);
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    public void Validate_WithMissingTimeZoneId_Fails(string timeZoneId)
+    {
+        var command = CreateValidCommand() with { TimeZoneId = timeZoneId };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.TimeZoneId);
+    }
+
+    [Fact]
+    public void Validate_WithInvalidTimeZoneId_Fails()
+    {
+        var command = CreateValidCommand() with { TimeZoneId = "Not/A/TimeZone" };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.TimeZoneId);
+    }
 }

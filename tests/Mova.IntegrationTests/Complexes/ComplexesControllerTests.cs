@@ -10,6 +10,7 @@ using Mova.Contracts.Complexes;
 using Mova.Contracts.Users;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.Domain.Helpers;
 using Mova.Infrastructure.Data;
 using Mova.IntegrationTests.Authentication;
 using Xunit;
@@ -616,8 +617,10 @@ public class ComplexesControllerTests : IClassFixture<MovaWebApplicationFactory>
         var player = User.CreateFromGoogle(Guid.NewGuid(), $"player-{suffix}", $"player-{suffix}@test.com", $"Player {suffix}");
         context.Users.Add(player);
 
-        var today = DateTime.UtcNow.Date;
-        var start = new DateTime(today.Year, today.Month, today.Day, 0, 0, 0, DateTimeKind.Utc);
+        var complex = await context.SportsComplexes.FindAsync(complexId);
+        var timeZone = TimeZoneConverter.GetTimeZone(complex!.TimeZoneId!);
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone));
+        var start = TimeZoneConverter.GetDayStartUtc(today, timeZone);
 
         var confirmed1 = Reservation.Create(complexId, activeCourt.Id, player.Id, start.AddHours(10), start.AddHours(11), ReservationSource.Web);
         confirmed1.Confirm();
