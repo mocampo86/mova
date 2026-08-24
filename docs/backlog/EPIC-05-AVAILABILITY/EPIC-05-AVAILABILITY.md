@@ -27,6 +27,7 @@ Enable visitors and logged-in users to discover sports complexes, view courts, f
 | [US-026](US-026.md) | As a user, I want to list the courts of a complex. |
 | [US-027](US-027.md) | As a user, I want to filter courts by sport. |
 | [US-028](US-028.md) | As a user, I want to see available time slots for a court on a selected date. |
+| [US-083](US-083.md) | As a complex administrator, I want to configure the IANA timezone of my sports complex. |
 
 ## Acceptance criteria
 
