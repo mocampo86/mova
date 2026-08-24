@@ -43,7 +43,8 @@ public class CompleteComplexAdminHandlerTests
             -34.6m,
             -58.3m,
             "+54 11 1234 5678",
-            "contact@clubpadel.com"));
+            "contact@clubpadel.com",
+            "America/Buenos_Aires"));
 
         Assert.NotNull(result);
         Assert.Equal("test-access-token", result.AccessToken);
@@ -94,7 +95,8 @@ public class CompleteComplexAdminHandlerTests
             null,
             null,
             "+54 11 1234 5678",
-            "email@test.com")));
+            "email@test.com",
+            "America/Montevideo")));
 
         Assert.Equal(0, _unitOfWork.TransactionCallCount);
         Assert.Equal(0, _unitOfWork.SaveChangesCallCount);
@@ -125,7 +127,8 @@ public class CompleteComplexAdminHandlerTests
             -34.6m,
             -58.3m,
             "+54 11 1234 5678",
-            "contact@clubpadel.com")));
+            "contact@clubpadel.com",
+            "America/Montevideo")));
 
         Assert.Equal(1, unitOfWork.TransactionCallCount);
         Assert.Equal(0, unitOfWork.SaveChangesCallCount);
@@ -156,7 +159,8 @@ public class CompleteComplexAdminHandlerTests
             -34.6m,
             -58.3m,
             "+54 11 1234 5678",
-            "contact@clubpadel.com")));
+            "contact@clubpadel.com",
+            "America/Montevideo")));
 
         Assert.Equal(1, unitOfWork.TransactionCallCount);
         Assert.Equal(0, unitOfWork.SaveChangesCallCount);
@@ -180,7 +184,6 @@ public class CompleteComplexAdminHandlerTests
             null,
             "+54 11 0000 0000",
             "existing@test.com",
-            utcOffsetMinutes: 0,
             status: ComplexStatus.Pending);
         await _sportsComplexRepository.AddAsync(existingComplex);
         await _complexAdministratorRepository.AddAsync(
@@ -197,7 +200,8 @@ public class CompleteComplexAdminHandlerTests
             null,
             null,
             "+54 11 1234 5678",
-            "second@test.com"));
+            "second@test.com",
+            "America/Montevideo"));
 
         Assert.NotEqual(Guid.Empty, result.ComplexId);
 

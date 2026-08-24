@@ -1,11 +1,15 @@
 using Mova.Application.Courts;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.Domain.Helpers;
 
 namespace Mova.UnitTests.Application.Courts;
 
 public sealed class AvailabilitySlotGeneratorTests
 {
+    private static readonly TimeZoneInfo Utc = TimeZoneInfo.Utc;
+    private static readonly TimeZoneInfo MontevideoTime = TimeZoneConverter.GetTimeZone("America/Montevideo");
+
     [Fact]
     public void GenerateSlots_WithRuleAndBusinessHours_ReturnsSlots()
     {
@@ -14,7 +18,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(12), 60, true);
         var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(9), TimeSpan.FromHours(22), false);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], []).ToList();
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], Utc).ToList();
 
         Assert.Equal(3, slots.Count);
         Assert.All(slots, s => Assert.Equal(courtId, s.CourtId));
@@ -31,7 +35,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(12), 60, true);
         var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(0), TimeSpan.FromHours(0), true);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], []);
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], Utc);
 
         Assert.Empty(slots);
     }
@@ -44,7 +48,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(7), TimeSpan.FromHours(10), 60, true);
         var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(9), TimeSpan.FromHours(22), false);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], []).ToList();
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], Utc).ToList();
 
         Assert.Single(slots);
         Assert.Equal(new DateTime(2026, 8, 10, 9, 0, 0, DateTimeKind.Utc), slots[0].StartAt);
@@ -62,7 +66,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var businessHours = BusinessHours.Create(complexId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
         var reservation = Reservation.Create(complexId, courtId, userId, new DateTime(2026, 8, 10, 9, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc), ReservationSource.Web);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [reservation], []);
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [reservation], [], Utc);
 
         Assert.Equal(3, slots.Count);
         Assert.DoesNotContain(slots, s => s.StartAt == new DateTime(2026, 8, 10, 9, 0, 0, DateTimeKind.Utc));
@@ -79,7 +83,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var businessHours = BusinessHours.Create(complexId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
         var block = CourtBlock.Create(complexId, courtId, new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 10, 11, 0, 0, DateTimeKind.Utc), userId);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [block]);
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [block], Utc);
 
         Assert.Equal(3, slots.Count);
         Assert.DoesNotContain(slots, s => s.StartAt == new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc));
@@ -97,7 +101,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var reservation = Reservation.Create(complexId, courtId, userId, new DateTime(2026, 8, 10, 9, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc), ReservationSource.Web);
         reservation.Cancel(userId);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [reservation], []);
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [reservation], [], Utc);
 
         Assert.Equal(4, slots.Count);
     }
@@ -110,7 +114,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(12), 60, true);
         var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Tuesday, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], []);
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], Utc);
 
         Assert.Empty(slots);
     }
@@ -123,7 +127,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(2), 60, true);
         var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(20), TimeSpan.FromHours(4), false);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], []).ToList();
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], Utc).ToList();
 
         Assert.Equal(4, slots.Count);
         Assert.Equal(new DateTime(2026, 8, 10, 22, 0, 0, DateTimeKind.Utc), slots[0].StartAt);
@@ -132,14 +136,14 @@ public sealed class AvailabilitySlotGeneratorTests
     }
 
     [Fact]
-    public void GenerateSlots_WithUtcOffset_AdjustsSlotTimes()
+    public void GenerateSlots_WithTimeZone_AdjustsSlotTimes()
     {
         var courtId = Guid.NewGuid();
         var date = new DateOnly(2026, 8, 10); // Monday
         var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(12), 60, true);
         var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], 180).ToList();
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], MontevideoTime).ToList();
 
         Assert.Equal(4, slots.Count);
         Assert.Equal(new DateTime(2026, 8, 10, 11, 0, 0, DateTimeKind.Utc), slots[0].StartAt);
@@ -155,7 +159,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(2), 60, true);
         var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(20), TimeSpan.FromHours(22), false);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], []);
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], Utc);
 
         Assert.Empty(slots);
     }
@@ -168,7 +172,7 @@ public sealed class AvailabilitySlotGeneratorTests
         var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Monday, TimeSpan.FromHours(22), TimeSpan.FromHours(2), 60, true);
         var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(23), TimeSpan.FromHours(3), false);
 
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], []).ToList();
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], Utc).ToList();
 
         Assert.Equal(3, slots.Count);
         Assert.Equal(new DateTime(2026, 8, 10, 23, 0, 0, DateTimeKind.Utc), slots[0].StartAt);
@@ -184,10 +188,42 @@ public sealed class AvailabilitySlotGeneratorTests
         var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Monday, TimeSpan.FromHours(8), TimeSpan.FromHours(22), false);
 
         var referenceTime = new DateTime(2026, 8, 10, 9, 30, 0, DateTimeKind.Utc);
-        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], 0, referenceTime).ToList();
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], Utc, referenceTime).ToList();
 
         Assert.Equal(2, slots.Count);
         Assert.Equal(new DateTime(2026, 8, 10, 10, 0, 0, DateTimeKind.Utc), slots[0].StartAt);
         Assert.Equal(new DateTime(2026, 8, 10, 12, 0, 0, DateTimeKind.Utc), slots[1].EndAt);
+    }
+
+    [Fact]
+    public void GenerateSlots_WithSpringForward_SkipsInvalidLocalTimes()
+    {
+        var courtId = Guid.NewGuid();
+        var date = new DateOnly(2026, 3, 8); // Sunday
+        var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Sunday, TimeSpan.FromHours(0), TimeSpan.FromHours(6), 60, true);
+        var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Sunday, TimeSpan.FromHours(0), TimeSpan.FromHours(6), false);
+
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], TimeZoneConverter.GetTimeZone("America/New_York")).ToList();
+
+        // 01:00-02:00 and 02:00-03:00 are not offered because 02:00 does not exist during spring-forward.
+        // Valid slots are 00:00-01:00, 03:00-04:00, 04:00-05:00 and 05:00-06:00.
+        Assert.Equal(4, slots.Count);
+        Assert.DoesNotContain(slots, s => s.StartAt.Hour == 2);
+    }
+
+    [Fact]
+    public void GenerateSlots_WithFallBack_UsesStandardTimeForAmbiguousHour()
+    {
+        var courtId = Guid.NewGuid();
+        var date = new DateOnly(2026, 11, 1); // Sunday
+        var rule = CourtAvailabilityRule.Create(courtId, DayOfWeek.Sunday, TimeSpan.FromHours(0), TimeSpan.FromHours(2), 60, true);
+        var businessHours = BusinessHours.Create(Guid.NewGuid(), DayOfWeek.Sunday, TimeSpan.FromHours(0), TimeSpan.FromHours(2), false);
+
+        var slots = AvailabilitySlotGenerator.GenerateSlots(courtId, date, rule, businessHours, [], [], TimeZoneConverter.GetTimeZone("America/New_York")).ToList();
+
+        // 00:00-01:00 is in DST (UTC-4). 01:00-02:00 is ambiguous and resolves to standard time (UTC-5).
+        Assert.Equal(2, slots.Count);
+        Assert.Equal(new DateTime(2026, 11, 1, 4, 0, 0, DateTimeKind.Utc), slots[0].StartAt);
+        Assert.Equal(new DateTime(2026, 11, 1, 6, 0, 0, DateTimeKind.Utc), slots[1].StartAt);
     }
 }

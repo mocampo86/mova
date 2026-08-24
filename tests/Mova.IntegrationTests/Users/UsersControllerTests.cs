@@ -323,7 +323,8 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
             Address = "Address",
             City = "Montevideo",
             PhoneNumber = "+598 99 123 456",
-            Email = $"dashboard-{Guid.NewGuid()}@test.com"
+            Email = $"dashboard-{Guid.NewGuid()}@test.com",
+            TimeZoneId = "America/Montevideo"
         });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<SportsComplexInfo>())!;

@@ -94,7 +94,8 @@ public class AuthControllerTests : IClassFixture<MovaWebApplicationFactory>
             Latitude = -34.6m,
             Longitude = -58.3m,
             ComplexPhoneNumber = "+54 11 1234 5678",
-            ComplexEmail = "contact@clubpadel.com"
+            ComplexEmail = "contact@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         };
 
         var response = await _client.PostAsJsonAsync("/api/v1/auth/complete-complex-admin", request);
@@ -136,7 +137,8 @@ public class AuthControllerTests : IClassFixture<MovaWebApplicationFactory>
             Address = "Av. Libertador 1234",
             City = "Buenos Aires",
             ComplexPhoneNumber = "+54 11 1234 5678",
-            ComplexEmail = "contact@clubpadel.com"
+            ComplexEmail = "contact@clubpadel.com",
+            TimeZoneId = "America/Argentina/Buenos_Aires"
         };
 
         var response = await _client.PostAsJsonAsync("/api/v1/auth/complete-complex-admin", request);

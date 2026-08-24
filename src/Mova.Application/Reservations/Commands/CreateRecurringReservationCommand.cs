@@ -10,5 +10,4 @@ public sealed record CreateRecurringReservationCommand(
     DateOnly StartDate,
     DateOnly EndDate,
     string? Notes,
-    bool IsAdmin,
-    int UtcOffsetMinutes = 0);
+    bool IsAdmin);

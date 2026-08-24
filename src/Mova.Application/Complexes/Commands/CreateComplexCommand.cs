@@ -10,4 +10,4 @@ public sealed record CreateComplexCommand(
     decimal? Longitude,
     string PhoneNumber,
     string Email,
-    int UtcOffsetMinutes = 0);
+    string TimeZoneId);

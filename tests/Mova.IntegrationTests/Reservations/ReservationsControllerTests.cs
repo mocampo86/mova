@@ -830,7 +830,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         });
         Assert.Equal(HttpStatusCode.Created, tomorrowResponse.StatusCode);
 
-        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=1&pageSize=10&date={today:yyyy-MM-dd}&utcOffsetMinutes=0");
+        var response = await client.GetAsync($"/api/v1/complexes/{complex.Id}/reservations?page=1&pageSize=10&date={today:yyyy-MM-dd}");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var result = await response.Content.ReadFromJsonAsync<PagedResult<ReservationInfo>>();
@@ -894,8 +894,8 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var singleResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/reservations/me", new CreateMyReservationRequest
         {
             CourtId = court.Id,
-            StartAt = new DateTime(2026, 9, 7, 14, 30, 0, DateTimeKind.Utc),
-            EndAt = new DateTime(2026, 9, 7, 15, 30, 0, DateTimeKind.Utc)
+            StartAt = new DateTime(2026, 9, 7, 17, 30, 0, DateTimeKind.Utc),
+            EndAt = new DateTime(2026, 9, 7, 18, 30, 0, DateTimeKind.Utc)
         });
         Assert.Equal(HttpStatusCode.Created, singleResponse.StatusCode);
 
@@ -1237,7 +1237,8 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
             Address = "Address",
             City = "Montevideo",
             PhoneNumber = "+598 99 123 456",
-            Email = $"reservation-{Guid.NewGuid()}@test.com"
+            Email = $"reservation-{Guid.NewGuid()}@test.com",
+            TimeZoneId = "America/Montevideo"
         });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<SportsComplexInfo>())!;

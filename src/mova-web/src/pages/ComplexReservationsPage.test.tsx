@@ -10,10 +10,12 @@ import {
   useUpdateReservationStatus
 } from '../features/reservations/reservationApi';
 import { useCourtAvailabilityForCourts } from '../features/reservations/reservationCalendarApi';
+import { useAdminComplex } from '../features/complexes/complexApi';
 import { renderWithAuth } from '../test-utils';
 
 vi.mock('../features/reservations/reservationApi');
 vi.mock('../features/courts/courtApi');
+vi.mock('../features/complexes/complexApi');
 vi.mock('../features/reservations/reservationCalendarApi');
 
 const mockCourts = {
@@ -122,6 +124,16 @@ describe('ComplexReservationsPage', () => {
       isLoading: false,
       isError: false
     } as unknown as ReturnType<typeof useCourtAvailabilityForCourts>);
+
+    vi.mocked(useAdminComplex).mockReturnValue({
+      data: {
+        id: 'complex-1',
+        name: 'Complex One',
+        timeZoneId: 'America/Montevideo'
+      },
+      isLoading: false,
+      isError: false
+    } as unknown as ReturnType<typeof useAdminComplex>);
   }
 
   it('renders the reservations list with details and actions', async () => {

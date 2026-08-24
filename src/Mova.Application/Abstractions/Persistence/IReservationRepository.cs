@@ -15,10 +15,10 @@ public interface IReservationRepository
         int pageSize,
         Guid? courtId = null,
         ReservationStatus? status = null,
-        DateTime? date = null,
+        DateTime? dayStart = null,
+        DateTime? dayEnd = null,
         string? sort = null,
         Guid? userId = null,
-        int utcOffsetMinutes = 0,
         CancellationToken cancellationToken = default);
     Task<(IReadOnlyList<Reservation> Items, int TotalItems)> GetUpcomingByUserIdAsync(
         Guid userId,

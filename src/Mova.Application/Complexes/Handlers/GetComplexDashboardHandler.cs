@@ -1,6 +1,8 @@
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Complexes.Queries;
 using Mova.Contracts.Complexes;
+using Mova.Domain.Exceptions;
+using Mova.Domain.Helpers;
 
 namespace Mova.Application.Complexes.Handlers;
 
@@ -36,9 +38,14 @@ public sealed class GetComplexDashboardHandler : IGetComplexDashboardHandler
             query.ComplexId,
             cancellationToken);
 
-        var today = DateTime.UtcNow.Date;
-        var start = new DateTime(today.Year, today.Month, today.Day, 0, 0, 0, DateTimeKind.Utc);
-        var end = start.AddDays(1);
+        if (!TimeZoneConverter.TryGetTimeZone(sportsComplex.TimeZoneId, out var timeZone))
+        {
+            throw new UnresolvedTimeZoneException();
+        }
+
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone));
+        var start = TimeZoneConverter.GetDayStartUtc(today, timeZone);
+        var end = TimeZoneConverter.GetDayStartUtc(today.AddDays(1), timeZone);
 
         var (confirmed, cancelled, completed) = await _reservationRepository.GetTodayStatusCountsByComplexIdAsync(
             query.ComplexId,

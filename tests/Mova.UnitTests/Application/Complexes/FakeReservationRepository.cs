@@ -46,10 +46,10 @@ public sealed class FakeReservationRepository : IReservationRepository
         int pageSize,
         Guid? courtId = null,
         ReservationStatus? status = null,
-        DateTime? date = null,
+        DateTime? dayStart = null,
+        DateTime? dayEnd = null,
         string? sort = null,
         Guid? userId = null,
-        int utcOffsetMinutes = 0,
         CancellationToken cancellationToken = default)
     {
         var query = _reservations.Where(r => r.SportsComplexId == sportsComplexId);
@@ -64,11 +64,9 @@ public sealed class FakeReservationRepository : IReservationRepository
             query = query.Where(r => r.Status == status.Value);
         }
 
-        if (date.HasValue)
+        if (dayStart.HasValue && dayEnd.HasValue)
         {
-            var dayStart = date.Value.Date.AddMinutes(utcOffsetMinutes);
-            var dayEnd = dayStart.AddDays(1);
-            query = query.Where(r => r.StartAt >= dayStart && r.StartAt < dayEnd);
+            query = query.Where(r => r.StartAt >= dayStart.Value && r.StartAt < dayEnd.Value);
         }
 
         if (userId.HasValue)

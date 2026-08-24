@@ -153,7 +153,8 @@ public sealed class CancellationPolicyControllerTests : IClassFixture<MovaWebApp
             Address = "Address",
             City = "Montevideo",
             PhoneNumber = "+598 99 123 456",
-            Email = $"policy-{Guid.NewGuid()}@test.com"
+            Email = $"policy-{Guid.NewGuid()}@test.com",
+            TimeZoneId = "America/Montevideo"
         });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<SportsComplexInfo>())!;

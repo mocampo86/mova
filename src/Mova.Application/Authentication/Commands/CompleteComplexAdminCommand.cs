@@ -10,4 +10,5 @@ public sealed record CompleteComplexAdminCommand(
     decimal? Latitude,
     decimal? Longitude,
     string ComplexPhoneNumber,
-    string ComplexEmail);
+    string ComplexEmail,
+    string TimeZoneId);

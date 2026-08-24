@@ -16,6 +16,8 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAdminComplex, useUpdateComplex } from '../features/complexes/complexApi';
+import TimezoneSelector from '../components/TimezoneSelector';
+import { DEFAULT_TIME_ZONE_ID } from '../utils/timezones';
 
 const phoneNumberPattern = /^\+[0-9](?:\s*[0-9]){6,14}$/;
 
@@ -52,11 +54,7 @@ const schema = z.object({
     .min(1, 'Email is required.')
     .email('Email is not valid.')
     .max(255, 'Email must not exceed 255 characters.'),
-  utcOffsetMinutes: z
-    .number()
-    .int('UTC offset must be an integer.')
-    .min(-840, 'UTC offset must be between -840 and 840 minutes.')
-    .max(840, 'UTC offset must be between -840 and 840 minutes.')
+  timeZoneId: z.string().min(1, 'Time zone is required.')
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -90,7 +88,7 @@ export default function ComplexProfilePage() {
       longitude: null,
       phoneNumber: '',
       email: '',
-      utcOffsetMinutes: 0
+      timeZoneId: DEFAULT_TIME_ZONE_ID
     }
   });
 
@@ -105,7 +103,7 @@ export default function ComplexProfilePage() {
         longitude: data.longitude ?? null,
         phoneNumber: data.phoneNumber,
         email: data.email,
-        utcOffsetMinutes: data.utcOffsetMinutes ?? 0
+        timeZoneId: data.timeZoneId ?? DEFAULT_TIME_ZONE_ID
       });
     }
   }, [data, reset]);
@@ -258,13 +256,20 @@ export default function ComplexProfilePage() {
           helperText={errors.email?.message}
         />
 
-        <TextField
-          {...register('utcOffsetMinutes', { valueAsNumber: true })}
-          label={t('admin.profile.utcOffsetMinutes')}
-          type="number"
-          fullWidth
-          error={Boolean(errors.utcOffsetMinutes)}
-          helperText={errors.utcOffsetMinutes?.message}
+        <Controller
+          name="timeZoneId"
+          control={control}
+          render={({ field }) => (
+            <TimezoneSelector
+              value={field.value}
+              onChange={field.onChange}
+              label={t('admin.profile.timeZone')}
+              helperText={t('admin.profile.timeZoneHelper')}
+              error={Boolean(errors.timeZoneId)}
+              required
+              fullWidth
+            />
+          )}
         />
 
         <TextField

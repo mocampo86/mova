@@ -70,8 +70,8 @@ public sealed class CreateRecurringReservationHandlerTests
             complex.Id,
             court.Id,
             user.Id,
-            new DateTime(2026, 8, 17, 14, 30, 0, DateTimeKind.Utc),
-            new DateTime(2026, 8, 17, 15, 30, 0, DateTimeKind.Utc),
+            new DateTime(2026, 8, 17, 17, 30, 0, DateTimeKind.Utc),
+            new DateTime(2026, 8, 17, 18, 30, 0, DateTimeKind.Utc),
             ReservationSource.Web);
         existing.Confirm();
         await _reservationRepository.AddAsync(existing);
@@ -97,8 +97,8 @@ public sealed class CreateRecurringReservationHandlerTests
         _courtBlockRepository.Add(CourtBlock.Create(
             complex.Id,
             court.Id,
-            new DateTime(2026, 8, 24, 14, 0, 0, DateTimeKind.Utc),
-            new DateTime(2026, 8, 24, 15, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 8, 24, 17, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 8, 24, 18, 0, 0, DateTimeKind.Utc),
             Guid.NewGuid(),
             "Maintenance"));
         var handler = CreateHandler();
@@ -175,8 +175,7 @@ public sealed class CreateRecurringReservationHandlerTests
             new DateOnly(2026, 8, 10),
             new DateOnly(2026, 9, 6),
             "Friday 8 PM",
-            false,
-            180));
+            false));
 
         Assert.Equal(4, result.Occurrences.Count);
         Assert.Equal(

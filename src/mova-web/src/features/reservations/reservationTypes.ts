@@ -36,7 +36,6 @@ export interface CreateMyRecurringReservationRequest {
   startDate: string;
   endDate: string;
   notes?: string;
-  utcOffsetMinutes?: number;
 }
 
 export interface CreateRecurringReservationForCustomerRequest {
@@ -48,7 +47,6 @@ export interface CreateRecurringReservationForCustomerRequest {
   startDate: string;
   endDate: string;
   notes?: string;
-  utcOffsetMinutes?: number;
 }
 
 export interface RecurringReservation {

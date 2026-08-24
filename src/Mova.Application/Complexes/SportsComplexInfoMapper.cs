@@ -20,7 +20,7 @@ public static class SportsComplexInfoMapper
             Email = sportsComplex.Email,
             Status = sportsComplex.Status.ToString(),
             AllowUserRecurringReservations = sportsComplex.AllowUserRecurringReservations,
-            UtcOffsetMinutes = sportsComplex.UtcOffsetMinutes,
+            TimeZoneId = sportsComplex.TimeZoneId,
             CreatedAt = sportsComplex.CreatedAt,
             UpdatedAt = sportsComplex.UpdatedAt
         };

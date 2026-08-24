@@ -35,7 +35,8 @@ public class CreateComplexHandlerTests
             -34.6m,
             -58.3m,
             "+54 11 1234 5678",
-            "contact@clubpadel.com"));
+            "contact@clubpadel.com",
+            "America/Montevideo"));
 
         Assert.NotNull(result);
         Assert.Equal("Club Padel", result.Name);
@@ -71,7 +72,8 @@ public class CreateComplexHandlerTests
             null,
             null,
             "+54 11 1234 5678",
-            "email@test.com")));
+            "email@test.com",
+            "America/Montevideo")));
 
         Assert.Equal(0, _unitOfWork.TransactionCallCount);
         Assert.Equal(0, _unitOfWork.SaveChangesCallCount);
@@ -100,7 +102,8 @@ public class CreateComplexHandlerTests
             -34.6m,
             -58.3m,
             "+54 11 1234 5678",
-            "contact@clubpadel.com")));
+            "contact@clubpadel.com",
+            "America/Montevideo")));
 
         Assert.Equal(1, unitOfWork.TransactionCallCount);
         Assert.Equal(0, unitOfWork.SaveChangesCallCount);
@@ -129,7 +132,8 @@ public class CreateComplexHandlerTests
             -34.6m,
             -58.3m,
             "+54 11 1234 5678",
-            "contact@clubpadel.com")));
+            "contact@clubpadel.com",
+            "America/Montevideo")));
 
         Assert.Equal(1, unitOfWork.TransactionCallCount);
         Assert.Equal(0, unitOfWork.SaveChangesCallCount);

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Alert,
@@ -29,6 +29,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useAdminComplex } from '../features/complexes/complexApi';
 import { useCourts } from '../features/courts/courtApi';
 import type { CourtListFilters } from '../features/courts/courtTypes';
 import UserAutocomplete from '../features/users/UserAutocomplete';
@@ -53,6 +54,7 @@ import type {
 } from '../features/reservations/reservationCalendarTypes';
 import { buildCalendarColumns } from '../features/reservations/reservationCalendarUtils';
 import { getReservationStatusColor } from '../features/reservations/reservationStatus';
+import { localDateTimeToUtc, nowInTimeZone, todayInTimeZone, utcToLocalDateTime } from '../utils/timezones';
 
 function formatDateTimeRange(startAt: string, endAt: string): string {
   const start = new Date(startAt);
@@ -60,39 +62,22 @@ function formatDateTimeRange(startAt: string, endAt: string): string {
   return `${start.toLocaleString()} - ${end.toLocaleTimeString()}`;
 }
 
-function getTodayLocalDateString(): string {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function toLocalDateTimeInputValue(isoString: string): string {
-  const date = new Date(isoString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-function initialCreateForm(): {
+function initialCreateForm(timeZoneId?: string | null): {
   courtId: string;
   userId: string;
   startAt: string;
   endAt: string;
   notes: string;
 } {
-  const start = new Date();
-  start.setMinutes(0, 0, 0);
-  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const startAt = nowInTimeZone(timeZoneId);
+  const startUtc = new Date(localDateTimeToUtc(timeZoneId, startAt));
+  const endUtc = new Date(startUtc.getTime() + 60 * 60 * 1000);
+  const endAt = utcToLocalDateTime(timeZoneId, endUtc.toISOString());
   return {
     courtId: '',
     userId: '',
-    startAt: toLocalDateTimeInputValue(start.toISOString()),
-    endAt: toLocalDateTimeInputValue(end.toISOString()),
+    startAt,
+    endAt,
     notes: ''
   };
 }
@@ -100,12 +85,14 @@ function initialCreateForm(): {
 export default function ComplexReservationsPage() {
   const { t } = useTranslation();
   const { complexId = '' } = useParams();
+  const complex = useAdminComplex(complexId);
+  const timeZoneId = complex.data?.timeZoneId ?? undefined;
   const [filters, setFilters] = useState<ReservationListFilters>({
     page: 0,
     pageSize: 10,
     courtId: '',
     status: 'All',
-    date: getTodayLocalDateString()
+    date: todayInTimeZone(timeZoneId)
   });
   const [view, setView] = useState<'list' | 'calendar'>('list');
 
@@ -154,8 +141,14 @@ export default function ComplexReservationsPage() {
     );
   }, [filters.courtId, courts.data, calendarReservations.data, availability.data]);
 
+  useEffect(() => {
+    if (timeZoneId) {
+      setFilters((prev) => ({ ...prev, date: todayInTimeZone(timeZoneId) }));
+    }
+  }, [timeZoneId]);
+
   const [createOpen, setCreateOpen] = useState(false);
-  const [createForm, setCreateForm] = useState(initialCreateForm);
+  const [createForm, setCreateForm] = useState(() => initialCreateForm(timeZoneId));
   const [createFormError, setCreateFormError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<ComplexUser | null>(null);
 
@@ -204,7 +197,7 @@ export default function ComplexReservationsPage() {
   };
 
   const resetCreateForm = () => {
-    setCreateForm(initialCreateForm());
+    setCreateForm(initialCreateForm(timeZoneId));
     setCreateFormError(null);
     setSelectedUser(null);
   };
@@ -216,8 +209,8 @@ export default function ComplexReservationsPage() {
 
   const handleCreateSubmit = async () => {
     setCreateFormError(null);
-    const startAt = new Date(createForm.startAt).toISOString();
-    const endAt = new Date(createForm.endAt).toISOString();
+    const startAt = localDateTimeToUtc(timeZoneId, createForm.startAt);
+    const endAt = localDateTimeToUtc(timeZoneId, createForm.endAt);
 
     if (new Date(endAt) <= new Date(startAt)) {
       setCreateFormError(t('admin.reservations.endTimeError'));
@@ -642,8 +635,8 @@ export default function ComplexReservationsPage() {
               setCreateForm({
                 courtId: selectedFreeSlot.courtId,
                 userId: '',
-                startAt: toLocalDateTimeInputValue(selectedFreeSlot.startAt),
-                endAt: toLocalDateTimeInputValue(selectedFreeSlot.endAt),
+                startAt: utcToLocalDateTime(timeZoneId, selectedFreeSlot.startAt),
+                endAt: utcToLocalDateTime(timeZoneId, selectedFreeSlot.endAt),
                 notes: ''
               });
               setSelectedFreeSlot(null);

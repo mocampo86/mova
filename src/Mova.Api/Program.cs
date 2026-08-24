@@ -82,6 +82,7 @@ public class Program
                 var jwtOptions = jwtOptionsAccessor.Value;
                 var keyBytes = Encoding.UTF8.GetBytes(jwtOptions.SecretKey);
 
+                jwtBearerOptions.MapInboundClaims = false;
                 jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -91,6 +92,7 @@ public class Program
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+                    NameClaimType = "sub",
                     RoleClaimType = "roles"
                 };
             });

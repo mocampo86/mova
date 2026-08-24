@@ -40,8 +40,9 @@ public sealed class SportsComplexInfo
     [JsonPropertyName("allowUserRecurringReservations")]
     public bool AllowUserRecurringReservations { get; set; }
 
-    [JsonPropertyName("utcOffsetMinutes")]
-    public int UtcOffsetMinutes { get; set; }
+    [JsonPropertyName("timeZoneId")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? TimeZoneId { get; set; }
 
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }

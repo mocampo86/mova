@@ -20,7 +20,7 @@ public class UpdateComplexCommandValidatorTests
             -58.3m,
             "+54 11 1234 5678",
             "contact@clubpadel.com",
-            0);
+            "America/Montevideo");
 
     [Fact]
     public void Validate_WithValidCommand_Passes()
@@ -79,11 +79,14 @@ public class UpdateComplexCommandValidatorTests
         result.ShouldHaveValidationErrorFor(x => x.PhoneNumber);
     }
 
-    [Fact]
-    public void Validate_WithInvalidUtcOffset_Fails()
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("Not/A/TimeZone")]
+    public void Validate_WithInvalidTimeZoneId_Fails(string timeZoneId)
     {
-        var command = CreateValidCommand() with { UtcOffsetMinutes = 1000 };
+        var command = CreateValidCommand() with { TimeZoneId = timeZoneId };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.UtcOffsetMinutes);
+        result.ShouldHaveValidationErrorFor(x => x.TimeZoneId);
     }
 }

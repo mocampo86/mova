@@ -1,4 +1,5 @@
 using Mova.Domain.Enums;
+using Mova.Domain.Helpers;
 
 namespace Mova.Domain.Entities;
 
@@ -15,7 +16,7 @@ public sealed class SportsComplex
     public string Email { get; private set; } = null!;
     public ComplexStatus Status { get; private set; }
     public bool AllowUserRecurringReservations { get; private set; }
-    public int UtcOffsetMinutes { get; private set; }
+    public string? TimeZoneId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
@@ -34,10 +35,10 @@ public sealed class SportsComplex
         decimal? longitude,
         string phoneNumber,
         string email,
-        int utcOffsetMinutes = 0,
+        string? timeZoneId = "America/Montevideo",
         ComplexStatus status = ComplexStatus.Active)
     {
-        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, utcOffsetMinutes);
+        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, timeZoneId);
 
         return new SportsComplex
         {
@@ -52,7 +53,7 @@ public sealed class SportsComplex
             Email = email.Trim(),
             Status = status,
             AllowUserRecurringReservations = true,
-            UtcOffsetMinutes = utcOffsetMinutes,
+            TimeZoneId = timeZoneId!.Trim(),
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -66,9 +67,9 @@ public sealed class SportsComplex
         decimal? longitude,
         string phoneNumber,
         string email,
-        int utcOffsetMinutes)
+        string? timeZoneId = "America/Montevideo")
     {
-        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, utcOffsetMinutes);
+        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, timeZoneId);
 
         Name = name.Trim();
         Description = description.Trim();
@@ -78,7 +79,7 @@ public sealed class SportsComplex
         Longitude = longitude;
         PhoneNumber = phoneNumber.Trim();
         Email = email.Trim();
-        UtcOffsetMinutes = utcOffsetMinutes;
+        TimeZoneId = timeZoneId!.Trim();
         UpdatedAt = DateTime.UtcNow;
     }
 
@@ -119,7 +120,7 @@ public sealed class SportsComplex
         decimal? longitude,
         string phoneNumber,
         string email,
-        int utcOffsetMinutes)
+        string? timeZoneId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(description);
@@ -168,9 +169,9 @@ public sealed class SportsComplex
             throw new ArgumentException("Email must not exceed 255 characters.", nameof(email));
         }
 
-        if (utcOffsetMinutes < -840 || utcOffsetMinutes > 840)
+        if (!TimeZoneConverter.IsValidTimeZoneId(timeZoneId))
         {
-            throw new ArgumentException("UTC offset must be between -840 and 840 minutes.", nameof(utcOffsetMinutes));
+            throw new ArgumentException("A valid IANA time zone is required.", nameof(timeZoneId));
         }
     }
 }

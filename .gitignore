@@ -87,6 +87,7 @@ appsettings.*.local.json
 
 # Test results
 TestResults/
+**/test-results/
 coverage/
 
 # Local database

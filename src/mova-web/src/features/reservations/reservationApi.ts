@@ -17,10 +17,6 @@ import type {
   UserReservationsFilters
 } from './reservationTypes';
 
-export function getUtcOffsetMinutes(date: string): number {
-  return new Date(`${date}T00:00`).getTimezoneOffset();
-}
-
 export function useReservations(
   complexId: string,
   filters: ReservationListFilters,
@@ -43,7 +39,6 @@ export function useReservations(
 
   if (filters.date) {
     params.set('date', filters.date);
-    params.set('utcOffsetMinutes', String(getUtcOffsetMinutes(filters.date)));
   }
 
   return useQuery({

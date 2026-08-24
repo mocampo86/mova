@@ -110,7 +110,8 @@ public sealed class BusinessHoursControllerTests : IClassFixture<MovaWebApplicat
             Address = "Address",
             City = "Montevideo",
             PhoneNumber = "+598 99 123 456",
-            Email = $"business-hours-{Guid.NewGuid()}@test.com"
+            Email = $"business-hours-{Guid.NewGuid()}@test.com",
+            TimeZoneId = "America/Montevideo"
         });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<SportsComplexInfo>())!;

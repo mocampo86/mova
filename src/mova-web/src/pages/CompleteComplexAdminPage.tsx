@@ -1,9 +1,11 @@
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useCompleteComplexAdminProfile } from '../features/users/useCompleteComplexAdminProfile';
+import TimezoneSelector from '../components/TimezoneSelector';
+import { DEFAULT_TIME_ZONE_ID } from '../utils/timezones';
 
 const phoneNumberPattern = /^\+[0-9](?:\s*[0-9]){6,14}$/;
 
@@ -67,7 +69,8 @@ const schema = z.object({
     .string()
     .min(1, 'Email is required.')
     .email('Email is not valid.')
-    .max(255, 'Email must not exceed 255 characters.')
+    .max(255, 'Email must not exceed 255 characters.'),
+  timeZoneId: z.string().min(1, 'Time zone is required.')
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -78,9 +81,22 @@ export default function CompleteComplexAdminPage() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors }
   } = useForm<FormValues>({
-    resolver: zodResolver(schema)
+    resolver: zodResolver(schema),
+    defaultValues: {
+      phoneNumber: '',
+      name: '',
+      description: '',
+      address: '',
+      city: '',
+      latitude: null,
+      longitude: null,
+      complexPhoneNumber: '',
+      complexEmail: '',
+      timeZoneId: DEFAULT_TIME_ZONE_ID
+    }
   });
 
   const onSubmit = (data: FormValues) => {
@@ -185,6 +201,23 @@ export default function CompleteComplexAdminPage() {
           fullWidth
           error={Boolean(errors.complexEmail)}
           helperText={errors.complexEmail?.message}
+        />
+
+        <Controller
+          name="timeZoneId"
+          control={control}
+          defaultValue={DEFAULT_TIME_ZONE_ID}
+          render={({ field }) => (
+            <TimezoneSelector
+              value={field.value}
+              onChange={field.onChange}
+              label={t('completeComplexAdmin.timeZone')}
+              helperText={t('completeComplexAdmin.timeZoneHelper')}
+              error={Boolean(errors.timeZoneId)}
+              required
+              fullWidth
+            />
+          )}
         />
 
         <Button type="submit" variant="contained" disabled={isPending}>

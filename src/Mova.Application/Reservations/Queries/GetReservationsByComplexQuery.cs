@@ -8,10 +8,9 @@ public sealed class GetReservationsByComplexQuery
         int pageSize,
         Guid? courtId = null,
         string? status = null,
-        DateTime? date = null,
+        DateOnly? date = null,
         string? sort = null,
-        Guid? userId = null,
-        int utcOffsetMinutes = 0)
+        Guid? userId = null)
     {
         SportsComplexId = sportsComplexId;
         Page = page;
@@ -21,7 +20,6 @@ public sealed class GetReservationsByComplexQuery
         Date = date;
         Sort = sort;
         UserId = userId;
-        UtcOffsetMinutes = utcOffsetMinutes;
     }
 
     public Guid SportsComplexId { get; }
@@ -29,8 +27,7 @@ public sealed class GetReservationsByComplexQuery
     public int PageSize { get; }
     public Guid? CourtId { get; }
     public string? Status { get; }
-    public DateTime? Date { get; }
+    public DateOnly? Date { get; }
     public string? Sort { get; }
     public Guid? UserId { get; }
-    public int UtcOffsetMinutes { get; }
 }

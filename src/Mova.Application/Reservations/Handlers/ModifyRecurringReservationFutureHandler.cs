@@ -5,6 +5,8 @@ using Mova.Application.Reservations.Commands;
 using Mova.Contracts.Reservations;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.Domain.Exceptions;
+using Mova.Domain.Helpers;
 
 namespace Mova.Application.Reservations.Handlers;
 
@@ -12,6 +14,7 @@ public sealed class ModifyRecurringReservationFutureHandler(
     IRecurringReservationRepository recurringReservations,
     IReservationRepository reservations,
     ICourtBlockRepository courtBlocks,
+    ISportsComplexRepository sportsComplexes,
     IUnitOfWork unitOfWork) : IModifyRecurringReservationFutureHandler
 {
     public async Task<RecurringReservationInfo> HandleAsync(ModifyRecurringReservationFutureCommand command, CancellationToken cancellationToken = default)
@@ -29,12 +32,18 @@ public sealed class ModifyRecurringReservationFutureHandler(
             throw new ConflictException("Only active recurring reservations can be modified.");
         }
 
+        var complex = await sportsComplexes.GetByIdAsync(command.SportsComplexId, cancellationToken)
+            ?? throw new NotFoundException("Sports complex not found.");
+
+        if (!TimeZoneConverter.TryGetTimeZone(complex.TimeZoneId, out var timeZone))
+        {
+            throw new UnresolvedTimeZoneException();
+        }
+
         return await unitOfWork.ExecuteInTransactionAsync(
             async token =>
             {
-                var effectiveFrom = command.EffectiveDate
-                    .ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
-                    .AddMinutes(command.UtcOffsetMinutes);
+                var effectiveFrom = TimeZoneConverter.GetDayStartUtc(command.EffectiveDate, timeZone);
                 var oldFutureOccurrences = await reservations.GetFutureActiveByRecurringReservationIdAsync(
                     command.RecurringReservationId,
                     effectiveFrom,
@@ -51,7 +60,7 @@ public sealed class ModifyRecurringReservationFutureHandler(
                     command.EffectiveDate,
                     command.EndDate,
                     command.Notes,
-                    command.UtcOffsetMinutes);
+                    timeZone);
 
                 if (newOccurrences.Count == 0)
                 {

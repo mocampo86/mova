@@ -229,6 +229,8 @@
     "complexPhone": "Complex phone number",
     "complexPhonePlaceholder": "+54 11 1234 5678",
     "complexEmail": "Complex email",
+    "timeZone": "Time zone",
+    "timeZoneHelper": "Select the time zone for this complex.",
     "submit": "Submit for review"
   },
   "admin": {
@@ -362,6 +364,8 @@
       "phone": "Phone number",
       "phonePlaceholder": "+54 11 1234 5678",
       "email": "Email",
+      "timeZone": "Time zone",
+      "timeZoneHelper": "Select the time zone for this complex.",
       "status": "Status",
       "success": "The complex profile has been updated successfully.",
       "save": "Save changes"

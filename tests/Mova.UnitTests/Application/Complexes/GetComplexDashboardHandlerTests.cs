@@ -2,6 +2,7 @@ using Mova.Application.Complexes.Handlers;
 using Mova.Application.Complexes.Queries;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.Domain.Helpers;
 using Xunit;
 
 namespace Mova.UnitTests.Application.Complexes;
@@ -36,8 +37,9 @@ public class GetComplexDashboardHandlerTests
         await _courtRepository.AddAsync(activeCourt);
         await _courtRepository.AddAsync(inactiveCourt);
 
-        var today = DateTime.UtcNow.Date;
-        var start = new DateTime(today.Year, today.Month, today.Day, 0, 0, 0, DateTimeKind.Utc);
+        var timeZone = TimeZoneConverter.GetTimeZone(complex.TimeZoneId!);
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone));
+        var start = TimeZoneConverter.GetDayStartUtc(today, timeZone);
 
         await _reservationRepository.AddAsync(CreateReservation(complex.Id, activeCourt.Id, ReservationStatus.Confirmed, start.AddHours(10)));
         await _reservationRepository.AddAsync(CreateReservation(complex.Id, activeCourt.Id, ReservationStatus.Confirmed, start.AddHours(11)));
