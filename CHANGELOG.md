@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial `.ai-kit/docs` knowledge base with architecture, agents, and workflows.
 - Initial project documentation (`mova-project-overview.md`) defining MVP vision, scope, and backlog.
+- Recurring reservations: user and admin weekly series creation, occurrence generation, conflict-aware validation, single-occurrence and series cancellation, complex-scoped administration, and user self-service enable/disable setting.
+- Idempotency support for recurring reservation mutations with durable key/response storage and replay.
 
 ### Notes
 
@@ -24,5 +26,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Identity and access (Google login, JWT, roles).
 - Complex and court administration.
 - Availability and reservation engine.
-- Recurring reservations.
 - Landing page and deployment.

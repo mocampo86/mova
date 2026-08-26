@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mova.Api.Authorization;
+using Mova.Api.Filters;
 using Mova.Application.Reservations.Commands;
 using Mova.Application.Reservations.Handlers;
 using Mova.Application.Reservations.Queries;
@@ -45,6 +46,7 @@ public sealed class RecurringReservationsController(
 
     [HttpPost("me")]
     [Authorize(Policy = AuthorizationPolicies.User)]
+    [IdempotencyRequired]
     public async Task<ActionResult<RecurringReservationInfo>> CreateMyRecurringReservation(
         Guid complexId,
         CreateRecurringReservationRequest request,
@@ -86,6 +88,7 @@ public sealed class RecurringReservationsController(
 
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
+    [IdempotencyRequired]
     public async Task<ActionResult<RecurringReservationInfo>> CreateRecurringReservationForCustomer(
         Guid complexId,
         [FromBody] CreateRecurringReservationForCustomerRequest request,
@@ -116,6 +119,7 @@ public sealed class RecurringReservationsController(
 
     [HttpPatch("{id:guid}/cancel")]
     [Authorize(Policy = AuthorizationPolicies.User)]
+    [IdempotencyRequired]
     public async Task<ActionResult<RecurringReservationInfo>> CancelRecurringReservation(
         Guid complexId,
         Guid id,
@@ -148,6 +152,7 @@ public sealed class RecurringReservationsController(
 
     [HttpPatch("{id:guid}/future")]
     [Authorize(Policy = AuthorizationPolicies.User)]
+    [IdempotencyRequired]
     public async Task<ActionResult<RecurringReservationInfo>> ModifyFutureOccurrences(
         Guid complexId,
         Guid id,
@@ -165,6 +170,11 @@ public sealed class RecurringReservationsController(
             return BadRequest(new { error = new { message = "DayOfWeek is not valid." } });
         }
 
+        var authorizationResult = await authorizationService.AuthorizeAsync(
+            User,
+            HttpContext,
+            AuthorizationPolicies.ComplexAdmin);
+
         var command = new ModifyRecurringReservationFutureCommand(
             complexId,
             id,
@@ -174,7 +184,8 @@ public sealed class RecurringReservationsController(
             request.StartTime,
             request.DurationMinutes,
             request.EndDate,
-            request.Notes);
+            request.Notes,
+            authorizationResult.Succeeded);
 
         await modifyFutureValidator.ValidateAndThrowAsync(command, cancellationToken);
 

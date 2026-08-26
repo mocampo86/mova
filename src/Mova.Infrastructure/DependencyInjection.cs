@@ -87,7 +87,10 @@ public static class DependencyInjection
         services.AddScoped<ICourtBlockRepository, CourtBlockRepository>();
         services.AddScoped<IBlockedUserRepository, BlockedUserRepository>();
         services.AddScoped<ICancellationPolicyRepository, CancellationPolicyRepository>();
+        services.AddScoped<IIdempotencyRecordRepository, IdempotencyRecordRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddScoped<Mova.Application.Common.Idempotency.IIdempotencyStore, Mova.Application.Common.Idempotency.IdempotencyStore>();
 
         return services;
     }

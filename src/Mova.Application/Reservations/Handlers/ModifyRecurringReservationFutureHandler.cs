@@ -22,7 +22,7 @@ public sealed class ModifyRecurringReservationFutureHandler(
         var recurringReservation = await recurringReservations.GetByIdAsync(command.RecurringReservationId, cancellationToken);
         if (recurringReservation is null ||
             recurringReservation.SportsComplexId != command.SportsComplexId ||
-            recurringReservation.UserId != command.UserId)
+            (recurringReservation.UserId != command.UserId && !command.IsAdmin))
         {
             throw new NotFoundException("Recurring reservation not found.");
         }
@@ -69,9 +69,11 @@ public sealed class ModifyRecurringReservationFutureHandler(
 
                 await EnsureAvailableAsync(recurringReservation.CourtId, newOccurrences, recurringReservation.Id, token);
 
+                var cancelledByAdmin = command.IsAdmin && recurringReservation.UserId != command.UserId;
+
                 foreach (var occurrence in oldFutureOccurrences)
                 {
-                    occurrence.Cancel(command.UserId, false, "Modified recurring reservation.");
+                    occurrence.Cancel(command.UserId, cancelledByAdmin, "Modified recurring reservation.");
                 }
 
                 recurringReservation.ModifyFuture(

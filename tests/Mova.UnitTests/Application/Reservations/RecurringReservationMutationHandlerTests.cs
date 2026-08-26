@@ -169,7 +169,8 @@ public sealed class RecurringReservationMutationHandlerTests
             new TimeOnly(16, 0),
             90,
             new DateOnly(2026, 8, 31),
-            "Moved"));
+            "Moved",
+            false));
 
         Assert.Equal(DayOfWeek.Tuesday, (DayOfWeek)result.DayOfWeek);
         Assert.Equal(new TimeOnly(16, 0), result.StartTime);
@@ -188,6 +189,83 @@ public sealed class RecurringReservationMutationHandlerTests
             series.Id,
             new DateTime(2026, 8, 17, 0, 0, 0, DateTimeKind.Utc));
         Assert.Equal(2, oldFuture.Count);
+    }
+
+    [Fact]
+    public async Task ModifyFutureAsync_AsAdmin_AllowedForCustomerSeries()
+    {
+        var series = await CreateSeriesWithOccurrencesAsync(
+            new DateOnly(2026, 8, 10),
+            new DateOnly(2026, 8, 24));
+
+        var adminUserId = Guid.NewGuid();
+        var handler = new ModifyRecurringReservationFutureHandler(
+            _recurringReservationRepository,
+            _reservationRepository,
+            _courtBlockRepository,
+            _sportsComplexRepository,
+            _unitOfWork);
+
+        var result = await handler.HandleAsync(new ModifyRecurringReservationFutureCommand(
+            series.SportsComplexId,
+            series.Id,
+            adminUserId,
+            new DateOnly(2026, 8, 17),
+            DayOfWeek.Tuesday,
+            new TimeOnly(16, 0),
+            90,
+            new DateOnly(2026, 8, 31),
+            "Moved by admin",
+            true));
+
+        Assert.Equal(DayOfWeek.Tuesday, (DayOfWeek)result.DayOfWeek);
+
+        var (allReservations, _) = await _reservationRepository.GetByComplexIdAsync(
+            series.SportsComplexId,
+            1,
+            100,
+            userId: series.UserId);
+
+        Assert.Equal(5, allReservations.Count);
+        Assert.Equal(3, allReservations.Count(r => r.Status == ReservationStatus.Confirmed));
+
+        var cancelled = allReservations.Where(r => r.Status == ReservationStatus.CancelledByAdmin).ToList();
+        Assert.Equal(2, cancelled.Count);
+        Assert.All(cancelled, occurrence =>
+        {
+            Assert.Equal(adminUserId, occurrence.CancelledByUserId);
+            Assert.Equal("Modified recurring reservation.", occurrence.CancellationReason);
+        });
+    }
+
+    [Fact]
+    public async Task ModifyFutureAsync_AsUnrelatedUser_ThrowsNotFoundException()
+    {
+        var series = await CreateSeriesWithOccurrencesAsync(
+            new DateOnly(2026, 8, 10),
+            new DateOnly(2026, 8, 24));
+
+        var unrelatedUserId = Guid.NewGuid();
+        var handler = new ModifyRecurringReservationFutureHandler(
+            _recurringReservationRepository,
+            _reservationRepository,
+            _courtBlockRepository,
+            _sportsComplexRepository,
+            _unitOfWork);
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(new ModifyRecurringReservationFutureCommand(
+            series.SportsComplexId,
+            series.Id,
+            unrelatedUserId,
+            new DateOnly(2026, 8, 17),
+            DayOfWeek.Tuesday,
+            new TimeOnly(16, 0),
+            90,
+            new DateOnly(2026, 8, 31),
+            "Moved",
+            false)));
+
+        Assert.Equal("Recurring reservation not found.", exception.Message);
     }
 
     private async Task<RecurringReservation> CreateSeriesWithOccurrencesAsync(DateOnly startDate, DateOnly endDate)
