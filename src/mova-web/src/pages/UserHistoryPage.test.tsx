@@ -38,7 +38,8 @@ const mockHistory = {
       notes: 'No show',
       createdAt: '2026-08-01T12:00:00Z',
       cancelledAt: '2026-08-09T15:00:00Z',
-      cancellationReason: 'No show'
+      cancellationReason: 'No show',
+      cancelledByUserName: 'Admin User'
     }
   ],
   page: 1,
@@ -75,7 +76,49 @@ describe('UserHistoryPage', () => {
     expect(screen.getByText('Court Two')).toBeTruthy();
     expect(screen.getByText('Confirmed')).toBeTruthy();
     expect(screen.getByText('Cancelled by admin')).toBeTruthy();
+    expect(screen.getByText('Cancelled by: Admin User')).toBeTruthy();
+    expect(screen.getByText('Reason: No show')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Book a court' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Details' })).toBeTruthy();
+  });
+
+  it('renders cancellation details with fallbacks for older records', async () => {
+    setupMocks({
+      data: {
+        items: [
+          {
+            id: 'reservation-history-3',
+            complexId: 'complex-1',
+            courtId: 'court-1',
+            courtName: 'Court One',
+            userId: 'user-1',
+            userName: 'Test User',
+            startAt: '2026-08-08T10:00:00Z',
+            endAt: '2026-08-08T11:00:00Z',
+            status: 'CancelledByUser',
+            source: 'Web',
+            notes: null,
+            createdAt: '2026-08-01T12:00:00Z',
+            cancelledAt: '2026-08-08T09:00:00Z',
+            cancellationReason: null,
+            cancelledByUserName: null
+          }
+        ],
+        page: 1,
+        pageSize: 10,
+        totalItems: 1,
+        totalPages: 1
+      }
+    } as unknown as ReturnType<typeof useMyReservationHistory>);
+
+    renderWithAuth(<UserHistoryPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Cancelled by user')).toBeTruthy();
+    });
+
+    expect(screen.getByText('Cancelled by: —')).toBeTruthy();
+    expect(screen.getByText('Reason: No reason provided')).toBeTruthy();
   });
 
   it('renders an empty state when no history exists', async () => {

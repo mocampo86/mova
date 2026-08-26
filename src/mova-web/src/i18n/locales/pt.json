@@ -563,6 +563,10 @@
     "reservationsError": "Não foi possível carregar as reservas.",
     "activeBlocksTitle": "Você está bloqueado nos seguintes complexos",
     "activeBlockMessage": "{{complex}}: {{reason}}",
-    "noReason": "sem motivo informado"
+    "noReason": "sem motivo informado",
+    "historyDetailsHeader": "Detalhes",
+    "cancelledBy": "Cancelado por: {{name}}",
+    "cancellationReason": "Motivo: {{reason}}",
+    "noCancellationReason": "sem motivo informado"
   }
 }
