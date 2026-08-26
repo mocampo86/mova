@@ -134,6 +134,7 @@ export default function UserRecurringReservationsPage() {
                 <Select
                   labelId="recurring-complex-label"
                   label={t('dashboard.recurringPage.complex')}
+                  name="complexId"
                   value={complexId}
                   onChange={(event) => setComplexId(event.target.value)}
                   disabled={complexes.isLoading}
@@ -155,6 +156,7 @@ export default function UserRecurringReservationsPage() {
                 <Select
                   labelId="recurring-court-label"
                   label={t('common.court')}
+                  name="courtId"
                   value={courtId}
                   onChange={(event) => setCourtId(event.target.value)}
                   data-testid="recurring-court-select"
@@ -175,6 +177,8 @@ export default function UserRecurringReservationsPage() {
                 <Select
                   labelId="recurring-day-label"
                   label={t('dashboard.recurringPage.dayOfWeek')}
+                  name="dayOfWeek"
+                  data-testid="recurring-day-select"
                   value={dayOfWeek}
                   onChange={(event) => setDayOfWeek(event.target.value)}
                 >

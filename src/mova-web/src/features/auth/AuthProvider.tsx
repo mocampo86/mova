@@ -7,8 +7,17 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+function getDevE2EToken(): string | null {
+  if (!import.meta.env.DEV || typeof window === 'undefined') {
+    return null;
+  }
+
+  const devToken = (window as unknown as Record<string, unknown>).__MOVA_E2E_TOKEN__;
+  return typeof devToken === 'string' && devToken ? devToken : null;
+}
+
 export default function AuthProvider({ children }: AuthProviderProps) {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() => getDevE2EToken());
   const [requiresProfileCompletion, setRequiresProfileCompletion] = useState(false);
 
   const login = useCallback((token: string, needsProfileCompletion = false) => {

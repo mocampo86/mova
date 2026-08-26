@@ -17,6 +17,18 @@ import type {
   UserReservationsFilters
 } from './reservationTypes';
 
+function generateIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 export function useReservations(
   complexId: string,
   filters: ReservationListFilters,
@@ -169,7 +181,8 @@ export async function createMyRecurringReservation(
     `/api/v1/complexes/${complexId}/recurring-reservations/me`,
     {
       method: 'POST',
-      body: JSON.stringify(request)
+      body: JSON.stringify(request),
+      headers: { 'Idempotency-Key': generateIdempotencyKey() }
     },
     accessToken
   );
@@ -204,7 +217,8 @@ export async function createRecurringReservationForCustomer(
     `/api/v1/complexes/${complexId}/recurring-reservations`,
     {
       method: 'POST',
-      body: JSON.stringify(request)
+      body: JSON.stringify(request),
+      headers: { 'Idempotency-Key': generateIdempotencyKey() }
     },
     accessToken
   );
@@ -289,7 +303,8 @@ export async function cancelRecurringReservation(
     `/api/v1/complexes/${complexId}/recurring-reservations/${recurringReservationId}/cancel`,
     {
       method: 'PATCH',
-      body: JSON.stringify(request)
+      body: JSON.stringify(request),
+      headers: { 'Idempotency-Key': generateIdempotencyKey() }
     },
     accessToken
   );
