@@ -563,6 +563,10 @@
     "reservationsError": "Reservations could not be loaded.",
     "activeBlocksTitle": "You are blocked in the following complexes",
     "activeBlockMessage": "{{complex}}: {{reason}}",
-    "noReason": "no reason provided"
+    "noReason": "no reason provided",
+    "historyDetailsHeader": "Details",
+    "cancelledBy": "Cancelled by: {{name}}",
+    "cancellationReason": "Reason: {{reason}}",
+    "noCancellationReason": "No reason provided"
   }
 }
