@@ -63,6 +63,7 @@ public static class DependencyInjection
         services.AddScoped<IGetUsersByComplexHandler, GetUsersByComplexHandler>();
         services.AddScoped<ISearchUsersHandler, SearchUsersHandler>();
         services.AddScoped<IGetUserDashboardHandler, GetUserDashboardHandler>();
+        services.AddScoped<IGetMyBlockStatusHandler, GetMyBlockStatusHandler>();
         services.AddScoped<IBlockUserHandler, BlockUserHandler>();
         services.AddScoped<IUnblockUserHandler, UnblockUserHandler>();
         services.AddValidatorsFromAssemblyContaining<BlockUserCommandValidator>();

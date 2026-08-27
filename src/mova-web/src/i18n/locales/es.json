@@ -190,6 +190,7 @@
     "loadingAvailability": "Cargando disponibilidad…",
     "availabilityError": "No se pudo cargar la disponibilidad.",
     "noAvailability": "No hay horarios disponibles para la fecha seleccionada. El complejo podría no tener configurados los horarios de apertura, el día podría estar cerrado o la cancha no tener reglas de disponibilidad para ese día.",
+    "blockedMessage": "Estás bloqueado en {{complex}}: {{reason}}.",
     "phoneWithValue": "Teléfono: {{value}}",
     "emailWithValue": "Correo: {{value}}",
     "availability": {

@@ -23,6 +23,15 @@ export interface UserBlockInfo {
   blockedUntil?: string | null;
 }
 
+export interface MyBlockStatusInfo {
+  isBlocked: boolean;
+  complexId: string;
+  complexName?: string | null;
+  reason?: string | null;
+  blockedAt?: string | null;
+  blockedUntil?: string | null;
+}
+
 export interface ReservationHistorySummaryInfo {
   totalItems: number;
   recentReservations: Reservation[];
@@ -60,4 +69,11 @@ export async function getUserDashboard(
   });
 
   return apiClient<UserDashboardInfo>(`/api/v1/users/me/dashboard?${params}`, {}, accessToken);
+}
+
+export async function getMyBlockStatus(
+  complexId: string,
+  accessToken: string
+): Promise<MyBlockStatusInfo> {
+  return apiClient<MyBlockStatusInfo>(`/api/v1/users/me/blocks/${complexId}`, {}, accessToken);
 }

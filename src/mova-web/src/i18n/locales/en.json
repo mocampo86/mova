@@ -190,6 +190,7 @@
     "loadingAvailability": "Loading availability…",
     "availabilityError": "Availability could not be loaded.",
     "noAvailability": "No available slots for the selected date. The complex may not have business hours configured, the day may be closed, or the court may not have availability rules for that day.",
+    "blockedMessage": "You are blocked in {{complex}}: {{reason}}.",
     "phoneWithValue": "Phone: {{value}}",
     "emailWithValue": "Email: {{value}}",
     "availability": {

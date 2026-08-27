@@ -29,6 +29,7 @@ import {
 } from '../features/complexes/complexApi';
 import type { CourtAvailabilitySlot } from '../features/complexes/complexTypes';
 import { useAuth } from '../features/auth/useAuth';
+import { useMyBlockStatus } from '../features/users/useMyBlockStatus';
 import { useCreateMyReservation } from '../features/reservations/reservationApi';
 import { todayInTimeZone } from '../utils/timezones';
 
@@ -124,6 +125,7 @@ export default function ComplexDetailPage() {
   const [bookingNotes, setBookingNotes] = useState('');
 
   const { isAuthenticated } = useAuth();
+  const myBlockStatus = useMyBlockStatus(complexId);
   const courts = useActiveCourts(complexId, selectedSportId || undefined);
   const sports = useSports();
   const createMyReservation = useCreateMyReservation(complexId);
@@ -171,6 +173,14 @@ export default function ComplexDetailPage() {
             {complex.data.city}{t('common.formatSeparator')}{complex.data.address}
           </Typography>
           <Typography sx={{ mt: 2 }}>{complex.data.description}</Typography>
+          {isAuthenticated && myBlockStatus.data?.isBlocked && (
+            <Alert severity="warning" variant="outlined" sx={{ mt: 2 }}>
+              {t('complexDetail.blockedMessage', {
+                complex: myBlockStatus.data.complexName ?? complex.data.name,
+                reason: myBlockStatus.data.reason ?? t('dashboard.noReason')
+              })}
+            </Alert>
+          )}
           {(complex.data.phoneNumber || complex.data.email) && (
             <Typography color="text.secondary" sx={{ mt: 1 }}>
               {complex.data.phoneNumber && <>{t('complexDetail.phoneWithValue', { value: complex.data.phoneNumber })}</>}

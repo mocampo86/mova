@@ -288,6 +288,66 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         Assert.Contains(list!.Items, u => u.Id == customerId && !u.IsBlocked);
     }
 
+    [Fact]
+    public async Task GetMyBlockStatus_WhenNotBlocked_ReturnsIsBlockedFalse()
+    {
+        var (customerClient, _, complexId, _) = await SeedBlockScenarioAsync();
+
+        var response = await customerClient.GetAsync($"/api/v1/users/me/blocks/{complexId}");
+
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<MyBlockStatusInfo>();
+
+        Assert.NotNull(result);
+        Assert.False(result!.IsBlocked);
+        Assert.Equal(complexId, result.ComplexId);
+    }
+
+    [Fact]
+    public async Task GetMyBlockStatus_WhenBlocked_ReturnsBlockDetails()
+    {
+        var (customerClient, adminClient, complexId, customerId) = await SeedBlockScenarioAsync();
+
+        var blockResponse = await adminClient.PostAsJsonAsync(
+            $"/api/v1/complexes/{complexId}/blocked-users",
+            new BlockUserRequest { UserId = customerId, Reason = "No-show" });
+
+        blockResponse.EnsureSuccessStatusCode();
+
+        var response = await customerClient.GetAsync($"/api/v1/users/me/blocks/{complexId}");
+
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<MyBlockStatusInfo>();
+
+        Assert.NotNull(result);
+        Assert.True(result!.IsBlocked);
+        Assert.Equal(complexId, result.ComplexId);
+        Assert.Equal("No-show", result.Reason);
+        Assert.NotEqual(default, result.BlockedAt);
+    }
+
+    [Fact]
+    public async Task GetMyBlockStatus_WithoutAuthorization_ReturnsUnauthorized()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync($"/api/v1/users/me/blocks/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetMyBlockStatus_ForNonExistentComplex_ReturnsNotFound()
+    {
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/users/me/blocks/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     private async Task<(string AdminSuffix, Guid ComplexId, Guid CustomerId, Guid CourtId)> SeedScenarioAsync()
     {
         using var scope = _factory.Services.CreateScope();
@@ -345,6 +405,56 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         var response = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<GoogleLoginResponse>())!;
+    }
+
+    private async Task<(HttpClient CustomerClient, HttpClient AdminClient, Guid ComplexId, Guid CustomerId)> SeedBlockScenarioAsync()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+
+        var adminSuffix = $"block-admin-{Guid.NewGuid()}";
+        var customerSuffix = $"block-customer-{Guid.NewGuid()}";
+
+        var adminUser = User.CreateFromGoogle(
+            Guid.NewGuid(),
+            $"sub-{adminSuffix}",
+            $"user-{adminSuffix}@test.com",
+            $"Admin {adminSuffix}");
+        adminUser.AddRole(Role.User);
+
+        var customerUser = User.CreateFromGoogle(
+            Guid.NewGuid(),
+            $"sub-{customerSuffix}",
+            $"user-{customerSuffix}@test.com",
+            "Customer User");
+        customerUser.AddRole(Role.User);
+
+        var complex = SportsComplex.Create(
+            $"Complex {Guid.NewGuid()}",
+            "Description",
+            "Address",
+            "Montevideo",
+            null,
+            null,
+            "+598 99 123 456",
+            $"complex-{Guid.NewGuid()}@test.com");
+
+        var administrator = ComplexAdministrator.Create(complex.Id, adminUser.Id, Role.ComplexAdmin);
+
+        await context.Users.AddRangeAsync(adminUser, customerUser);
+        await context.SportsComplexes.AddAsync(complex);
+        await context.ComplexAdministrators.AddAsync(administrator);
+        await context.SaveChangesAsync();
+
+        var customerClient = _factory.CreateClient();
+        var customerLogin = await LoginWithUserAsync(customerClient, customerSuffix);
+        customerClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", customerLogin.AccessToken);
+
+        var adminClient = _factory.CreateClient();
+        var adminToken = await LoginAsync(adminClient, adminSuffix);
+        adminClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+        return (customerClient, adminClient, complex.Id, customerUser.Id);
     }
 
     private static async Task<SportsComplexInfo> CreateComplexAsync(HttpClient client)

@@ -17,19 +17,25 @@ public class UsersController : ControllerBase
 {
     private readonly ICompleteProfileHandler _completeProfileHandler;
     private readonly IGetUserDashboardHandler _dashboardHandler;
+    private readonly IGetMyBlockStatusHandler _myBlockStatusHandler;
     private readonly IValidator<CompleteProfileCommand> _completeProfileValidator;
     private readonly IValidator<GetUserDashboardQuery> _dashboardValidator;
+    private readonly IValidator<GetMyBlockStatusQuery> _myBlockStatusValidator;
 
     public UsersController(
         ICompleteProfileHandler completeProfileHandler,
         IGetUserDashboardHandler dashboardHandler,
+        IGetMyBlockStatusHandler myBlockStatusHandler,
         IValidator<CompleteProfileCommand> completeProfileValidator,
-        IValidator<GetUserDashboardQuery> dashboardValidator)
+        IValidator<GetUserDashboardQuery> dashboardValidator,
+        IValidator<GetMyBlockStatusQuery> myBlockStatusValidator)
     {
         _completeProfileHandler = completeProfileHandler;
         _dashboardHandler = dashboardHandler;
+        _myBlockStatusHandler = myBlockStatusHandler;
         _completeProfileValidator = completeProfileValidator;
         _dashboardValidator = dashboardValidator;
+        _myBlockStatusValidator = myBlockStatusValidator;
     }
 
     [HttpPatch("me")]
@@ -68,6 +74,24 @@ public class UsersController : ControllerBase
 
         var dashboard = await _dashboardHandler.HandleAsync(query, cancellationToken);
         return Ok(dashboard);
+    }
+
+    [HttpGet("me/blocks/{complexId:guid}")]
+    public async Task<ActionResult<MyBlockStatusInfo>> GetMyBlockStatus(
+        Guid complexId,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var query = new GetMyBlockStatusQuery(userId, complexId);
+        await _myBlockStatusValidator.ValidateAndThrowAsync(query, cancellationToken);
+
+        var result = await _myBlockStatusHandler.HandleAsync(query, cancellationToken);
+        return Ok(result);
     }
 
     private Guid GetCurrentUserId()
