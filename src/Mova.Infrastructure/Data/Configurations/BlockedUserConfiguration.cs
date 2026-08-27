@@ -16,6 +16,8 @@ public sealed class BlockedUserConfiguration : IEntityTypeConfiguration<BlockedU
         builder.Property(x => x.BlockedAt).IsRequired();
         builder.Property(x => x.Status).IsRequired().HasConversion<string>();
         builder.HasIndex(x => x.SportsComplexId);
-        builder.HasIndex(x => new { x.SportsComplexId, x.UserId, x.Status }).IsUnique();
+        builder.HasIndex(x => new { x.SportsComplexId, x.UserId, x.Status })
+            .IsUnique()
+            .HasFilter("\"Status\" = 'Active'");
     }
 }
