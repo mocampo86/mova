@@ -202,8 +202,7 @@ CREATE TABLE BlockedUsers (
     BlockedAt TIMESTAMPTZ NOT NULL,
     BlockedUntil TIMESTAMPTZ,
     BlockedByUserId UUID NOT NULL REFERENCES Users(Id),
-    Status TEXT NOT NULL,
-    UNIQUE (SportsComplexId, UserId, Status)
+    Status TEXT NOT NULL
 );
 ```
 
@@ -229,6 +228,8 @@ CREATE TABLE AuditLogs (
 CREATE INDEX IX_Courts_SportsComplexId ON Courts (SportsComplexId);
 CREATE INDEX IX_Reservations_SportsComplexId ON Reservations (SportsComplexId);
 CREATE INDEX IX_BlockedUsers_SportsComplexId ON BlockedUsers (SportsComplexId);
+CREATE UNIQUE INDEX IX_BlockedUsers_SportsComplexId_UserId_Active
+ON BlockedUsers (SportsComplexId, UserId, Status) WHERE "Status" = 'Active';
 
 -- Availability and conflict detection
 CREATE INDEX IX_Reservations_CourtId_StartAt_EndAt_Status

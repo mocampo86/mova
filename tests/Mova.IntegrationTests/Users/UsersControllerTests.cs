@@ -255,6 +255,39 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         Assert.Contains(list!.Items, u => u.Id == customerId && !u.IsBlocked);
     }
 
+    [Fact]
+    public async Task BlockedUsers_RepeatedBlockAndUnblock_Cycles_Succeed()
+    {
+        var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        for (var i = 0; i < 3; i++)
+        {
+            var blockResponse = await client.PostAsJsonAsync(
+                $"/api/v1/complexes/{complexId}/blocked-users",
+                new BlockUserRequest { UserId = customerId, Reason = $"Violation {i + 1}" });
+
+            Assert.Equal(HttpStatusCode.Created, blockResponse.StatusCode);
+            var block = await blockResponse.Content.ReadFromJsonAsync<BlockedUserInfo>();
+            Assert.NotNull(block);
+            Assert.Equal("Active", block!.Status);
+
+            var unblockResponse = await client.DeleteAsync($"/api/v1/complexes/{complexId}/blocked-users/{block.Id}");
+            unblockResponse.EnsureSuccessStatusCode();
+            var unblocked = await unblockResponse.Content.ReadFromJsonAsync<BlockedUserInfo>();
+            Assert.NotNull(unblocked);
+            Assert.Equal("Lifted", unblocked!.Status);
+        }
+
+        var listResponse = await client.GetAsync($"/api/v1/complexes/{complexId}/users");
+        listResponse.EnsureSuccessStatusCode();
+        var list = await listResponse.Content.ReadFromJsonAsync<PagedResult<ComplexUserInfo>>();
+        Assert.Contains(list!.Items, u => u.Id == customerId && !u.IsBlocked);
+    }
+
     private async Task<(string AdminSuffix, Guid ComplexId, Guid CustomerId, Guid CourtId)> SeedScenarioAsync()
     {
         using var scope = _factory.Services.CreateScope();
