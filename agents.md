@@ -157,7 +157,7 @@ For a full command reference see `agents/AGENT-COMMANDS.md`.
 PowerShell execution policy may block `npm` and `npx` in this environment. Use `cmd /c` to run commands, for example:
 
 ```cmd
-cmd /c "cd /d C:\Endava\EndevLocal\source\mova\src\mova-web && npm run test"
+cmd /c "cd /d C:\source\mova\src\mova-web && npm run test"
 ```
 
 ### Vitest on Windows and drive-letter casing
@@ -169,8 +169,22 @@ Vitest v4.1.10 can fail with `Vitest failed to find the runner` when the working
 Vitest's default `forks` pool can time out waiting for workers to start in this Windows environment (`[vitest-pool]: Failed to start forks worker`). When this happens, run the suite with the `threads` pool:
 
 ```cmd
-cmd /c "cd /d C:\Endava\EndevLocal\source\mova\src\mova-web && npx vitest run --pool=threads"
+cmd /c "cd /d C:\source\mova\src\mova-web && npx vitest run --pool=threads"
 ```
+
+### Running .NET build and tests
+
+The repo does not include a solution (`.sln`) file. Build and run tests from the repo root using the project files directly, for example:
+
+```powershell
+dotnet build src/Mova.Api/Mova.Api.csproj
+dotnet test tests/Mova.UnitTests/Mova.UnitTests.csproj
+dotnet test tests/Mova.IntegrationTests/Mova.IntegrationTests.csproj
+```
+
+### Integration tests and PostgreSQL
+
+`Mova.IntegrationTests` requires a running PostgreSQL server. The test factory reads `Database:ConnectionString` from user secrets or the `Database__ConnectionString` environment variable and creates a `mova_test` database. On Windows with Rancher Desktop, `localhost` port forwarding may reset connections during the PostgreSQL handshake; use the WSL VM IP and `SslMode=Disable` when configuring the test connection string.
 
 ### `localStorage` in the jsdom test environment
 
