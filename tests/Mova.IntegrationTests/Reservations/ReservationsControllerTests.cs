@@ -851,7 +851,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var complex = await CreateComplexAsync(client);
         var court = await CreateCourtAsync(client, complex.Id);
 
-        var response = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        var response = await PostAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
         {
             CourtId = court.Id,
             DayOfWeek = (int)DayOfWeek.Monday,
@@ -899,7 +899,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         });
         Assert.Equal(HttpStatusCode.Created, singleResponse.StatusCode);
 
-        var response = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        var response = await PostAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
         {
             CourtId = court.Id,
             DayOfWeek = (int)DayOfWeek.Monday,
@@ -923,7 +923,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var complex = await CreateComplexAsync(client);
         var court = await CreateCourtAsync(client, complex.Id);
 
-        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        var createResponse = await PostAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
         {
             CourtId = court.Id,
             DayOfWeek = (int)DayOfWeek.Monday,
@@ -936,7 +936,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var created = await createResponse.Content.ReadFromJsonAsync<RecurringReservationInfo>();
         Assert.NotNull(created);
 
-        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/{created.Id}/cancel", new CancelReservationRequest
+        var cancelResponse = await PatchAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations/{created.Id}/cancel", new CancelReservationRequest
         {
             Reason = "Season changed"
         });
@@ -960,7 +960,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var complex = await CreateComplexAsync(client);
         var court = await CreateCourtAsync(client, complex.Id);
 
-        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        var createResponse = await PostAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
         {
             CourtId = court.Id,
             DayOfWeek = (int)DayOfWeek.Monday,
@@ -1022,7 +1022,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var playerLogin = await LoginWithUserAsync(client, playerSuffix);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", playerLogin.AccessToken);
 
-        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        var createResponse = await PostAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
         {
             CourtId = court.Id,
             DayOfWeek = (int)DayOfWeek.Monday,
@@ -1038,7 +1038,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var adminToken = await LoginAsync(client, adminSuffix);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
 
-        var cancelResponse = await client.PatchAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/{created.Id}/cancel", new CancelReservationRequest
+        var cancelResponse = await PatchAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations/{created.Id}/cancel", new CancelReservationRequest
         {
             Reason = "Court maintenance"
         });
@@ -1067,7 +1067,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
 
         var playerLogin = await LoginWithUserAsync(client, $"recurring-player-create-{Guid.NewGuid()}");
 
-        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations", new CreateRecurringReservationForCustomerRequest
+        var createResponse = await PostAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations", new CreateRecurringReservationForCustomerRequest
         {
             UserId = playerLogin.User.Id,
             CourtId = court.Id,
@@ -1161,7 +1161,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var playerToken = await LoginAsync(client, $"recurring-disabled-player-{Guid.NewGuid()}");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", playerToken);
 
-        var response = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        var response = await PostAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
         {
             CourtId = court.Id,
             DayOfWeek = (int)DayOfWeek.Monday,
@@ -1196,7 +1196,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
 
         var playerLogin = await LoginWithUserAsync(client, $"recurring-admin-disabled-player-{Guid.NewGuid()}");
 
-        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations", new CreateRecurringReservationForCustomerRequest
+        var createResponse = await PostAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations", new CreateRecurringReservationForCustomerRequest
         {
             UserId = playerLogin.User.Id,
             CourtId = court.Id,
@@ -1226,6 +1226,26 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var response = await client.PostAsJsonAsync("/api/v1/auth/google", new GoogleLoginRequest { IdToken = $"valid-token-{suffix}" });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<GoogleLoginResponse>())!;
+    }
+
+    private static async Task<HttpResponseMessage> PostAsJsonWithIdempotencyAsync<T>(HttpClient client, string requestUri, T value)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
+        {
+            Content = JsonContent.Create(value)
+        };
+        request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        return await client.SendAsync(request);
+    }
+
+    private static async Task<HttpResponseMessage> PatchAsJsonWithIdempotencyAsync<T>(HttpClient client, string requestUri, T value)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Patch, requestUri)
+        {
+            Content = JsonContent.Create(value)
+        };
+        request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        return await client.SendAsync(request);
     }
 
     private static async Task<SportsComplexInfo> CreateComplexAsync(HttpClient client)
@@ -1273,7 +1293,7 @@ public sealed class ReservationsControllerTests : IClassFixture<MovaWebApplicati
         var playerLogin = await LoginWithUserAsync(client, playerSuffix);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", playerLogin.AccessToken);
 
-        var createResponse = await client.PostAsJsonAsync($"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
+        var createResponse = await PostAsJsonWithIdempotencyAsync(client, $"/api/v1/complexes/{complex.Id}/recurring-reservations/me", new CreateRecurringReservationRequest
         {
             CourtId = court.Id,
             DayOfWeek = (int)DayOfWeek.Monday,
