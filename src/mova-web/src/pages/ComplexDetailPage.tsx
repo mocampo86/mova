@@ -43,6 +43,11 @@ function formatLocalDate(isoString: string) {
   return date.toLocaleDateString();
 }
 
+function formatLocalDateTime(isoString: string) {
+  const date = new Date(isoString);
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+}
+
 
 
 interface BookingDialogProps {
@@ -175,10 +180,16 @@ export default function ComplexDetailPage() {
           <Typography sx={{ mt: 2 }}>{complex.data.description}</Typography>
           {isAuthenticated && myBlockStatus.data?.isBlocked && (
             <Alert severity="warning" variant="outlined" sx={{ mt: 2 }}>
-              {t('complexDetail.blockedMessage', {
-                complex: myBlockStatus.data.complexName ?? complex.data.name,
-                reason: myBlockStatus.data.reason ?? t('dashboard.noReason')
-              })}
+              {myBlockStatus.data.blockedUntil
+                ? t('complexDetail.blockedMessageWithExpiration', {
+                    complex: myBlockStatus.data.complexName ?? complex.data.name,
+                    reason: myBlockStatus.data.reason ?? t('dashboard.noReason'),
+                    expiresAt: formatLocalDateTime(myBlockStatus.data.blockedUntil)
+                  })
+                : t('complexDetail.blockedMessage', {
+                    complex: myBlockStatus.data.complexName ?? complex.data.name,
+                    reason: myBlockStatus.data.reason ?? t('dashboard.noReason')
+                  })}
             </Alert>
           )}
           {(complex.data.phoneNumber || complex.data.email) && (

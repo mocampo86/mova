@@ -3,6 +3,7 @@ using Mova.Application.Common.Exceptions;
 using Mova.Application.Users.Queries;
 using Mova.Contracts.Users;
 using Mova.Domain.Entities;
+using Mova.Domain.Enums;
 
 namespace Mova.Application.Users.Handlers;
 
@@ -14,6 +15,11 @@ public sealed class GetMyBlockStatusHandler(
     {
         var complex = await sportsComplexes.GetByIdAsync(query.ComplexId, cancellationToken)
             ?? throw new NotFoundException("Sports complex not found.");
+
+        if (complex.Status != ComplexStatus.Active)
+        {
+            throw new NotFoundException("Sports complex not found.");
+        }
 
         var block = await blockedUsers.GetActiveByComplexAndUserAsync(
             query.ComplexId,

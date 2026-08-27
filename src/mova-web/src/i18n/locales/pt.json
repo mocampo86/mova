@@ -191,6 +191,7 @@
     "availabilityError": "Não foi possível carregar a disponibilidade.",
     "noAvailability": "Não há horários disponíveis para a data selecionada. O complexo pode não ter horários de funcionamento configurados, o dia pode estar fechado ou a quadra pode não ter regras de disponibilidade para esse dia.",
     "blockedMessage": "Você está bloqueado em {{complex}}: {{reason}}.",
+    "blockedMessageWithExpiration": "Você está bloqueado em {{complex}}: {{reason}}. Expira em {{expiresAt}}.",
     "phoneWithValue": "Telefone: {{value}}",
     "emailWithValue": "E-mail: {{value}}",
     "availability": {

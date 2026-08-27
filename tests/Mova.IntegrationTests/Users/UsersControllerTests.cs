@@ -348,6 +348,22 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    [Fact]
+    public async Task GetMyBlockStatus_ForInactiveComplex_ReturnsNotFound()
+    {
+        var (customerClient, adminClient, complexId, _) = await SeedBlockScenarioAsync();
+
+        var deactivateResponse = await adminClient.PatchAsJsonAsync(
+            $"/api/v1/complexes/{complexId}/status",
+            new UpdateComplexStatusRequest { Status = "Inactive" });
+
+        deactivateResponse.EnsureSuccessStatusCode();
+
+        var response = await customerClient.GetAsync($"/api/v1/users/me/blocks/{complexId}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     private async Task<(string AdminSuffix, Guid ComplexId, Guid CustomerId, Guid CourtId)> SeedScenarioAsync()
     {
         using var scope = _factory.Services.CreateScope();

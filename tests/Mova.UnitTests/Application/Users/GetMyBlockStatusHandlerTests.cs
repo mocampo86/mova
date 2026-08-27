@@ -53,6 +53,21 @@ public sealed class GetMyBlockStatusHandlerTests
     }
 
     [Fact]
+    public async Task HandleAsync_WithInactiveComplex_ThrowsNotFoundException()
+    {
+        var complex = SportsComplex.Create("Complex", "Description", "Address", "Montevideo", null, null, "+598 99 123 456", "complex@example.com");
+        complex.Deactivate();
+        await _sportsComplexRepository.AddAsync(complex);
+
+        var user = User.CreateFromGoogle(Guid.NewGuid(), $"sub-{Guid.NewGuid()}", $"user-{Guid.NewGuid()}@example.com", "Test User");
+
+        var handler = CreateHandler();
+
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => handler.HandleAsync(new GetMyBlockStatusQuery(user.Id, complex.Id)));
+    }
+
+    [Fact]
     public async Task HandleAsync_WithNonExistentComplex_ThrowsNotFoundException()
     {
         var handler = CreateHandler();
