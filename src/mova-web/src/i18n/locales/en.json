@@ -145,6 +145,22 @@
       "playTitle": "Play",
       "playDescription": "Pick a convenient time and keep your reservations organized in one place."
     },
+    "audiences": {
+      "title": "Built for every side of the game",
+      "playersTitle": "For players",
+      "playersDescription": "Find active complexes, explore their courts, and reserve a time that fits your schedule.",
+      "playersAction": "Find a court",
+      "ownersTitle": "For complex owners",
+      "ownersDescription": "Bring your complex online and manage courts, availability, reservations, and customers in one place.",
+      "ownersAction": "Manage your complex"
+    },
+    "featured": {
+      "title": "Featured complexes",
+      "subtitle": "Explore active sports complexes ready for your next game.",
+      "action": "View complex",
+      "empty": "There are no featured complexes available yet.",
+      "error": "Featured complexes could not be loaded. Please try again later."
+    },
     "cta": {
       "title": "Ready to get moving?",
       "subtitle": "Join Mova as a player or bring your complex online.",

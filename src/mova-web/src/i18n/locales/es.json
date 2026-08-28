@@ -145,6 +145,22 @@
       "playTitle": "Jugar",
       "playDescription": "Elige un horario conveniente y mantén tus reservas organizadas en un solo lugar."
     },
+    "audiences": {
+      "title": "Creado para cada lado del juego",
+      "playersTitle": "Para jugadores",
+      "playersDescription": "Encuentra complejos activos, explora sus canchas y reserva un horario que se adapte a tu agenda.",
+      "playersAction": "Encontrar una cancha",
+      "ownersTitle": "Para dueños de complejos",
+      "ownersDescription": "Lleva tu complejo en línea y administra canchas, disponibilidad, reservas y clientes en un solo lugar.",
+      "ownersAction": "Administrar tu complejo"
+    },
+    "featured": {
+      "title": "Complejos destacados",
+      "subtitle": "Explora complejos deportivos activos listos para tu próximo juego.",
+      "action": "Ver complejo",
+      "empty": "Aún no hay complejos destacados disponibles.",
+      "error": "No se pudieron cargar los complejos destacados. Inténtalo de nuevo más tarde."
+    },
     "cta": {
       "title": "¿Listo para empezar a moverte?",
       "subtitle": "Únete a Mova como jugador o lleva tu complejo en línea.",

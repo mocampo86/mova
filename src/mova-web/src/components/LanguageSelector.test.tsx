@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 import i18n from '../i18n';
@@ -10,9 +11,13 @@ import HomePage from '../pages/HomePage';
 import LanguageSelector from './LanguageSelector';
 
 function renderWithI18n(ui: ReactNode) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
   return render(
     <I18nextProvider i18n={i18n}>
-      <BrowserRouter>{ui}</BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>{ui}</BrowserRouter>
+      </QueryClientProvider>
     </I18nextProvider>
   );
 }
