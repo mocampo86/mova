@@ -6,9 +6,9 @@ using Microsoft.Extensions.Options;
 using Npgsql;
 using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
+using Mova.Infrastructure.Authentication;
 using Mova.Application.Abstractions.Policies;
 using Mova.Application.Health;
-using Mova.Infrastructure.Authentication;
 using Mova.Infrastructure.Authentication.Options;
 using Mova.Infrastructure.Configuration;
 using Mova.Infrastructure.Data;
@@ -23,6 +23,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+
         services.AddOptions<DatabaseOptions>()
             .BindConfiguration(DatabaseOptions.SectionName)
             .Validate(options =>
@@ -88,6 +91,7 @@ public static class DependencyInjection
         services.AddScoped<IBlockedUserRepository, BlockedUserRepository>();
         services.AddScoped<ICancellationPolicyRepository, CancellationPolicyRepository>();
         services.AddScoped<IIdempotencyRecordRepository, IdempotencyRecordRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<Mova.Application.Common.Idempotency.IIdempotencyStore, Mova.Application.Common.Idempotency.IdempotencyStore>();

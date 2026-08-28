@@ -3,6 +3,7 @@ using Mova.Application.Complexes.Handlers;
 using Mova.Application.Common.Exceptions;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 using Xunit;
 
@@ -14,10 +15,12 @@ public class CreateComplexHandlerTests
     private readonly FakeSportsComplexRepository _sportsComplexRepository = new();
     private readonly FakeComplexAdministratorRepository _complexAdministratorRepository = new();
     private readonly FakeBusinessHoursRepository _businessHours = new();
+    private readonly FakeAuditLogRepository _auditLogs = new();
+    private readonly FakeCurrentUserContext _currentUser = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private CreateComplexHandler CreateHandler() =>
-        new(_userRepository, _sportsComplexRepository, _complexAdministratorRepository, _businessHours, _unitOfWork);
+        new(_userRepository, _sportsComplexRepository, _complexAdministratorRepository, _businessHours, _auditLogs, _currentUser, _unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WithValidData_CreatesComplexAndLinksAdministrator()
@@ -91,6 +94,8 @@ public class CreateComplexHandlerTests
             _sportsComplexRepository,
             _complexAdministratorRepository,
             new ThrowingBusinessHoursRepository(),
+            _auditLogs,
+            _currentUser,
             unitOfWork);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(new CreateComplexCommand(
@@ -121,6 +126,8 @@ public class CreateComplexHandlerTests
             _sportsComplexRepository,
             new ThrowingComplexAdministratorRepository(),
             _businessHours,
+            _auditLogs,
+            _currentUser,
             unitOfWork);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(new CreateComplexCommand(

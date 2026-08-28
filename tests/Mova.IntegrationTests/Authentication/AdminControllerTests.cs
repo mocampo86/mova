@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Mova.Contracts.Audit;
 using Mova.Contracts.Auth;
 using Mova.Contracts.Common;
 using Mova.Contracts.Complexes;
@@ -184,6 +185,134 @@ public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
         Assert.Equal("Inactive", deactivated.Status);
     }
 
+    [Fact]
+    public async Task GetAuditLogs_AsSuperAdmin_ReturnsAuditLogs()
+    {
+        var superSuffix = $"super-audit-{Guid.NewGuid()}";
+        await SeedUserAsync(superSuffix, [Role.SuperAdmin]);
+        var entityId = Guid.NewGuid().ToString();
+        await SeedAuditLogAsync("SportsComplex.Create", "SportsComplex", entityId);
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, superSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync("/api/v1/admin/audit-logs");
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<AuditLogInfo>>();
+        Assert.NotNull(result);
+        Assert.True(result.TotalItems >= 1);
+        Assert.Contains(result.Items, x => x.EntityId == entityId);
+    }
+
+    [Fact]
+    public async Task GetAuditLogs_WithFilters_ReturnsMatchingAuditLogs()
+    {
+        var superSuffix = $"super-audit-filter-{Guid.NewGuid()}";
+        await SeedUserAsync(superSuffix, [Role.SuperAdmin]);
+        var entityId = Guid.NewGuid().ToString();
+        await SeedAuditLogAsync("Court.Create", "Court", entityId);
+        await SeedAuditLogAsync("SportsComplex.Create", "SportsComplex", Guid.NewGuid().ToString());
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, superSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync($"/api/v1/admin/audit-logs?action=Court.Create&entityType=Court");
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<AuditLogInfo>>();
+        Assert.NotNull(result);
+        Assert.True(result.TotalItems >= 1);
+        Assert.All(result.Items, x =>
+        {
+            Assert.Equal("Court.Create", x.Action);
+            Assert.Equal("Court", x.EntityType);
+        });
+    }
+
+    [Fact]
+    public async Task GetAuditLogs_AsUser_ReturnsForbidden()
+    {
+        var suffix = $"user-audit-{Guid.NewGuid()}";
+        await SeedUserAsync(suffix, [Role.User]);
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, suffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync("/api/v1/admin/audit-logs");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetAuditLogs_WithDateRangeFilter_ReturnsAuditLogs()
+    {
+        var superSuffix = $"super-audit-date-{Guid.NewGuid()}";
+        await SeedUserAsync(superSuffix, [Role.SuperAdmin]);
+        var entityId = Guid.NewGuid().ToString();
+        await SeedAuditLogAsync("SportsComplex.Create", "SportsComplex", entityId);
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, superSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var from = DateTime.UtcNow.AddDays(-2).ToString("o");
+        var to = DateTime.UtcNow.AddHours(1).ToString("o");
+
+        var response = await client.GetAsync($"/api/v1/admin/audit-logs?from={Uri.EscapeDataString(from)}&to={Uri.EscapeDataString(to)}");
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<AuditLogInfo>>();
+        Assert.NotNull(result);
+        Assert.True(result.TotalItems >= 1);
+        Assert.Contains(result.Items, x => x.EntityId == entityId);
+    }
+
+    [Fact]
+    public async Task GetAuditLogs_WithoutAuthentication_ReturnsUnauthorized()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/v1/admin/audit-logs");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateComplexStatus_AsSuperAdmin_CreatesAuditLog()
+    {
+        var ownerSuffix = $"owner-audit-{Guid.NewGuid()}";
+        var superSuffix = $"super-audit-{Guid.NewGuid()}";
+        var seededComplexIds = await SeedUserAsync(ownerSuffix, [Role.User, Role.ComplexAdmin], [Guid.NewGuid()]);
+        await SeedUserAsync(superSuffix, [Role.SuperAdmin]);
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, superSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.PatchAsJsonAsync(
+            $"/api/v1/complexes/{seededComplexIds[0]}/status",
+            new UpdateComplexStatusRequest { Status = "Inactive" });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var auditResponse = await client.GetAsync($"/api/v1/admin/audit-logs?entityType=SportsComplex&entityId={seededComplexIds[0]}");
+        auditResponse.EnsureSuccessStatusCode();
+
+        var result = await auditResponse.Content.ReadFromJsonAsync<PagedResult<AuditLogInfo>>();
+        Assert.NotNull(result);
+        Assert.Contains(result.Items, x =>
+            x.Action == "SportsComplex.UpdateStatus" &&
+            x.EntityType == "SportsComplex" &&
+            x.EntityId == seededComplexIds[0].ToString());
+    }
+
     private async Task DeactivateComplexAsync(Guid complexId)
     {
         using var scope = _factory.Services.CreateScope();
@@ -195,6 +324,23 @@ public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
             complex.Deactivate();
             await context.SaveChangesAsync();
         }
+    }
+
+    private async Task SeedAuditLogAsync(string action, string entityType, string entityId)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+
+        var auditLog = AuditLog.Create(
+            null,
+            null,
+            action,
+            entityType,
+            entityId,
+            new { });
+
+        await context.AuditLogs.AddAsync(auditLog);
+        await context.SaveChangesAsync();
     }
 
     private async Task<IReadOnlyList<Guid>> SeedUserAsync(

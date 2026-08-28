@@ -3,6 +3,7 @@ using Mova.Application.Reservations.Commands;
 using Mova.Application.Reservations.Handlers;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 using Mova.UnitTests.Application.Complexes;
 using Xunit;
@@ -12,9 +13,10 @@ namespace Mova.UnitTests.Application.Reservations;
 public sealed class CancelReservationHandlerTests
 {
     private readonly FakeReservationRepository _reservationRepository = new();
+    private readonly FakeAuditLogRepository _auditLogs = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
-    private CancelReservationHandler CreateHandler() => new(_reservationRepository, _unitOfWork);
+    private CancelReservationHandler CreateHandler() => new(_reservationRepository, _auditLogs, _unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WithValidReservation_CancelsAndSetsAdminStatus()

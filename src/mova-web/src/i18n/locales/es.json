@@ -9,6 +9,7 @@
     "continue": "Continuar",
     "submit": "Enviar",
     "select": "Seleccionar",
+    "clear": "Limpiar",
     "create": "Crear",
     "edit": "Editar",
     "close": "Cerrar",
@@ -510,7 +511,26 @@
     "title": "No autorizado"
   },
   "superAdmin": {
-    "title": "Panel de superadministrador"
+    "title": "Panel de superadministrador",
+    "viewAuditLog": "Ver registro de auditoría",
+    "auditLog": {
+      "title": "Registro de auditoría",
+      "actionFilter": "Acción",
+      "entityTypeFilter": "Tipo de entidad",
+      "entityIdFilter": "ID de entidad",
+      "complexIdFilter": "ID de complejo",
+      "userIdFilter": "ID de usuario",
+      "fromFilter": "Desde",
+      "toFilter": "Hasta",
+      "createdAt": "Fecha de creación",
+      "action": "Acción",
+      "entityType": "Tipo de entidad",
+      "entityId": "ID de entidad",
+      "userId": "ID de usuario",
+      "complexId": "ID de complejo",
+      "metadata": "Metadatos",
+      "empty": "No hay registros de auditoría que coincidan con los filtros seleccionados."
+    }
   },
   "nav": {
     "brand": "Mova",

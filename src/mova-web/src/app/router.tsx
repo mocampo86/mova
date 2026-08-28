@@ -29,6 +29,7 @@ import UserDashboardPage from '../pages/UserDashboardPage';
 import UserHistoryPage from '../pages/UserHistoryPage';
 import UserProfilePage from '../pages/UserProfilePage';
 import AdminRecurringReservationsListPage from '../pages/AdminRecurringReservationsListPage';
+import AuditLogPage from '../pages/AuditLogPage';
 import UserRecurringReservationsPage from '../pages/UserRecurringReservationsPage';
 import UserReservationsPage from '../pages/UserReservationsPage';
 
@@ -92,6 +93,14 @@ export default function AppRouter() {
           element={
             <RequireRole allowedRoles={['SuperAdmin']}>
               <SuperAdminPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="admin/super/audit-logs"
+          element={
+            <RequireRole allowedRoles={['SuperAdmin']}>
+              <AuditLogPage />
             </RequireRole>
           }
         />

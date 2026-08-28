@@ -56,7 +56,8 @@ The application uses Google Sign-In to obtain an ID token, which is exchanged wi
 | `/user/recurring` | Create a weekly recurring reservation for the authenticated user. | Authenticated users |
 | `/user/history` | List of the authenticated user's reservation history. | Authenticated users |
 | `/user/profile` | View and update the authenticated user's profile and update the phone number. | Authenticated users |
-| `/admin/super` | Super admin dashboard. | `SuperAdmin` |
+| `/admin/super` | Super admin dashboard.
+|| `/admin/super/audit-logs` | View and filter the administrative audit log. | `SuperAdmin` | | `SuperAdmin` |
 | `/admin/complex/:complexId` | Complex admin dashboard overview with courts, reservations, and blocked users summaries. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/profile` | Edit the complex public profile. | `ComplexAdmin` of the requested complex |
 | `/admin/complex/:complexId/courts` | List and manage the courts of the complex. | `ComplexAdmin` of the requested complex |
