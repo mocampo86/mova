@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ApiError } from '../shared/utils/apiError';
 import { apiClient, API_BASE_URL } from './apiClient';
 
 describe('apiClient', () => {
@@ -60,5 +61,31 @@ describe('apiClient', () => {
     fetchSpy.mockResolvedValueOnce(new Response('Bad request', { status: 400 }));
 
     await expect(apiClient('/api/v1/test', { method: 'GET' })).rejects.toThrow('Bad request');
+  });
+
+  it('throws an ApiError with code and trace id for a structured error response', async () => {
+    const body = JSON.stringify({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'The request is invalid.',
+        traceId: '00-123'
+      }
+    });
+
+    fetchSpy.mockResolvedValueOnce(
+      new Response(body, { status: 400, headers: { 'Content-Type': 'application/json' } })
+    );
+
+    try {
+      await apiClient('/api/v1/test', { method: 'GET' });
+      expect.fail('apiClient should have thrown');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ApiError);
+      const apiError = error as ApiError;
+      expect(apiError.status).toBe(400);
+      expect(apiError.code).toBe('VALIDATION_ERROR');
+      expect(apiError.message).toBe('The request is invalid.');
+      expect(apiError.traceId).toBe('00-123');
+    }
   });
 });

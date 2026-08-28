@@ -26,6 +26,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import {
   useAssignCourtSports,
   useCourt,
@@ -223,25 +224,25 @@ export default function EditCourtPage() {
 
       {isCourtError && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {courtError?.message ?? t('admin.editCourt.loadError')}
+          {courtError ? <ApiErrorMessage error={courtError} /> : t('admin.editCourt.loadError')}
         </Alert>
       )}
 
       {updateCourt.error && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {updateCourt.error.message}
+          <ApiErrorMessage error={updateCourt.error} />
         </Alert>
       )}
 
       {assignSports.error && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {assignSports.error.message}
+          <ApiErrorMessage error={assignSports.error} />
         </Alert>
       )}
 
       {updateAvailability.error && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {updateAvailability.error.message}
+          <ApiErrorMessage error={updateAvailability.error} />
         </Alert>
       )}
 

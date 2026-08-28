@@ -23,6 +23,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useCourts } from '../features/courts/courtApi';
 import { useComplexUsers } from '../features/users/userAdminApi';
 import { useRecurringReservations } from '../features/reservations/reservationApi';
@@ -97,7 +98,7 @@ export default function AdminRecurringReservationsListPage() {
           </Button>
         </Stack>
 
-        {recurringReservations.isError && <Alert severity="error">{recurringReservations.error.message}</Alert>}
+        {recurringReservations.isError && <Alert severity="error"><ApiErrorMessage error={recurringReservations.error} /></Alert>}
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <FormControl sx={{ minWidth: 200 }}>

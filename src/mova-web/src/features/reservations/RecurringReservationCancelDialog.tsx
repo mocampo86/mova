@@ -11,6 +11,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../../components/ApiErrorMessage';
 import { useCancelRecurringReservation } from './reservationApi';
 import type { RecurringReservationListItem } from './reservationTypes';
 
@@ -55,7 +56,7 @@ export default function RecurringReservationCancelDialog({
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           {cancelRecurringReservation.isError && (
-            <Alert severity="error">{cancelRecurringReservation.error.message}</Alert>
+            <Alert severity="error"><ApiErrorMessage error={cancelRecurringReservation.error} /></Alert>
           )}
           {recurringReservation ? (
             <Typography variant="body2" color="text.secondary">

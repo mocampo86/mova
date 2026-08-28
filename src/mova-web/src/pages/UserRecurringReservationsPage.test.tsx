@@ -2,6 +2,7 @@ import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import UserRecurringReservationsPage from './UserRecurringReservationsPage';
 import { renderWithAuth } from '../test-utils';
+import { ApiError } from '../shared/utils/apiError';
 
 const mockComplex = {
   id: 'complex-1',
@@ -116,6 +117,30 @@ describe('UserRecurringReservationsPage', () => {
 
     const createButton = screen.getByRole('button', { name: 'Create recurring booking' }) as HTMLButtonElement;
     expect(createButton.disabled).toBe(true);
+  });
+
+  it('displays a translated message when the mutation fails with a known API error', async () => {
+    setupSettings(true);
+    (createMutation as unknown as { isError: boolean; error: unknown }).isError = true;
+    (createMutation as unknown as { isError: boolean; error: unknown }).error = new ApiError(
+      409,
+      'Recurring reservation conflict',
+      'RESERVATION_CONFLICT'
+    );
+
+    renderWithAuth(<UserRecurringReservationsPage />, {
+      authState: {
+        accessToken: 'token',
+        isAuthenticated: true
+      },
+      initialRoute: '/user/recurring'
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('The requested action conflicts with existing data.')
+      ).toBeTruthy();
+    });
   });
 
   it('submits the form when the setting is enabled', async () => {

@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useCompleteProfile } from '../features/users/useCompleteProfile';
 
 const phoneNumberPattern = /^\+[0-9](?:\s*[0-9]){6,14}$/;
@@ -60,7 +61,7 @@ export default function CompleteProfilePage() {
 
         {error && (
           <Typography color="error" variant="body2">
-            {error.message}
+            <ApiErrorMessage error={error} />
           </Typography>
         )}
       </Box>

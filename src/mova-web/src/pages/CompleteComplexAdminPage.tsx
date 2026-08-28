@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useCompleteComplexAdminProfile } from '../features/users/useCompleteComplexAdminProfile';
 import TimezoneSelector from '../components/TimezoneSelector';
 import { DEFAULT_TIME_ZONE_ID } from '../utils/timezones';
@@ -226,7 +227,7 @@ export default function CompleteComplexAdminPage() {
 
         {error && (
           <Typography color="error" variant="body2">
-            {error.message}
+            <ApiErrorMessage error={error} />
           </Typography>
         )}
       </Box>

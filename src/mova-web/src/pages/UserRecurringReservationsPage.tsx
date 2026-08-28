@@ -15,6 +15,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useActiveComplexes, useActiveCourts, useRecurringReservationSettings } from '../features/complexes/complexApi';
 import { useCreateMyRecurringReservation } from '../features/reservations/reservationApi';
 
@@ -111,7 +112,7 @@ export default function UserRecurringReservationsPage() {
         {complexes.isError && <Alert severity="error">{t('dashboard.recurringPage.complexesError')}</Alert>}
         {courts.isError && <Alert severity="error">{t('dashboard.recurringPage.courtsError')}</Alert>}
         {settings.isError && <Alert severity="error">{t('dashboard.recurringPage.settingsError')}</Alert>}
-        {createRecurring.isError && <Alert severity="error">{createRecurring.error.message}</Alert>}
+        {createRecurring.isError && <Alert severity="error"><ApiErrorMessage error={createRecurring.error} /></Alert>}
         {createRecurring.isSuccess && (
           <Alert severity="success">
             {t('dashboard.recurringPage.success', {
