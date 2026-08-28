@@ -159,13 +159,28 @@ Load balancers and container orchestrators use these endpoints for routing and r
 
 The API uses ASP.NET Core rate limiting on sensitive endpoints. The `RateLimiting` configuration section controls each policy:
 
-| Policy | Endpoints | Default | Config keys |
-|--------|-----------|---------|-------------|
-| `search` | Complex user search | 60 requests/minute | `RateLimiting:Search:PermitLimit`, `RateLimiting:Search:WindowSeconds`, `RateLimiting:Search:QueueLimit` |
-| `login` | `POST /api/v1/auth/google`, `POST /api/v1/auth/complete-complex-admin` | 20 requests/minute | `RateLimiting:Login:PermitLimit`, `RateLimiting:Login:WindowSeconds`, `RateLimiting:Login:QueueLimit` |
-| `reservation` | Reservation and recurring-reservation creation | 30 requests/minute | `RateLimiting:Reservation:PermitLimit`, `RateLimiting:Reservation:WindowSeconds`, `RateLimiting:Reservation:QueueLimit` |
+| Policy | Endpoints | Partition key | Default | Config keys |
+|--------|-----------|---------------|---------|-------------|
+| `search` | Complex user search | Authenticated user ID or client IP | 60 requests/minute | `RateLimiting:Search:PermitLimit`, `RateLimiting:Search:WindowSeconds`, `RateLimiting:Search:QueueLimit` |
+| `login` | `POST /api/v1/auth/google`, `POST /api/v1/auth/complete-complex-admin` | Effective client IP | 20 requests/minute | `RateLimiting:Login:PermitLimit`, `RateLimiting:Login:WindowSeconds`, `RateLimiting:Login:QueueLimit` |
+| `reservation` | Reservation and recurring-reservation creation | Authenticated user ID or client IP | 30 requests/minute | `RateLimiting:Reservation:PermitLimit`, `RateLimiting:Reservation:WindowSeconds`, `RateLimiting:Reservation:QueueLimit` |
 
 Set `RateLimiting:Enabled` to `false` to disable rate-limiter middleware entirely (useful for integration tests).
+
+When a limit is exceeded, the API returns `429 Too Many Requests` with the standard structured error response and a `Retry-After` header indicating when the client can retry.
+
+## Forwarded headers
+
+When the API runs behind a reverse proxy or load balancer (e.g., Azure Front Door, Azure Load Balancer), the `ForwardedHeaders` configuration section controls how the application derives the effective client IP used by the `login` rate-limiting policy. Only configure this for trusted proxies and networks.
+
+| Setting | Purpose | Example |
+|---------|---------|---------|
+| `ForwardedHeaders:ForwardedHeaders` | Which forwarded headers to process. Defaults to `XForwardedFor` for client IP. | `XForwardedFor` |
+| `ForwardedHeaders:ForwardLimit` | Maximum number of entries to read from `X-Forwarded-For`. | `1` |
+| `ForwardedHeaders:KnownProxies` | Specific proxy IP addresses that are trusted. | `["10.0.0.10"]` |
+| `ForwardedHeaders:KnownNetworks` | Trusted proxy networks in CIDR notation. | `["10.0.0.0/24"]` |
+
+Do not set `KnownProxies` or `KnownNetworks` to broad ranges such as `0.0.0.0/0`, because that would allow clients to spoof their IP address. When `KnownProxies` and `KnownNetworks` are not configured, the middleware does not trust `X-Forwarded-For` and uses the direct TCP remote address.
 
 ## Backup and restore
 

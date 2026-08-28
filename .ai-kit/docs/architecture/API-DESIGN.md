@@ -281,6 +281,7 @@ Common error codes:
 | FORBIDDEN | 403 | Insufficient role or complex access |
 | NOT_FOUND | 404 | Resource does not exist or is not accessible |
 | CONCURRENCY_ERROR | 409 | Optimistic concurrency conflict |
+| RATE_LIMIT_EXCEEDED | 429 | Request rate limit exceeded |
 
 ## Pagination contract
 
