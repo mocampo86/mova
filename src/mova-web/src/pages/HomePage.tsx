@@ -7,18 +7,18 @@ export default function HomePage() {
   const { t } = useTranslation();
   const { data: featuredComplexes, isLoading: isFeaturedLoading, isError: isFeaturedError } = useActiveComplexes('', 1);
 
-  const benefits = [
+  const steps = [
     {
-      title: t('home.benefits.discoverTitle'),
-      description: t('home.benefits.discoverDescription')
+      title: t('home.steps.searchTitle'),
+      description: t('home.steps.searchDescription')
     },
     {
-      title: t('home.benefits.chooseTitle'),
-      description: t('home.benefits.chooseDescription')
+      title: t('home.steps.selectTitle'),
+      description: t('home.steps.selectDescription')
     },
     {
-      title: t('home.benefits.playTitle'),
-      description: t('home.benefits.playDescription')
+      title: t('home.steps.bookTitle'),
+      description: t('home.steps.bookDescription')
     }
   ];
 
@@ -61,29 +61,34 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      <Container id="how-it-works" component="section" aria-labelledby="benefits-title" maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>
+      <Container id="how-it-works" component="section" aria-labelledby="steps-title" maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>
         <Stack spacing={2} alignItems="center" textAlign="center" sx={{ mb: 5 }}>
-          <Typography id="benefits-title" component="h2" variant="h4" sx={{ fontWeight: 700 }}>
-            {t('home.benefits.title')}
+          <Typography id="steps-title" component="h2" variant="h4" sx={{ fontWeight: 700 }}>
+            {t('home.steps.title')}
           </Typography>
           <Typography color="text.secondary" sx={{ maxWidth: 620 }}>
-            {t('home.benefits.subtitle')}
+            {t('home.steps.subtitle')}
           </Typography>
         </Stack>
         <Grid container spacing={3}>
-          {benefits.map((benefit) => (
-            <Grid key={benefit.title} size={{ xs: 12, md: 4 }}>
+          {steps.map((step) => (
+            <Grid key={step.title} size={{ xs: 12, md: 4 }}>
               <Card variant="outlined" sx={{ height: '100%', borderRadius: 3 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Typography component="h3" variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    {benefit.title}
+                    {step.title}
                   </Typography>
-                  <Typography color="text.secondary">{benefit.description}</Typography>
+                  <Typography color="text.secondary">{step.description}</Typography>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
+        <Stack alignItems="center" sx={{ mt: 4 }}>
+          <Button component={RouterLink} to="/complexes" variant="contained" size="large">
+            {t('home.steps.action')}
+          </Button>
+        </Stack>
       </Container>
 
       <Container component="section" aria-labelledby="audiences-title" maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>

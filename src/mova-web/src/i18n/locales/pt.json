@@ -135,15 +135,16 @@
       "manage": "Gerenciar seu complexo",
       "browse": "Explorar complexos"
     },
-    "benefits": {
-      "title": "Tudo o que você precisa para jogar",
-      "subtitle": "Mova torna simples encontrar e reservar instalações esportivas, para que você passe menos tempo coordenando e mais tempo na quadra.",
-      "discoverTitle": "Descobrir",
-      "discoverDescription": "Explore complexos esportivos ativos e encontre uma instalação que se encaixe no seu jogo.",
-      "chooseTitle": "Escolher",
-      "chooseDescription": "Veja as quadras e esportes disponíveis em cada complexo antes de se comprometer.",
-      "playTitle": "Jogar",
-      "playDescription": "Escolha um horário conveniente e mantenha suas reservas organizadas em um só lugar."
+    "steps": {
+      "title": "Como encontrar e reservar uma quadra",
+      "subtitle": "Encontre um complexo ativo, escolha uma quadra e reserve seu próximo jogo em três passos simples.",
+      "searchTitle": "Buscar",
+      "searchDescription": "Explore complexos esportivos ativos por localização, nome ou esporte.",
+      "selectTitle": "Selecionar",
+      "selectDescription": "Veja as quadras e esportes que cada complexo oferece.",
+      "bookTitle": "Reservar",
+      "bookDescription": "Confira a disponibilidade em tempo real e confirme o horário que funciona para você.",
+      "action": "Encontrar uma quadra"
     },
     "audiences": {
       "title": "Feito para todos os lados do jogo",

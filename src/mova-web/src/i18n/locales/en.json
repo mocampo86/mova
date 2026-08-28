@@ -135,15 +135,16 @@
       "manage": "Manage your complex",
       "browse": "Browse complexes"
     },
-    "benefits": {
-      "title": "Everything you need to play",
-      "subtitle": "Mova makes finding and booking sports facilities simple, so you can spend less time coordinating and more time on the court.",
-      "discoverTitle": "Discover",
-      "discoverDescription": "Explore active sports complexes and find a facility that fits your game.",
-      "chooseTitle": "Choose",
-      "chooseDescription": "See the courts and sports available at each complex before you commit.",
-      "playTitle": "Play",
-      "playDescription": "Pick a convenient time and keep your reservations organized in one place."
+    "steps": {
+      "title": "How to find and book a court",
+      "subtitle": "Find an active complex, choose a court, and reserve your next game in three simple steps.",
+      "searchTitle": "Search",
+      "searchDescription": "Browse active sports complexes by location, name, or sport.",
+      "selectTitle": "Select",
+      "selectDescription": "Explore the courts and sports each complex offers.",
+      "bookTitle": "Book",
+      "bookDescription": "Check live availability and confirm the time that works for you.",
+      "action": "Find a court"
     },
     "audiences": {
       "title": "Built for every side of the game",
