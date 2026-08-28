@@ -291,6 +291,7 @@ When the API is running:
 
 | Endpoint | Purpose |
 |----------|---------|
+| `GET /health` | Aggregate health status (includes all registered checks) |
 | `GET /health/live` | Liveness probe (does not require the database) |
 | `GET /health/ready` | Readiness probe (verifies database connectivity) |
 | `GET /swagger/index.html` | OpenAPI/Swagger UI (Development environment) |
