@@ -2,6 +2,7 @@ using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Mova.Api.Authorization;
 using Mova.Api.Filters;
 using Mova.Application.Reservations.Commands;
@@ -47,6 +48,7 @@ public sealed class RecurringReservationsController(
     [HttpPost("me")]
     [Authorize(Policy = AuthorizationPolicies.User)]
     [IdempotencyRequired]
+    [EnableRateLimiting("reservation")]
     public async Task<ActionResult<RecurringReservationInfo>> CreateMyRecurringReservation(
         Guid complexId,
         CreateRecurringReservationRequest request,
@@ -89,6 +91,7 @@ public sealed class RecurringReservationsController(
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
     [IdempotencyRequired]
+    [EnableRateLimiting("reservation")]
     public async Task<ActionResult<RecurringReservationInfo>> CreateRecurringReservationForCustomer(
         Guid complexId,
         [FromBody] CreateRecurringReservationForCustomerRequest request,

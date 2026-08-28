@@ -17,6 +17,7 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
     private readonly IBlockedUserRepository _blockedUsers;
     private readonly IReservationRepository _reservations;
     private readonly ICourtBlockRepository _courtBlocks;
+    private readonly IAuditLogRepository _auditLogs;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateReservationHandler(
@@ -26,6 +27,7 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
         IBlockedUserRepository blockedUsers,
         IReservationRepository reservations,
         ICourtBlockRepository courtBlocks,
+        IAuditLogRepository auditLogs,
         IUnitOfWork unitOfWork)
     {
         _sportsComplexes = sportsComplexes;
@@ -34,6 +36,7 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
         _blockedUsers = blockedUsers;
         _reservations = reservations;
         _courtBlocks = courtBlocks;
+        _auditLogs = auditLogs;
         _unitOfWork = unitOfWork;
     }
 
@@ -98,6 +101,20 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
                 reservation.Confirm();
 
                 await _reservations.AddAsync(reservation, token);
+
+                if (command.Source == ReservationSource.Admin)
+                {
+                    var auditLog = AuditLog.Create(
+                        command.CreatedByUserId,
+                        command.SportsComplexId,
+                        "Reservation.Create",
+                        "Reservation",
+                        reservation.Id.ToString(),
+                        new { courtId = reservation.CourtId, userId = reservation.UserId, startAt = reservation.StartAt, endAt = reservation.EndAt, source = command.Source.ToString() });
+
+                    await _auditLogs.AddAsync(auditLog, token);
+                }
+
                 await _unitOfWork.SaveChangesAsync(token);
 
                 return ReservationMapper.ToInfo(reservation);

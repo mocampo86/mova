@@ -143,12 +143,33 @@ Always back up the database before applying migrations to production.
 
 ## Health checks
 
-The API exposes `/health` and `/health/ready` endpoints:
+The API exposes the following health endpoints:
 
-- `/health`: API is running.
-- `/health/ready`: API can connect to PostgreSQL.
+| Endpoint | Purpose | Checks |
+|----------|---------|--------|
+| `/health` | Aggregate health status. | All registered checks. |
+| `/health/live` | Liveness probe. | Returns `Healthy` when the API process is running. |
+| `/health/ready` | Readiness probe. | PostgreSQL connectivity and error-rate threshold. |
+
+The `error-rate` check becomes `Unhealthy` when the rolling error rate (server-side errors per minute) in the last five minutes exceeds the configured `ErrorRateHealthCheck:MaxErrorRatePerMinute` threshold (default `5.0`). `ErrorRateTracker:EvaluationWindow` controls the window duration and `ErrorRateTracker:MaxQueueSize` caps the in-memory error queue. Load balancers and container orchestrators can use this to route traffic away from an instance that is experiencing elevated failures and to trigger operator alerts.
 
 Load balancers and container orchestrators use these endpoints for routing and restart decisions.
+
+## Rate limiting
+
+The API uses ASP.NET Core rate limiting on sensitive endpoints. The `RateLimiting` configuration section controls each policy:
+
+| Policy | Endpoints | Default | Config keys |
+|--------|-----------|---------|-------------|
+| `search` | Complex user search | 60 requests/minute | `RateLimiting:Search:PermitLimit`, `RateLimiting:Search:WindowSeconds`, `RateLimiting:Search:QueueLimit` |
+| `login` | `POST /api/v1/auth/google`, `POST /api/v1/auth/complete-complex-admin` | 20 requests/minute | `RateLimiting:Login:PermitLimit`, `RateLimiting:Login:WindowSeconds`, `RateLimiting:Login:QueueLimit` |
+| `reservation` | Reservation and recurring-reservation creation | 30 requests/minute | `RateLimiting:Reservation:PermitLimit`, `RateLimiting:Reservation:WindowSeconds`, `RateLimiting:Reservation:QueueLimit` |
+
+Set `RateLimiting:Enabled` to `false` to disable rate-limiter middleware entirely (useful for integration tests).
+
+## Backup and restore
+
+See [operations/BACKUP-RESTORE.md](../operations/BACKUP-RESTORE.md) for detailed backup, restore, and drill procedures for local and Azure Database for PostgreSQL environments.
 
 ## Rollback plan
 

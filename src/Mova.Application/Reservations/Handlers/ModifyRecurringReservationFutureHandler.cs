@@ -15,6 +15,7 @@ public sealed class ModifyRecurringReservationFutureHandler(
     IReservationRepository reservations,
     ICourtBlockRepository courtBlocks,
     ISportsComplexRepository sportsComplexes,
+    IAuditLogRepository auditLogs,
     IUnitOfWork unitOfWork) : IModifyRecurringReservationFutureHandler
 {
     public async Task<RecurringReservationInfo> HandleAsync(ModifyRecurringReservationFutureCommand command, CancellationToken cancellationToken = default)
@@ -84,6 +85,20 @@ public sealed class ModifyRecurringReservationFutureHandler(
                     command.EndDate);
 
                 await reservations.AddRangeAsync(newOccurrences, token);
+
+                if (command.IsAdmin)
+                {
+                    var auditLog = AuditLog.Create(
+                        command.UserId,
+                        command.SportsComplexId,
+                        "RecurringReservation.ModifyFuture",
+                        "RecurringReservation",
+                        recurringReservation.Id.ToString(),
+                        new { effectiveDate = command.EffectiveDate, dayOfWeek = command.DayOfWeek.ToString(), startTime = command.StartTime, durationMinutes = command.DurationMinutes, endDate = command.EndDate, occurrenceCount = newOccurrences.Count });
+
+                    await auditLogs.AddAsync(auditLog, token);
+                }
+
                 await unitOfWork.SaveChangesAsync(token);
 
                 return RecurringReservationMapper.ToInfo(recurringReservation, newOccurrences);

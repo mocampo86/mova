@@ -42,7 +42,8 @@ public sealed class MovaWebApplicationFactory : WebApplicationFactory<Program>, 
                 ["Jwt:ExpirationMinutes"] = "15",
                 ["Google:ClientId"] = "test-client-id.apps.googleusercontent.com",
                 ["CancellationPolicy:MinimumHours"] = "24",
-                ["CancellationPolicy:AllowUserCancellation"] = "true"
+                ["CancellationPolicy:AllowUserCancellation"] = "true",
+                ["RateLimiting:Enabled"] = "false"
             });
         });
 

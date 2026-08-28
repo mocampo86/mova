@@ -4,25 +4,42 @@ using Mova.Application.Courts.Commands;
 using Mova.Application.Courts.Handlers;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 
 namespace Mova.UnitTests.Application.Courts;
 
 public sealed class AssignCourtSportsHandlerTests
 {
+    private readonly FakeAuditLogRepository _auditLogs = new();
+    private readonly FakeCurrentUserContext _currentUser = new();
+    private readonly FakeUnitOfWork _unitOfWork = new();
+
+    private AssignCourtSportsHandler CreateHandler(ICourtRepository courts, ISportRepository sports) =>
+        new(courts, sports, _auditLogs, _currentUser, _unitOfWork);
+
     [Fact]
-    public async Task Handle_WithExistingSports_AssignsThemToCourt()
+    public async Task Handle_WithExistingSports_AssignsThemToCourtAndCreatesAuditLog()
     {
         var complexId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        _currentUser.UserId = userId;
         var court = Court.Create(complexId, "Court", "Description", "Surface", false);
         var sports = new[] { Sport.Create("Football"), Sport.Create("Padel") };
-        var handler = new AssignCourtSportsHandler(
-            new FakeCourtRepository(court), new FakeSportRepository(sports), new FakeUnitOfWork());
+        var handler = CreateHandler(
+            new FakeCourtRepository(court), new FakeSportRepository(sports));
 
         var result = await handler.HandleAsync(new AssignCourtSportsCommand(complexId, court.Id, sports.Select(x => x.Id).ToArray()));
 
         Assert.Equal(sports.Select(x => x.Id), result.SportIds);
         Assert.Equal(sports.Select(x => x.Id), court.CourtSports.Select(x => x.SportId));
+
+        var auditLog = Assert.Single(_auditLogs.AuditLogs);
+        Assert.Equal("Court.AssignSports", auditLog.Action);
+        Assert.Equal("Court", auditLog.EntityType);
+        Assert.Equal(court.Id.ToString(), auditLog.EntityId);
+        Assert.Equal(complexId, auditLog.SportsComplexId);
+        Assert.Equal(userId, auditLog.UserId);
     }
 
     [Fact]
@@ -30,8 +47,8 @@ public sealed class AssignCourtSportsHandlerTests
     {
         var complexId = Guid.NewGuid();
         var court = Court.Create(complexId, "Court", "Description", "Surface", false);
-        var handler = new AssignCourtSportsHandler(
-            new FakeCourtRepository(court), new FakeSportRepository([]), new FakeUnitOfWork());
+        var handler = CreateHandler(
+            new FakeCourtRepository(court), new FakeSportRepository([]));
 
         await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(
             new AssignCourtSportsCommand(complexId, court.Id, [Guid.NewGuid()])));

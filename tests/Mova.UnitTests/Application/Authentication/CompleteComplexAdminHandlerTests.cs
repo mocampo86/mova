@@ -3,6 +3,7 @@ using Mova.Application.Authentication.Handlers;
 using Mova.Application.Common.Exceptions;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Complexes;
 using Xunit;
 
@@ -15,6 +16,7 @@ public class CompleteComplexAdminHandlerTests
     private readonly FakeComplexAdministratorRepository _complexAdministratorRepository = new();
     private readonly FakeBusinessHoursRepository _businessHours = new();
     private readonly FakeJwtTokenService _jwtTokenService = new();
+    private readonly FakeAuditLogRepository _auditLogs = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private CompleteComplexAdminHandler CreateHandler() =>
@@ -24,6 +26,7 @@ public class CompleteComplexAdminHandlerTests
             _complexAdministratorRepository,
             _businessHours,
             _jwtTokenService,
+            _auditLogs,
             _unitOfWork);
 
     [Fact]
@@ -78,6 +81,13 @@ public class CompleteComplexAdminHandlerTests
 
         Assert.Equal(1, _unitOfWork.TransactionCallCount);
         Assert.Equal(1, _unitOfWork.SaveChangesCallCount);
+
+        var auditLog = Assert.Single(_auditLogs.AuditLogs);
+        Assert.Equal("SportsComplex.Create", auditLog.Action);
+        Assert.Equal("SportsComplex", auditLog.EntityType);
+        Assert.Equal(complex.Id.ToString(), auditLog.EntityId);
+        Assert.Equal(complex.Id, auditLog.SportsComplexId);
+        Assert.Equal(user.Id, auditLog.UserId);
     }
 
     [Fact]
@@ -115,6 +125,7 @@ public class CompleteComplexAdminHandlerTests
             _complexAdministratorRepository,
             new ThrowingBusinessHoursRepository(),
             _jwtTokenService,
+            _auditLogs,
             unitOfWork);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(new CompleteComplexAdminCommand(
@@ -147,6 +158,7 @@ public class CompleteComplexAdminHandlerTests
             new ThrowingComplexAdministratorRepository(),
             _businessHours,
             _jwtTokenService,
+            _auditLogs,
             unitOfWork);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(new CompleteComplexAdminCommand(
