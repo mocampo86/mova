@@ -9,6 +9,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Mova.Api.Authorization;
+using Mova.Api.Configuration;
 using Mova.Api.Exceptions;
 using Mova.Api.HealthChecks;
 using Mova.Api.Middleware;
@@ -58,6 +59,9 @@ public class Program
 
         builder.Services.Configure<ErrorRateHealthCheckOptions>(
             builder.Configuration.GetSection(ErrorRateHealthCheckOptions.SectionName));
+
+        builder.Services.Configure<ErrorRateTrackerOptions>(
+            builder.Configuration.GetSection(ErrorRateTrackerOptions.SectionName));
 
         builder.Services.AddSingleton<IErrorRateTracker, ErrorRateTracker>();
         builder.Services.AddScoped<ErrorRateTrackingMiddleware>();
@@ -139,10 +143,14 @@ public class Program
 
         builder.Services.AddScoped<IAuthorizationHandler, ComplexAdminAuthorizationHandler>();
 
+        builder.Services.Configure<RateLimitingOptions>(
+            builder.Configuration.GetSection(RateLimitingOptions.SectionName));
+
         builder.Services.AddRateLimiter(options =>
         {
             options.AddPolicy("search", context =>
             {
+                var rateOptions = context.RequestServices.GetRequiredService<IOptions<RateLimitingOptions>>().Value;
                 var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                     ?? context.User.FindFirst("sub")?.Value
                     ?? context.Connection.RemoteIpAddress?.ToString()
@@ -150,32 +158,12 @@ public class Program
 
                 return RateLimitPartition.GetFixedWindowLimiter(
                     userId,
-                    _ => new FixedWindowRateLimiterOptions
-                    {
-                        AutoReplenishment = true,
-                        PermitLimit = 60,
-                        QueueLimit = 0,
-                        Window = TimeSpan.FromMinutes(1)
-                    });
+                    _ => CreateFixedWindowOptions(rateOptions.Search));
             });
 
             options.AddPolicy("login", context =>
             {
-                var partitionKey = context.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
-
-                return RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey,
-                    _ => new FixedWindowRateLimiterOptions
-                    {
-                        AutoReplenishment = true,
-                        PermitLimit = 20,
-                        QueueLimit = 0,
-                        Window = TimeSpan.FromMinutes(1)
-                    });
-            });
-
-            options.AddPolicy("reservation", context =>
-            {
+                var rateOptions = context.RequestServices.GetRequiredService<IOptions<RateLimitingOptions>>().Value;
                 var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                     ?? context.User.FindFirst("sub")?.Value
                     ?? context.Connection.RemoteIpAddress?.ToString()
@@ -183,17 +171,33 @@ public class Program
 
                 return RateLimitPartition.GetFixedWindowLimiter(
                     userId,
-                    _ => new FixedWindowRateLimiterOptions
-                    {
-                        AutoReplenishment = true,
-                        PermitLimit = 30,
-                        QueueLimit = 0,
-                        Window = TimeSpan.FromMinutes(1)
-                    });
+                    _ => CreateFixedWindowOptions(rateOptions.Login));
+            });
+
+            options.AddPolicy("reservation", context =>
+            {
+                var rateOptions = context.RequestServices.GetRequiredService<IOptions<RateLimitingOptions>>().Value;
+                var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? context.User.FindFirst("sub")?.Value
+                    ?? context.Connection.RemoteIpAddress?.ToString()
+                    ?? "anonymous";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    userId,
+                    _ => CreateFixedWindowOptions(rateOptions.Reservation));
             });
 
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
+
+        static FixedWindowRateLimiterOptions CreateFixedWindowOptions(RateLimitingPolicyOptions policyOptions) =>
+            new()
+            {
+                AutoReplenishment = true,
+                PermitLimit = policyOptions.PermitLimit,
+                QueueLimit = policyOptions.QueueLimit,
+                Window = TimeSpan.FromSeconds(policyOptions.WindowSeconds)
+            };
 
         var app = builder.Build();
 
@@ -205,14 +209,16 @@ public class Program
 
         app.UseCors();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+        var rateLimitingOptions = app.Services.GetRequiredService<IOptions<RateLimitingOptions>>().Value;
 
-        var rateLimitingEnabled = app.Services.GetRequiredService<IConfiguration>().GetValue("RateLimiting:Enabled", true);
-        if (rateLimitingEnabled)
+        app.UseAuthentication();
+
+        if (rateLimitingOptions.Enabled)
         {
             app.UseRateLimiter();
         }
+
+        app.UseAuthorization();
 
         app.MapOpenApi();
         app.MapControllers();

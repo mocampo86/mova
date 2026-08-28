@@ -18,14 +18,16 @@ public sealed class ErrorRateHealthCheck : IHealthCheck
     {
         var snapshot = _tracker.GetSnapshot();
 
-        if (snapshot.ErrorCount >= _options.MaxErrorCount)
+        if (snapshot.ErrorRatePerMinute > _options.MaxErrorRatePerMinute)
         {
             return Task.FromResult(HealthCheckResult.Unhealthy(
-                $"Error rate exceeded threshold: {snapshot.ErrorCount} server errors in the last {snapshot.Window.TotalMinutes:F0} minutes."));
+                $"Error rate exceeded threshold: {snapshot.ErrorRatePerMinute:F2} errors/minute " +
+                $"({snapshot.ErrorCount} server errors in the last {snapshot.Window.TotalMinutes:F0} minutes)."));
         }
 
         return Task.FromResult(HealthCheckResult.Healthy(
-            $"Error rate within threshold: {snapshot.ErrorCount} server errors in the last {snapshot.Window.TotalMinutes:F0} minutes."));
+            $"Error rate within threshold: {snapshot.ErrorRatePerMinute:F2} errors/minute " +
+            $"({snapshot.ErrorCount} server errors in the last {snapshot.Window.TotalMinutes:F0} minutes)."));
     }
 }
 
@@ -33,5 +35,5 @@ public sealed class ErrorRateHealthCheckOptions
 {
     public const string SectionName = "ErrorRateHealthCheck";
 
-    public int MaxErrorCount { get; set; } = 25;
+    public double MaxErrorRatePerMinute { get; set; } = 5.0;
 }

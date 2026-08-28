@@ -8,7 +8,9 @@ public sealed class FakeErrorRateTracker : IErrorRateTracker
 
     public FakeErrorRateTracker(int errorCount = 0)
     {
-        _snapshot = new ErrorRateSnapshot(errorCount, TimeSpan.FromMinutes(5), 0);
+        var window = TimeSpan.FromMinutes(5);
+        var rate = errorCount / window.TotalMinutes;
+        _snapshot = new ErrorRateSnapshot(errorCount, window, rate);
     }
 
     public void RecordServerError()
