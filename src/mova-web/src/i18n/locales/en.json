@@ -504,7 +504,7 @@
     "cancelled": "Cancelled"
   },
   "notFound": {
-    "title": "404 - Página no encontrada"
+    "title": "404 - Page not found"
   },
   "unauthorized": {
     "title": "Unauthorized"
@@ -587,5 +587,17 @@
     "cancelledBy": "Cancelled by: {{name}}",
     "cancellationReason": "Reason: {{reason}}",
     "noCancellationReason": "No reason provided"
+  },
+  "seo": {
+    "homeTitle": "Find your next game",
+    "homeDescription": "Discover nearby sports complexes, check court availability, and reserve the time that works for you.",
+    "complexesTitle": "Find a sports complex",
+    "complexesDescription": "Search active complexes by name, city, or address.",
+    "loginUserTitle": "Sign in to play",
+    "loginUserDescription": "Sign in with your Google account to continue.",
+    "loginComplexTitle": "Register your complex",
+    "loginComplexDescription": "Sign in with your Google account to register and manage your sports complex.",
+    "notFoundDescription": "The page you are looking for does not exist.",
+    "unauthorizedDescription": "You do not have permission to view this page."
   }
 }

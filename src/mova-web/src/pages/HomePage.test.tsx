@@ -24,6 +24,8 @@ describe('HomePage', () => {
     expect(screen.getAllByRole('link', { name: 'Find a court' })[0].getAttribute('href')).toBe('/complexes');
     expect(screen.getByRole('heading', { name: 'For players' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'For complex owners' })).toBeTruthy();
+    expect(document.title).toBe('Mova | Find your next game');
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('Discover nearby sports complexes, check court availability, and reserve the time that works for you.');
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Featured complexes' })).toBeTruthy();

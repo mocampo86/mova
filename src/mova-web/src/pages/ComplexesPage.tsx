@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Alert, Button, Card, CardContent, Container, Grid, Pagination, Stack, TextField, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import Seo from '../components/Seo';
 import { useActiveComplexes } from '../features/complexes/complexApi';
 
 export default function ComplexesPage() {
@@ -12,7 +13,11 @@ export default function ComplexesPage() {
   const { data, isLoading, isError } = useActiveComplexes(submittedSearch, page);
 
   return (
-    <Container component="main" maxWidth="lg" sx={{ py: 6 }}>
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Seo
+        title={`${t('common.appName')} | ${t('seo.complexesTitle')}`}
+        description={t('seo.complexesDescription')}
+      />
       <Stack spacing={3}>
         <div>
           <Typography component="h1" variant="h3" sx={{ fontWeight: 800 }}>{t('complexes.title')}</Typography>

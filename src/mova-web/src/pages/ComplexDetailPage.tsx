@@ -21,6 +21,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import Seo from '../components/Seo';
 import {
   useActiveComplex,
   useActiveCourts,
@@ -164,7 +165,11 @@ export default function ComplexDetailPage() {
   }
 
   return (
-    <Container component="main" maxWidth="lg" sx={{ py: 6 }}>
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Seo
+        title={`${t('common.appName')} | ${complex.data.name}`}
+        description={complex.data.description || t('common.noDescription')}
+      />
       <Stack spacing={4}>
         <Button component={RouterLink} to="/complexes" sx={{ alignSelf: 'flex-start' }}>
           {t('common.back')}

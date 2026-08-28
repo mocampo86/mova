@@ -52,6 +52,8 @@ describe('ComplexesPage', () => {
     expect(screen.getByRole('heading', { name: 'Find a sports complex' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Search' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Central Padel' })).toBeTruthy();
+    expect(document.title).toBe('Mova | Find a sports complex');
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('Search active complexes by name, city, or address.');
   });
 
   it('renders pagination controls when there is more than one page', () => {

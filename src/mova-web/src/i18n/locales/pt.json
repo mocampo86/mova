@@ -587,5 +587,17 @@
     "cancelledBy": "Cancelado por: {{name}}",
     "cancellationReason": "Motivo: {{reason}}",
     "noCancellationReason": "sem motivo informado"
+  },
+  "seo": {
+    "homeTitle": "Encontre seu próximo jogo",
+    "homeDescription": "Descubra complexos esportivos próximos, verifique a disponibilidade de quadras e reserve o horário que funciona para você.",
+    "complexesTitle": "Encontrar um complexo esportivo",
+    "complexesDescription": "Busque complexos ativos por nome, cidade ou endereço.",
+    "loginUserTitle": "Entrar para jogar",
+    "loginUserDescription": "Entre com sua conta do Google para continuar.",
+    "loginComplexTitle": "Registrar seu complexo",
+    "loginComplexDescription": "Entre com sua conta do Google para registrar e gerenciar seu complexo esportivo.",
+    "notFoundDescription": "A página que você procura não existe.",
+    "unauthorizedDescription": "Você não tem permissão para ver esta página."
   }
 }
