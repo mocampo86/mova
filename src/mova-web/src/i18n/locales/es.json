@@ -136,14 +136,15 @@
       "browse": "Explorar complejos"
     },
     "benefits": {
-      "title": "Todo lo que necesitas para jugar",
-      "subtitle": "Mova hace que encontrar y reservar instalaciones deportivas sea sencillo, para que pases menos tiempo coordinando y más tiempo en la cancha.",
-      "discoverTitle": "Descubrir",
-      "discoverDescription": "Explora complejos deportivos activos y encuentra una instalación que se adapte a tu juego.",
-      "chooseTitle": "Elegir",
-      "chooseDescription": "Consulta las canchas y deportes disponibles en cada complejo antes de decidirte.",
-      "playTitle": "Jugar",
-      "playDescription": "Elige un horario conveniente y mantén tus reservas organizadas en un solo lugar."
+      "title": "Cómo encontrar y reservar una cancha",
+      "subtitle": "Encuentra un complejo activo, elige una cancha y reserva tu próximo juego en tres simples pasos.",
+      "searchTitle": "Buscar",
+      "searchDescription": "Explora complejos deportivos activos por ubicación, nombre o deporte.",
+      "selectTitle": "Seleccionar",
+      "selectDescription": "Consulta las canchas y deportes que ofrece cada complejo.",
+      "bookTitle": "Reservar",
+      "bookDescription": "Verifica la disponibilidad en tiempo real y confirma el horario que prefieras.",
+      "action": "Encontrar una cancha"
     },
     "audiences": {
       "title": "Creado para cada lado del juego",

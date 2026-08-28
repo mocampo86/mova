@@ -16,7 +16,12 @@ describe('HomePage', () => {
 
     expect(screen.getByRole('heading', { name: 'Find your next game.' })).toBeTruthy();
     expect(screen.getByText(/Discover nearby sports complexes/)).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'Everything you need to play' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'How to find and book a court' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Search' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Select' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Book' })).toBeTruthy();
+    expect(screen.getAllByRole('link', { name: 'Find a court' }).length).toBe(2);
+    expect(screen.getAllByRole('link', { name: 'Find a court' })[0].getAttribute('href')).toBe('/complexes');
     expect(screen.getByRole('heading', { name: 'For players' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'For complex owners' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Featured complexes' })).toBeTruthy();

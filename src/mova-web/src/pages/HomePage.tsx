@@ -7,18 +7,18 @@ export default function HomePage() {
   const { t } = useTranslation();
   const { data: featuredComplexes, isLoading: isFeaturedLoading, isError: isFeaturedError } = useActiveComplexes('', 1);
 
-  const benefits = [
+  const steps = [
     {
-      title: t('home.benefits.discoverTitle'),
-      description: t('home.benefits.discoverDescription')
+      title: t('home.benefits.searchTitle'),
+      description: t('home.benefits.searchDescription')
     },
     {
-      title: t('home.benefits.chooseTitle'),
-      description: t('home.benefits.chooseDescription')
+      title: t('home.benefits.selectTitle'),
+      description: t('home.benefits.selectDescription')
     },
     {
-      title: t('home.benefits.playTitle'),
-      description: t('home.benefits.playDescription')
+      title: t('home.benefits.bookTitle'),
+      description: t('home.benefits.bookDescription')
     }
   ];
 
@@ -71,19 +71,24 @@ export default function HomePage() {
           </Typography>
         </Stack>
         <Grid container spacing={3}>
-          {benefits.map((benefit) => (
-            <Grid key={benefit.title} size={{ xs: 12, md: 4 }}>
+          {steps.map((step) => (
+            <Grid key={step.title} size={{ xs: 12, md: 4 }}>
               <Card variant="outlined" sx={{ height: '100%', borderRadius: 3 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Typography component="h3" variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    {benefit.title}
+                    {step.title}
                   </Typography>
-                  <Typography color="text.secondary">{benefit.description}</Typography>
+                  <Typography color="text.secondary">{step.description}</Typography>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
+        <Stack alignItems="center" sx={{ mt: 4 }}>
+          <Button component={RouterLink} to="/complexes" variant="contained" size="large">
+            {t('home.benefits.action')}
+          </Button>
+        </Stack>
       </Container>
 
       <Container component="section" aria-labelledby="audiences-title" maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>
