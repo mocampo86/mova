@@ -18,6 +18,7 @@ public sealed class CompleteComplexAdminHandler : ICompleteComplexAdminHandler
     private readonly IComplexAdministratorRepository _complexAdministratorRepository;
     private readonly IBusinessHoursRepository _businessHours;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IAuditLogRepository _auditLogs;
     private readonly IUnitOfWork _unitOfWork;
 
     public CompleteComplexAdminHandler(
@@ -26,6 +27,7 @@ public sealed class CompleteComplexAdminHandler : ICompleteComplexAdminHandler
         IComplexAdministratorRepository complexAdministratorRepository,
         IBusinessHoursRepository businessHours,
         IJwtTokenService jwtTokenService,
+        IAuditLogRepository auditLogs,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
@@ -33,6 +35,7 @@ public sealed class CompleteComplexAdminHandler : ICompleteComplexAdminHandler
         _complexAdministratorRepository = complexAdministratorRepository;
         _businessHours = businessHours;
         _jwtTokenService = jwtTokenService;
+        _auditLogs = auditLogs;
         _unitOfWork = unitOfWork;
     }
 
@@ -67,6 +70,15 @@ public sealed class CompleteComplexAdminHandler : ICompleteComplexAdminHandler
                 await _complexAdministratorRepository.AddAsync(administrator, token);
                 await CreateDefaultBusinessHoursAsync(sportsComplex.Id, token);
 
+                var auditLog = AuditLog.Create(
+                    command.UserId,
+                    sportsComplex.Id,
+                    "SportsComplex.Create",
+                    "SportsComplex",
+                    sportsComplex.Id.ToString(),
+                    new { name = sportsComplex.Name, city = sportsComplex.City, timeZoneId = sportsComplex.TimeZoneId });
+
+                await _auditLogs.AddAsync(auditLog, token);
                 await _unitOfWork.SaveChangesAsync(token);
 
                 return sportsComplex.Id;

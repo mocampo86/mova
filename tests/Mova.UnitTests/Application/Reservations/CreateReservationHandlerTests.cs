@@ -5,6 +5,7 @@ using Mova.Application.Reservations.Handlers;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
 using Mova.Domain.Exceptions;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 using Mova.UnitTests.Application.Complexes;
 using Xunit;
@@ -19,6 +20,7 @@ public sealed class CreateReservationHandlerTests
     private readonly FakeBlockedUserRepository _blockedUserRepository = new();
     private readonly FakeReservationRepository _reservationRepository = new();
     private readonly FakeCourtBlockRepository _courtBlockRepository = new();
+    private readonly FakeAuditLogRepository _auditLogs = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private CreateReservationHandler CreateHandler() =>
@@ -29,6 +31,7 @@ public sealed class CreateReservationHandlerTests
             _blockedUserRepository,
             _reservationRepository,
             _courtBlockRepository,
+            _auditLogs,
             _unitOfWork);
 
     private async Task<(SportsComplex Complex, Court Court, User User)> CreateScenarioAsync()
@@ -54,18 +57,19 @@ public sealed class CreateReservationHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_WithValidData_CreatesReservation()
+    public async Task HandleAsync_WithValidData_CreatesReservationAndAuditLog()
     {
         var (complex, court, user) = await CreateScenarioAsync();
         var start = new DateTime(2026, 8, 10, 14, 0, 0, DateTimeKind.Utc);
         var end = start.AddHours(1);
+        var createdByUserId = Guid.NewGuid();
         var handler = CreateHandler();
 
         var result = await handler.HandleAsync(new CreateReservationCommand(
             complex.Id,
             court.Id,
             user.Id,
-            Guid.NewGuid(),
+            createdByUserId,
             start,
             end,
             "Notes"));
@@ -77,6 +81,13 @@ public sealed class CreateReservationHandlerTests
         Assert.Equal("Confirmed", result.Status);
         Assert.Equal("Admin", result.Source);
         Assert.NotNull(result.UpdatedAt);
+
+        var auditLog = Assert.Single(_auditLogs.AuditLogs);
+        Assert.Equal("Reservation.Create", auditLog.Action);
+        Assert.Equal("Reservation", auditLog.EntityType);
+        Assert.Equal(result.Id.ToString(), auditLog.EntityId);
+        Assert.Equal(complex.Id, auditLog.SportsComplexId);
+        Assert.Equal(createdByUserId, auditLog.UserId);
     }
 
     [Fact]

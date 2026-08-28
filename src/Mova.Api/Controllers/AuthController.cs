@@ -2,6 +2,7 @@ using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Mova.Application.Authentication.Commands;
 using Mova.Application.Authentication.Handlers;
 using Mova.Contracts.Auth;
@@ -31,6 +32,7 @@ public class AuthController : ControllerBase
 
     [HttpPost("google")]
     [AllowAnonymous]
+    [EnableRateLimiting("login")]
     public async Task<ActionResult<GoogleLoginResponse>> GoogleLogin(
         [FromBody] GoogleLoginRequest request,
         CancellationToken cancellationToken)
@@ -44,6 +46,7 @@ public class AuthController : ControllerBase
 
     [HttpPost("complete-complex-admin")]
     [Authorize]
+    [EnableRateLimiting("login")]
     public async Task<ActionResult<CompleteComplexAdminResponse>> CompleteComplexAdmin(
         [FromBody] CompleteComplexAdminRequest request,
         CancellationToken cancellationToken)

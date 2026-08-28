@@ -3,6 +3,7 @@ using Mova.Application.Abstractions.Policies;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Reservations.Commands;
 using Mova.Contracts.Reservations;
+using Mova.Domain.Entities;
 using Mova.Domain.Enums;
 
 namespace Mova.Application.Reservations.Handlers;
@@ -11,6 +12,7 @@ public sealed class CancelRecurringReservationHandler(
     IRecurringReservationRepository recurringReservations,
     IReservationRepository reservations,
     ICancellationPolicy cancellationPolicy,
+    IAuditLogRepository auditLogs,
     IUnitOfWork unitOfWork) : ICancelRecurringReservationHandler
 {
     public async Task<RecurringReservationInfo> HandleAsync(CancelRecurringReservationCommand command, CancellationToken cancellationToken = default)
@@ -66,6 +68,19 @@ public sealed class CancelRecurringReservationHandler(
         foreach (var occurrence in futureOccurrences)
         {
             occurrence.Cancel(command.CancelledByUserId, cancelledByAdmin, command.Reason);
+        }
+
+        if (command.IsAdmin)
+        {
+            var auditLog = AuditLog.Create(
+                command.CancelledByUserId,
+                command.SportsComplexId,
+                "RecurringReservation.Cancel",
+                "RecurringReservation",
+                recurringReservation.Id.ToString(),
+                new { occurrenceCount = futureOccurrences.Count });
+
+            await auditLogs.AddAsync(auditLog, cancellationToken);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

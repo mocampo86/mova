@@ -5,19 +5,28 @@ using Mova.Application.Courts.Handlers;
 using Mova.Application.Courts.Validators;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 
 namespace Mova.UnitTests.Application.Courts;
 
 public sealed class UpdateCourtAvailabilityRulesHandlerTests
 {
+    private readonly FakeAuditLogRepository _auditLogs = new();
+    private readonly FakeCurrentUserContext _currentUser = new();
+    private readonly FakeUnitOfWork _unitOfWork = new();
+
+    private UpdateCourtAvailabilityRulesHandler CreateHandler(ICourtRepository courts, ICourtAvailabilityRuleRepository? rules = null) =>
+        new(courts, rules ?? new FakeCourtAvailabilityRuleRepository(), _auditLogs, _currentUser, _unitOfWork);
+
     [Fact]
-    public async Task Handle_WithValidData_UpdatesRules()
+    public async Task Handle_WithValidData_UpdatesRulesAndCreatesAuditLog()
     {
         var complexId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        _currentUser.UserId = userId;
         var court = Court.Create(complexId, "Court", "Description", "Synthetic", false);
-        var handler = new UpdateCourtAvailabilityRulesHandler(
-            new FakeCourtRepository(court), new FakeCourtAvailabilityRuleRepository(), new FakeUnitOfWork());
+        var handler = CreateHandler(new FakeCourtRepository(court));
 
         var result = await handler.HandleAsync(new UpdateCourtAvailabilityRulesCommand(complexId, court.Id,
         [
@@ -28,13 +37,19 @@ public sealed class UpdateCourtAvailabilityRulesHandlerTests
         Assert.Equal(DayOfWeek.Monday, rule.DayOfWeek);
         Assert.Equal(TimeSpan.FromHours(8), rule.StartTime);
         Assert.Equal(TimeSpan.FromHours(12), rule.EndTime);
+
+        var auditLog = Assert.Single(_auditLogs.AuditLogs);
+        Assert.Equal("CourtAvailabilityRule.Update", auditLog.Action);
+        Assert.Equal("CourtAvailabilityRule", auditLog.EntityType);
+        Assert.Equal(court.Id.ToString(), auditLog.EntityId);
+        Assert.Equal(complexId, auditLog.SportsComplexId);
+        Assert.Equal(userId, auditLog.UserId);
     }
 
     [Fact]
     public async Task Handle_WithUnknownCourt_ThrowsNotFound()
     {
-        var handler = new UpdateCourtAvailabilityRulesHandler(
-            new FakeCourtRepository(null), new FakeCourtAvailabilityRuleRepository(), new FakeUnitOfWork());
+        var handler = CreateHandler(new FakeCourtRepository(null));
 
         await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(
             new UpdateCourtAvailabilityRulesCommand(Guid.NewGuid(), Guid.NewGuid(),
@@ -47,8 +62,7 @@ public sealed class UpdateCourtAvailabilityRulesHandlerTests
     public async Task Handle_WithDifferentComplex_ThrowsNotFound()
     {
         var court = Court.Create(Guid.NewGuid(), "Court", "Description", "Synthetic", false);
-        var handler = new UpdateCourtAvailabilityRulesHandler(
-            new FakeCourtRepository(court), new FakeCourtAvailabilityRuleRepository(), new FakeUnitOfWork());
+        var handler = CreateHandler(new FakeCourtRepository(court));
 
         await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(
             new UpdateCourtAvailabilityRulesCommand(Guid.NewGuid(), court.Id,

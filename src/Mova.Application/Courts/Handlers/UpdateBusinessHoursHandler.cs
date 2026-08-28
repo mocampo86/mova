@@ -1,3 +1,4 @@
+using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Courts.Commands;
 using Mova.Contracts.Courts;
@@ -7,6 +8,8 @@ namespace Mova.Application.Courts.Handlers;
 
 public sealed class UpdateBusinessHoursHandler(
     IBusinessHoursRepository businessHours,
+    IAuditLogRepository auditLogs,
+    ICurrentUserContext currentUser,
     IUnitOfWork unitOfWork) : IUpdateBusinessHoursHandler
 {
     public async Task<IReadOnlyCollection<BusinessHoursInfo>> HandleAsync(UpdateBusinessHoursCommand command, CancellationToken cancellationToken = default)
@@ -22,7 +25,17 @@ public sealed class UpdateBusinessHoursHandler(
             result.Add(hours);
         }
 
+        var auditLog = AuditLog.Create(
+            currentUser.UserId,
+            command.SportsComplexId,
+            "BusinessHours.Update",
+            "BusinessHours",
+            command.SportsComplexId.ToString(),
+            new { count = result.Count, days = result.Select(x => x.DayOfWeek.ToString()).ToArray() });
+
+        await auditLogs.AddAsync(auditLog, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
         return result.Select(BusinessHoursMapper.ToInfo).ToArray();
     }
 }

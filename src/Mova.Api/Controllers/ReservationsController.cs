@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using FluentValidation;
 using Mova.Api.Authorization;
 using Mova.Application.Reservations.Commands;
@@ -73,6 +74,7 @@ public sealed class ReservationsController(
 
     [Authorize(Policy = AuthorizationPolicies.ComplexAdmin)]
     [HttpPost]
+    [EnableRateLimiting("reservation")]
     public async Task<ActionResult<ReservationInfo>> Create(Guid complexId, CreateReservationRequest request, CancellationToken cancellationToken)
     {
         var createdByUserId = GetCurrentUserId();
@@ -141,6 +143,7 @@ public sealed class ReservationsController(
 
     [HttpPost("me")]
     [Authorize(Policy = AuthorizationPolicies.User)]
+    [EnableRateLimiting("reservation")]
     public async Task<ActionResult<ReservationInfo>> CreateMyReservation(Guid complexId, CreateMyReservationRequest request, CancellationToken cancellationToken)
     {
         var userId = GetCurrentUserId();

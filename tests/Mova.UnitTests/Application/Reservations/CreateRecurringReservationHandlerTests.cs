@@ -3,6 +3,7 @@ using Mova.Application.Reservations.Commands;
 using Mova.Application.Reservations.Handlers;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 using Mova.UnitTests.Application.Complexes;
 using Xunit;
@@ -18,6 +19,8 @@ public sealed class CreateRecurringReservationHandlerTests
     private readonly FakeRecurringReservationRepository _recurringReservationRepository = new();
     private readonly FakeReservationRepository _reservationRepository = new();
     private readonly FakeCourtBlockRepository _courtBlockRepository = new();
+    private readonly FakeAuditLogRepository _auditLogs = new();
+    private readonly FakeCurrentUserContext _currentUser = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private CreateRecurringReservationHandler CreateHandler() =>
@@ -29,6 +32,8 @@ public sealed class CreateRecurringReservationHandlerTests
             _recurringReservationRepository,
             _reservationRepository,
             _courtBlockRepository,
+            _auditLogs,
+            _currentUser,
             _unitOfWork);
 
     [Fact]
@@ -137,10 +142,12 @@ public sealed class CreateRecurringReservationHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_AsAdministrator_WithUserRecurringReservationsDisabled_CreatesConfirmedOccurrences()
+    public async Task HandleAsync_AsAdministrator_WithUserRecurringReservationsDisabled_CreatesConfirmedOccurrencesAndAuditLog()
     {
         var (complex, court, user) = await CreateScenarioAsync();
         complex.UpdateRecurringReservationSettings(false);
+        var adminUserId = Guid.NewGuid();
+        _currentUser.UserId = adminUserId;
         var handler = CreateHandler();
 
         var result = await handler.HandleAsync(new CreateRecurringReservationCommand(
@@ -157,6 +164,13 @@ public sealed class CreateRecurringReservationHandlerTests
 
         Assert.Equal("Active", result.Status);
         Assert.Equal(4, result.Occurrences.Count);
+
+        var auditLog = Assert.Single(_auditLogs.AuditLogs);
+        Assert.Equal("RecurringReservation.Create", auditLog.Action);
+        Assert.Equal("RecurringReservation", auditLog.EntityType);
+        Assert.Equal(result.Id.ToString(), auditLog.EntityId);
+        Assert.Equal(complex.Id, auditLog.SportsComplexId);
+        Assert.Equal(adminUserId, auditLog.UserId);
     }
 
     [Fact]

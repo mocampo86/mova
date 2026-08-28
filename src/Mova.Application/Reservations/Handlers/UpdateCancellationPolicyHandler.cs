@@ -1,3 +1,4 @@
+using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Reservations.Commands;
@@ -9,6 +10,8 @@ namespace Mova.Application.Reservations.Handlers;
 public sealed class UpdateCancellationPolicyHandler(
     ISportsComplexRepository sportsComplexes,
     ICancellationPolicyRepository repository,
+    IAuditLogRepository auditLogs,
+    ICurrentUserContext currentUser,
     IUnitOfWork unitOfWork) : IUpdateCancellationPolicyHandler
 {
     public async Task<CancellationPolicyInfo> HandleAsync(UpdateCancellationPolicyCommand command, CancellationToken cancellationToken = default)
@@ -32,6 +35,15 @@ public sealed class UpdateCancellationPolicyHandler(
             existing.Update(command.MinimumHours, command.AllowUserCancellation);
         }
 
+        var auditLog = AuditLog.Create(
+            currentUser.UserId,
+            command.SportsComplexId,
+            "CancellationPolicy.Update",
+            "CancellationPolicy",
+            existing.Id.ToString(),
+            new { minimumHours = existing.MinimumHours, allowUserCancellation = existing.AllowUserCancellation });
+
+        await auditLogs.AddAsync(auditLog, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new CancellationPolicyInfo

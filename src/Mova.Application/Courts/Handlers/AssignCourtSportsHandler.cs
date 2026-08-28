@@ -1,13 +1,17 @@
+using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Courts.Commands;
 using Mova.Contracts.Courts;
+using Mova.Domain.Entities;
 
 namespace Mova.Application.Courts.Handlers;
 
 public sealed class AssignCourtSportsHandler(
     ICourtRepository courts,
     ISportRepository sports,
+    IAuditLogRepository auditLogs,
+    ICurrentUserContext currentUser,
     IUnitOfWork unitOfWork) : IAssignCourtSportsHandler
 {
     public async Task<CourtInfo> HandleAsync(AssignCourtSportsCommand command, CancellationToken cancellationToken = default)
@@ -24,7 +28,18 @@ public sealed class AssignCourtSportsHandler(
             throw new NotFoundException("One or more sports were not found.");
 
         court.AssignSports(requestedIds);
+
+        var auditLog = AuditLog.Create(
+            currentUser.UserId,
+            command.SportsComplexId,
+            "Court.AssignSports",
+            "Court",
+            court.Id.ToString(),
+            new { sportIds = requestedIds });
+
+        await auditLogs.AddAsync(auditLog, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
         return CourtMapper.ToInfo(court);
     }
 }

@@ -1,4 +1,5 @@
 using System.Data;
+using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Reservations.Commands;
@@ -18,6 +19,8 @@ public sealed class CreateRecurringReservationHandler(
     IRecurringReservationRepository recurringReservations,
     IReservationRepository reservations,
     ICourtBlockRepository courtBlocks,
+    IAuditLogRepository auditLogs,
+    ICurrentUserContext currentUser,
     IUnitOfWork unitOfWork) : ICreateRecurringReservationHandler
 {
     public async Task<RecurringReservationInfo> HandleAsync(CreateRecurringReservationCommand command, CancellationToken cancellationToken = default)
@@ -64,6 +67,20 @@ public sealed class CreateRecurringReservationHandler(
 
                 await recurringReservations.AddAsync(recurringReservation, token);
                 await reservations.AddRangeAsync(occurrences, token);
+
+                if (command.IsAdmin)
+                {
+                    var auditLog = AuditLog.Create(
+                        currentUser.UserId,
+                        recurringReservation.SportsComplexId,
+                        "RecurringReservation.Create",
+                        "RecurringReservation",
+                        recurringReservation.Id.ToString(),
+                        new { courtId = recurringReservation.CourtId, userId = recurringReservation.UserId, startDate = recurringReservation.StartDate, endDate = recurringReservation.EndDate, occurrenceCount = occurrences.Count });
+
+                    await auditLogs.AddAsync(auditLog, token);
+                }
+
                 await unitOfWork.SaveChangesAsync(token);
 
                 return RecurringReservationMapper.ToInfo(recurringReservation, occurrences);
