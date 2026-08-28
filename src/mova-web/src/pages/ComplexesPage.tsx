@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Alert, Button, Card, CardContent, Container, Grid, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Button, Card, CardContent, Container, Grid, Pagination, Stack, TextField, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useActiveComplexes } from '../features/complexes/complexApi';
 
@@ -8,7 +8,8 @@ export default function ComplexesPage() {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
-  const { data, isLoading, isError } = useActiveComplexes(submittedSearch);
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useActiveComplexes(submittedSearch, page);
 
   return (
     <Container component="main" maxWidth="lg" sx={{ py: 6 }}>
@@ -17,7 +18,7 @@ export default function ComplexesPage() {
           <Typography component="h1" variant="h3" sx={{ fontWeight: 800 }}>{t('complexes.title')}</Typography>
           <Typography color="text.secondary">{t('complexes.subtitle')}</Typography>
         </div>
-        <Stack component="form" direction={{ xs: 'column', sm: 'row' }} spacing={2} onSubmit={(event) => { event.preventDefault(); setSubmittedSearch(search); }}>
+        <Stack component="form" direction={{ xs: 'column', sm: 'row' }} spacing={2} onSubmit={(event) => { event.preventDefault(); setSubmittedSearch(search); setPage(1); }}>
           <TextField fullWidth label={t('complexes.searchPlaceholder')} value={search} onChange={(event) => setSearch(event.target.value)} inputProps={{ maxLength: 100 }} />
           <Button type="submit" variant="contained" sx={{ minWidth: 120 }}>{t('complexes.searchButton')}</Button>
         </Stack>
@@ -38,6 +39,11 @@ export default function ComplexesPage() {
             </Grid>
           ))}
         </Grid>
+        {!isLoading && !isError && data && data.totalPages > 1 && (
+          <Stack alignItems="center">
+            <Pagination count={data.totalPages} page={page} onChange={(_, value) => setPage(value)} color="primary" size="large" />
+          </Stack>
+        )}
       </Stack>
     </Container>
   );

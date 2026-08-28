@@ -9,16 +9,16 @@ export default function HomePage() {
 
   const steps = [
     {
-      title: t('home.benefits.searchTitle'),
-      description: t('home.benefits.searchDescription')
+      title: t('home.steps.searchTitle'),
+      description: t('home.steps.searchDescription')
     },
     {
-      title: t('home.benefits.selectTitle'),
-      description: t('home.benefits.selectDescription')
+      title: t('home.steps.selectTitle'),
+      description: t('home.steps.selectDescription')
     },
     {
-      title: t('home.benefits.bookTitle'),
-      description: t('home.benefits.bookDescription')
+      title: t('home.steps.bookTitle'),
+      description: t('home.steps.bookDescription')
     }
   ];
 
@@ -61,13 +61,13 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      <Container id="how-it-works" component="section" aria-labelledby="benefits-title" maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>
+      <Container id="how-it-works" component="section" aria-labelledby="steps-title" maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>
         <Stack spacing={2} alignItems="center" textAlign="center" sx={{ mb: 5 }}>
-          <Typography id="benefits-title" component="h2" variant="h4" sx={{ fontWeight: 700 }}>
-            {t('home.benefits.title')}
+          <Typography id="steps-title" component="h2" variant="h4" sx={{ fontWeight: 700 }}>
+            {t('home.steps.title')}
           </Typography>
           <Typography color="text.secondary" sx={{ maxWidth: 620 }}>
-            {t('home.benefits.subtitle')}
+            {t('home.steps.subtitle')}
           </Typography>
         </Stack>
         <Grid container spacing={3}>
@@ -86,7 +86,7 @@ export default function HomePage() {
         </Grid>
         <Stack alignItems="center" sx={{ mt: 4 }}>
           <Button component={RouterLink} to="/complexes" variant="contained" size="large">
-            {t('home.benefits.action')}
+            {t('home.steps.action')}
           </Button>
         </Stack>
       </Container>
