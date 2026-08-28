@@ -6,7 +6,7 @@ test.describe('US-052 Access login and registration from the landing page', () =
   test.setTimeout(60000);
 
   test('landing page exposes login and registration links and reaches the login page', async ({ page }) => {
-    await page.route(`${API_BASE_URL}/api/v1/complexes?**`, (route) => {
+    await page.route(new RegExp(`${API_BASE_URL}/api/v1/complexes(\\?.*)?$`), (route) => {
       if (route.request().method() !== 'GET') {
         route.continue();
         return;

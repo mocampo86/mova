@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { useActiveComplexes } from '../features/complexes/complexApi';
 import HomePage from './HomePage';
@@ -9,7 +9,7 @@ vi.mock('../features/complexes/complexApi');
 const mockUseActiveComplexes = vi.mocked(useActiveComplexes);
 
 describe('HomePage', () => {
-  it('presents the platform value proposition, audiences, and visitor calls to action', () => {
+  it('presents the platform value proposition, audiences, and visitor calls to action', async () => {
     mockUseActiveComplexes.mockReturnValue({ data: { items: [], page: 1, pageSize: 12, totalItems: 0, totalPages: 0 }, isLoading: false, isError: false } as unknown as ReturnType<typeof useActiveComplexes>);
 
     renderWithAuth(<HomePage />);
@@ -24,7 +24,10 @@ describe('HomePage', () => {
     expect(screen.getAllByRole('link', { name: 'Find a court' })[0].getAttribute('href')).toBe('/complexes');
     expect(screen.getByRole('heading', { name: 'For players' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'For complex owners' })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'Featured complexes' })).toBeTruthy();
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Featured complexes' })).toBeTruthy();
+    });
   });
 
   it('exposes login and registration entry points for visitors', () => {
@@ -39,12 +42,12 @@ describe('HomePage', () => {
     expect(screen.getByRole('link', { name: 'Register your complex' }).getAttribute('href')).toBe('/login?intent=complex');
   });
 
-  it('displays active public complexes as featured links', () => {
+  it('displays active public complexes as featured links', async () => {
     mockUseActiveComplexes.mockReturnValue({
       data: {
         items: [{ id: 'complex-1', name: 'Central Padel', description: 'Padel for everyone', address: '123 Main St', city: 'Montevideo', phoneNumber: '', email: '', allowUserRecurringReservations: true, timeZoneId: 'America/Montevideo' }],
         page: 1,
-        pageSize: 12,
+        pageSize: 3,
         totalItems: 1,
         totalPages: 1
       },
@@ -54,7 +57,9 @@ describe('HomePage', () => {
 
     renderWithAuth(<HomePage />);
 
-    expect(screen.getByRole('heading', { name: 'Central Padel' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'View complex' }).getAttribute('href')).toBe('/complexes/complex-1');
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Central Padel' })).toBeTruthy();
+      expect(screen.getByRole('link', { name: 'View complex' }).getAttribute('href')).toBe('/complexes/complex-1');
+    });
   });
 });

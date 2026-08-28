@@ -16,12 +16,12 @@ import type {
   UpdateRecurringReservationSettingsRequest
 } from './complexTypes';
 
-export function useActiveComplexes(search: string, page = 1) {
-  const params = new URLSearchParams({ page: String(page), pageSize: '12' });
+export function useActiveComplexes(search: string, page = 1, pageSize = 12) {
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
   if (search.trim()) params.set('search', search.trim());
 
   return useQuery({
-    queryKey: ['active-complexes', search, page],
+    queryKey: ['active-complexes', search, page, pageSize],
     queryFn: () => apiClient<PagedResult<SportsComplex>>(`/api/v1/complexes?${params}`)
   });
 }
