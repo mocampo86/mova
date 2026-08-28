@@ -145,6 +145,22 @@
       "playTitle": "Jogar",
       "playDescription": "Escolha um horário conveniente e mantenha suas reservas organizadas em um só lugar."
     },
+    "audiences": {
+      "title": "Feito para todos os lados do jogo",
+      "playersTitle": "Para jogadores",
+      "playersDescription": "Encontre complexos ativos, explore suas quadras e reserve um horário que se encaixe na sua agenda.",
+      "playersAction": "Encontrar uma quadra",
+      "ownersTitle": "Para proprietários de complexos",
+      "ownersDescription": "Coloque seu complexo online e gerencie quadras, disponibilidade, reservas e clientes em um só lugar.",
+      "ownersAction": "Gerenciar seu complexo"
+    },
+    "featured": {
+      "title": "Complexos em destaque",
+      "subtitle": "Explore complexos esportivos ativos prontos para seu próximo jogo.",
+      "action": "Ver complexo",
+      "empty": "Ainda não há complexos em destaque disponíveis.",
+      "error": "Não foi possível carregar os complexos em destaque. Tente novamente mais tarde."
+    },
     "cta": {
       "title": "Pronto para começar a se mover?",
       "subtitle": "Junte-se ao Mova como jogador ou coloque seu complexo online.",
