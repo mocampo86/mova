@@ -2,7 +2,7 @@
 
 ## Status
 
-Ready
+Done
 
 ## Objective
 
@@ -28,14 +28,14 @@ Enable visitors and users to view the application in their preferred language (S
 
 ## Acceptance criteria
 
-- [ ] A language selector is visible on the main/public screen.
-- [ ] Selecting Spanish, English, or Portuguese updates the language of all pages immediately.
-- [ ] The selector includes a visual indicator (flag or language icon).
-- [ ] The selected language persists across browser sessions.
-- [ ] The application detects the browser language on first visit when no preference is stored.
-- [ ] Translation files are structured to make adding new languages straightforward.
-- [ ] All existing public and authenticated pages use translated strings.
-- [ ] No hard-coded UI text remains on pages covered by this epic.
+- [x] A language selector is visible on the main/public screen.
+- [x] Selecting Spanish, English, or Portuguese updates the language of all pages immediately.
+- [x] The selector includes a visual indicator (flag or language icon).
+- [x] The selected language persists across browser sessions.
+- [x] The application detects the browser language on first visit when no preference is stored.
+- [x] Translation files are structured to make adding new languages straightforward.
+- [x] All existing public and authenticated pages use translated strings.
+- [x] No hard-coded UI text remains on pages covered by this epic.
 - [x] The language selector is available in the admin panel and all admin pages use translated strings.
 
 ## Dependencies

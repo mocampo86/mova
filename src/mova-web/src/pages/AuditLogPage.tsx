@@ -23,6 +23,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useAuditLogs } from '../features/audit/auditApi';
 import type { AuditLogFilters } from '../features/audit/auditTypes';
 
@@ -90,7 +91,7 @@ export default function AuditLogPage() {
           {t('superAdmin.auditLog.title')}
         </Typography>
 
-        {auditLogs.isError && <Alert severity="error">{auditLogs.error.message}</Alert>}
+        {auditLogs.isError && <Alert severity="error"><ApiErrorMessage error={auditLogs.error} /></Alert>}
 
         <Paper variant="outlined" sx={{ p: 2 }}>
           <Grid container spacing={2}>

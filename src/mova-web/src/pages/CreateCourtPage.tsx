@@ -18,6 +18,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useCreateCourt } from '../features/courts/courtApi';
 import { useSports } from '../features/complexes/complexApi';
 
@@ -87,7 +88,7 @@ export default function CreateCourtPage() {
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {error.message}
+          <ApiErrorMessage error={error} />
         </Alert>
       )}
 

@@ -5,6 +5,7 @@ import CreateCourtPage from './CreateCourtPage';
 import { useCreateCourt } from '../features/courts/courtApi';
 import { useSports } from '../features/complexes/complexApi';
 import { renderWithAuth } from '../test-utils';
+import { ApiError } from '../shared/utils/apiError';
 
 vi.mock('../features/courts/courtApi');
 vi.mock('../features/complexes/complexApi');
@@ -195,6 +196,19 @@ describe('CreateCourtPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Court creation failed')).toBeTruthy();
+    });
+  });
+
+  it('displays a translated message when the API returns a known error code', async () => {
+    setupMocks({
+      error: new ApiError(409, 'Court conflict', 'RESERVATION_CONFLICT')
+    });
+    renderPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('The requested action conflicts with existing data.')
+      ).toBeTruthy();
     });
   });
 

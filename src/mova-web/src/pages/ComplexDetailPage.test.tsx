@@ -8,9 +8,12 @@ import {
   useCourtAvailability,
   useSports
 } from '../features/complexes/complexApi';
+import { useCreateMyReservation } from '../features/reservations/reservationApi';
 import { renderWithAuth } from '../test-utils';
+import { ApiError } from '../shared/utils/apiError';
 
 vi.mock('../features/complexes/complexApi');
+vi.mock('../features/reservations/reservationApi');
 
 const mockComplex = {
   id: 'complex-id',
@@ -97,6 +100,13 @@ describe('ComplexDetailPage', () => {
       isLoading: false,
       isError: false
     } as unknown as ReturnType<typeof useCourtAvailability>);
+
+    vi.mocked(useCreateMyReservation).mockReturnValue({
+      isPending: false,
+      isError: false,
+      error: null,
+      mutateAsync: vi.fn()
+    } as unknown as ReturnType<typeof useCreateMyReservation>);
   });
 
   it('renders complex details and courts', async () => {
@@ -192,6 +202,31 @@ describe('ComplexDetailPage', () => {
     });
 
     expect(screen.queryByText('Padel Court')).toBeNull();
+  });
+
+  it('renders a translated error in the booking dialog when the reservation fails', async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(useCreateMyReservation).mockReturnValue({
+      isPending: false,
+      isError: true,
+      error: new ApiError(409, 'Slot is taken', 'RESERVATION_CONFLICT'),
+      mutateAsync: vi.fn()
+    } as unknown as ReturnType<typeof useCreateMyReservation>);
+
+    renderWithAuth(<ComplexDetailPage />, { initialRoute: '/complexes/complex-id' });
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/^\d{1,2}:00/).length).toBeGreaterThan(0);
+    });
+
+    await user.click(screen.getAllByText(/^\d{1,2}:00/)[0]);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('The requested action conflicts with existing data.')
+      ).toBeTruthy();
+    });
   });
 
 });

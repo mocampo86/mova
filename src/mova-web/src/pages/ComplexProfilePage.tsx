@@ -15,6 +15,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useAdminComplex, useUpdateComplex } from '../features/complexes/complexApi';
 import TimezoneSelector from '../components/TimezoneSelector';
 import { DEFAULT_TIME_ZONE_ID } from '../utils/timezones';
@@ -152,7 +153,7 @@ export default function ComplexProfilePage() {
       )}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {error.message}
+          <ApiErrorMessage error={error} />
         </Alert>
       )}
 

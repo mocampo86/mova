@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { z } from 'zod';
 import {
   Alert,
@@ -162,7 +163,7 @@ export default function BusinessHoursPage() {
 
       {updateBusinessHours.error && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {updateBusinessHours.error.message}
+          <ApiErrorMessage error={updateBusinessHours.error} />
         </Alert>
       )}
 

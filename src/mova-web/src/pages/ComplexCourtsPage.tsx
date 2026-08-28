@@ -23,6 +23,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useSports } from '../features/complexes/complexApi';
 import { useCourts, useUpdateCourtStatus } from '../features/courts/courtApi';
 import type { CourtListFilters, CourtStatus } from '../features/courts/courtTypes';
@@ -155,7 +156,7 @@ export default function ComplexCourtsPage() {
         )}
 
         {updateStatus.error && (
-          <Alert severity="error">{updateStatus.error.message}</Alert>
+          <Alert severity="error"><ApiErrorMessage error={updateStatus.error} /></Alert>
         )}
 
         {isLoading ? (

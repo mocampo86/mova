@@ -23,6 +23,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useCancelMyReservation, useMyReservations } from '../features/reservations/reservationApi';
 import { getReservationStatusKey } from '../features/reservations/reservationStatus';
 import type { Reservation, UserReservationsFilters } from '../features/reservations/reservationTypes';
@@ -163,7 +164,7 @@ export default function UserReservationsPage() {
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             {cancelMyReservation.isError && (
-              <Alert severity="error">{cancelMyReservation.error.message}</Alert>
+              <Alert severity="error"><ApiErrorMessage error={cancelMyReservation.error} /></Alert>
             )}
             <Typography variant="body1">{t('admin.reservations.cancelConfirm')}</Typography>
             <TextField

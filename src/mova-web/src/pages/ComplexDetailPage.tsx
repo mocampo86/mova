@@ -21,6 +21,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ApiErrorMessage from '../components/ApiErrorMessage';
 import Seo from '../components/Seo';
 import {
   useActiveComplex,
@@ -84,7 +85,7 @@ function BookingDialog({
           {!isAuthenticated && (
             <Alert severity="info">{t('complexDetail.booking.loginPrompt')}</Alert>
           )}
-          {error && <Alert severity="error">{error.message}</Alert>}
+          {error && <Alert severity="error"><ApiErrorMessage error={error} /></Alert>}
           <Typography>
             {t('complexDetail.booking.message', {
               court: courtName,

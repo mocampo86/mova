@@ -118,7 +118,16 @@
     },
     "error": {
       "title": "Something went wrong",
-      "message": "An unexpected error occurred. Please try again later."
+      "message": "An unexpected error occurred. Please try again later.",
+      "validation": "Some fields are invalid. Please check and try again.",
+      "notFound": "The requested resource was not found.",
+      "unauthorized": "You need to sign in to continue.",
+      "forbidden": "You don't have permission to do this.",
+      "conflict": "The requested action conflicts with existing data.",
+      "concurrency": "The data has changed. Please refresh and try again.",
+      "rateLimit": "Too many requests. Please wait and try again.",
+      "blockedUser": "You are blocked in this complex.",
+      "recurringDisabled": "Recurring reservations are not enabled for this complex."
     }
   },
   "language": {

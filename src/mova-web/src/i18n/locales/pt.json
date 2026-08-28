@@ -118,7 +118,16 @@
     },
     "error": {
       "title": "Algo deu errado",
-      "message": "Ocorreu um erro inesperado. Tente novamente mais tarde."
+      "message": "Ocorreu um erro inesperado. Tente novamente mais tarde.",
+      "validation": "Alguns campos são inválidos. Verifique e tente novamente.",
+      "notFound": "O recurso solicitado não foi encontrado.",
+      "unauthorized": "Você precisa fazer login para continuar.",
+      "forbidden": "Você não tem permissão para fazer isso.",
+      "conflict": "A ação solicitada entra em conflito com os dados existentes.",
+      "concurrency": "Os dados mudaram. Atualize a página e tente novamente.",
+      "rateLimit": "Muitas solicitações. Aguarde um momento e tente novamente.",
+      "blockedUser": "Você está bloqueado neste complexo.",
+      "recurringDisabled": "As reservas recorrentes não estão habilitadas neste complexo."
     }
   },
   "language": {

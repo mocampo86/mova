@@ -1,5 +1,6 @@
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { Box, CircularProgress, Typography } from '@mui/material';
+import ApiErrorMessage from '../../components/ApiErrorMessage';
 import { useGoogleLogin } from './useGoogleLogin';
 
 interface GoogleLoginButtonProps {
@@ -24,7 +25,7 @@ export function GoogleLoginButton({ intent = 'user' }: GoogleLoginButtonProps) {
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
       <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
       {isPending && <CircularProgress size={24} />}
-      {error && <Typography color="error">{error.message}</Typography>}
+      {error && <Typography color="error"><ApiErrorMessage error={error} /></Typography>}
     </Box>
   );
 }
