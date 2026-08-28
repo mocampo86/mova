@@ -10,6 +10,18 @@ import type {
   UserReservationListResult
 } from './userAdminTypes';
 
+function generateIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 export function useSearchUsers(complexId: string, filters: UserListFilters, enabled = true) {
   const { accessToken } = useAuth();
   const params = new URLSearchParams({
@@ -91,7 +103,8 @@ export async function blockUser(
     `/api/v1/complexes/${complexId}/blocked-users`,
     {
       method: 'POST',
-      body: JSON.stringify(request)
+      body: JSON.stringify(request),
+      headers: { 'Idempotency-Key': generateIdempotencyKey() }
     },
     accessToken
   );

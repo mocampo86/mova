@@ -28,6 +28,16 @@ public sealed class FakeBlockedUserRepository : IBlockedUserRepository
             b.SportsComplexId == sportsComplexId && b.UserId == userId && IsActive(b)));
     }
 
+    public Task<BlockedUser?> GetExpiredActiveByComplexAndUserAsync(Guid sportsComplexId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_blockedUsers.FirstOrDefault(b =>
+            b.SportsComplexId == sportsComplexId
+            && b.UserId == userId
+            && b.Status == BlockedUserStatus.Active
+            && b.BlockedUntil.HasValue
+            && b.BlockedUntil.Value <= DateTime.UtcNow));
+    }
+
     public Task<IReadOnlyList<BlockedUser>> GetActiveBlocksByComplexAndUserIdsAsync(
         Guid sportsComplexId,
         IReadOnlyCollection<Guid> userIds,

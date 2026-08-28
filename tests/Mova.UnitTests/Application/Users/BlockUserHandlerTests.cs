@@ -58,6 +58,26 @@ public sealed class BlockUserHandlerTests
     }
 
     [Fact]
+    public async Task HandleAsync_WithExpiredBlock_LiftsItAndCreatesNewBlock()
+    {
+        var complex = SportsComplex.Create("Complex", "Description", "Address", "Montevideo", null, null, "+598 99 123 456", "complex@example.com");
+        await _sportsComplexRepository.AddAsync(complex);
+
+        var user = User.CreateFromGoogle(Guid.NewGuid(), $"sub-{Guid.NewGuid()}", $"user-{Guid.NewGuid()}@example.com", "Test User");
+        await _userRepository.AddAsync(user);
+
+        var adminId = Guid.NewGuid();
+        var expiredBlock = BlockedUser.Create(complex.Id, user.Id, adminId, "Expired", DateTime.UtcNow.AddDays(-1));
+        await _blockedUserRepository.AddAsync(expiredBlock);
+
+        var result = await CreateHandler().HandleAsync(new BlockUserCommand(complex.Id, user.Id, adminId, "New block"));
+
+        Assert.Equal("Lifted", expiredBlock.Status.ToString());
+        Assert.Equal("Active", result.Status);
+        Assert.Equal(2, _unitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
     public async Task HandleAsync_WithNonExistentComplex_ThrowsNotFoundException()
     {
         var user = User.CreateFromGoogle(Guid.NewGuid(), $"sub-{Guid.NewGuid()}", $"user-{Guid.NewGuid()}@example.com", "Test User");

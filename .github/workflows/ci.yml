@@ -78,8 +78,7 @@ jobs:
       - name: Test
         env:
           Database__ConnectionString: "Host=localhost;Port=5432;Database=mova_test;Username=postgres;"
-        # Integration tests are temporarily skipped in CI while the failing tests are investigated.
-        run: dotnet test Mova.slnx --no-build --verbosity normal --filter "FullyQualifiedName!~Mova.IntegrationTests"
+        run: dotnet test Mova.slnx --no-build --verbosity normal
 
   frontend:
     name: Frontend build and test

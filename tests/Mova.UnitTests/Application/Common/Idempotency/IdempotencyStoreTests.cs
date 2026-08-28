@@ -1,15 +1,17 @@
 using Mova.Application.Common.Idempotency;
+using Mova.UnitTests.Application.Authentication;
 
 namespace Mova.UnitTests.Application.Common.Idempotency;
 
 public sealed class IdempotencyStoreTests
 {
     private readonly FakeIdempotencyRecordRepository _repository = new();
+    private readonly FakeUnitOfWork _unitOfWork = new();
     private readonly IdempotencyStore _store;
 
     public IdempotencyStoreTests()
     {
-        _store = new IdempotencyStore(_repository);
+        _store = new IdempotencyStore(_repository, _unitOfWork);
     }
 
     [Fact]
@@ -30,6 +32,7 @@ public sealed class IdempotencyStoreTests
         Assert.NotNull(result);
         Assert.Equal(201, result.StatusCode);
         Assert.Equal("{\"id\":\"abc\"}", result.ResponseBody);
+        Assert.Equal(1, _unitOfWork.SaveChangesCallCount);
     }
 
     [Fact]

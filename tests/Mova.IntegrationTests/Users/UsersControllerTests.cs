@@ -234,8 +234,9 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         var token = await LoginAsync(client, adminSuffix);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var blockResponse = await client.PostAsJsonAsync(
-            $"/api/v1/complexes/{complexId}/blocked-users",
+        var blockResponse = await PostBlockAsync(
+            client,
+            complexId,
             new BlockUserRequest { UserId = customerId, Reason = "No-show" });
 
         Assert.Equal(HttpStatusCode.Created, blockResponse.StatusCode);
@@ -256,6 +257,55 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
     }
 
     [Fact]
+    public async Task BlockedUsers_WithRepeatedIdempotencyKey_ReplaysCreatedBlock()
+    {
+        var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var key = Guid.NewGuid().ToString();
+        var request = new BlockUserRequest { UserId = customerId, Reason = "No-show" };
+        var firstResponse = await PostBlockAsync(client, complexId, request, key);
+        var secondResponse = await PostBlockAsync(client, complexId, request, key);
+
+        Assert.Equal(HttpStatusCode.Created, firstResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, secondResponse.StatusCode);
+        var firstBlock = await firstResponse.Content.ReadFromJsonAsync<BlockedUserInfo>();
+        var secondBlock = await secondResponse.Content.ReadFromJsonAsync<BlockedUserInfo>();
+        Assert.NotNull(firstBlock);
+        Assert.NotNull(secondBlock);
+        Assert.Equal(firstBlock!.Id, secondBlock!.Id);
+    }
+
+    [Fact]
+    public async Task BlockedUsers_AfterExpiration_CanBlockUserAgain()
+    {
+        var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MovaDbContext>();
+            await context.BlockedUsers.AddAsync(BlockedUser.Create(
+                complexId,
+                customerId,
+                Guid.NewGuid(),
+                "Expired",
+                DateTime.UtcNow.AddDays(-1)));
+            await context.SaveChangesAsync();
+        }
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, adminSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await PostBlockAsync(client, complexId, new BlockUserRequest { UserId = customerId, Reason = "New block" });
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
     public async Task BlockedUsers_RepeatedBlockAndUnblock_Cycles_Succeed()
     {
         var (adminSuffix, complexId, customerId, _) = await SeedScenarioAsync();
@@ -266,8 +316,9 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
 
         for (var i = 0; i < 3; i++)
         {
-            var blockResponse = await client.PostAsJsonAsync(
-                $"/api/v1/complexes/{complexId}/blocked-users",
+            var blockResponse = await PostBlockAsync(
+                client,
+                complexId,
                 new BlockUserRequest { UserId = customerId, Reason = $"Violation {i + 1}" });
 
             Assert.Equal(HttpStatusCode.Created, blockResponse.StatusCode);
@@ -308,8 +359,9 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
     {
         var (customerClient, adminClient, complexId, customerId) = await SeedBlockScenarioAsync();
 
-        var blockResponse = await adminClient.PostAsJsonAsync(
-            $"/api/v1/complexes/{complexId}/blocked-users",
+        var blockResponse = await PostBlockAsync(
+            adminClient,
+            complexId,
             new BlockUserRequest { UserId = customerId, Reason = "No-show" });
 
         blockResponse.EnsureSuccessStatusCode();
@@ -362,6 +414,20 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
         var response = await customerClient.GetAsync($"/api/v1/users/me/blocks/{complexId}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    private static async Task<HttpResponseMessage> PostBlockAsync(
+        HttpClient client,
+        Guid complexId,
+        BlockUserRequest request,
+        string? idempotencyKey = null)
+    {
+        using var message = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/complexes/{complexId}/blocked-users")
+        {
+            Content = JsonContent.Create(request)
+        };
+        message.Headers.Add("Idempotency-Key", idempotencyKey ?? Guid.NewGuid().ToString());
+        return await client.SendAsync(message);
     }
 
     private async Task<(string AdminSuffix, Guid ComplexId, Guid CustomerId, Guid CourtId)> SeedScenarioAsync()

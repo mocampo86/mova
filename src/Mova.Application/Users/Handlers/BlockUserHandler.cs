@@ -41,24 +41,43 @@ public sealed class BlockUserHandler : IBlockUserHandler
             throw new NotFoundException("User not found.");
         }
 
-        var existingBlock = await _blockedUsers.GetActiveByComplexAndUserAsync(command.SportsComplexId, command.UserId, cancellationToken);
+        return await _unitOfWork.ExecuteInTransactionAsync(
+            async token =>
+            {
+                var expiredBlock = await _blockedUsers.GetExpiredActiveByComplexAndUserAsync(
+                    command.SportsComplexId,
+                    command.UserId,
+                    token);
 
-        if (existingBlock is not null)
-        {
-            throw new ConflictException("User is already blocked in this complex.");
-        }
+                if (expiredBlock is not null)
+                {
+                    expiredBlock.Lift();
+                    await _unitOfWork.SaveChangesAsync(token);
+                }
 
-        var block = BlockedUser.Create(
-            command.SportsComplexId,
-            command.UserId,
-            command.BlockedByUserId,
-            command.Reason,
-            command.BlockedUntil);
+                var existingBlock = await _blockedUsers.GetActiveByComplexAndUserAsync(
+                    command.SportsComplexId,
+                    command.UserId,
+                    token);
 
-        await _blockedUsers.AddAsync(block, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+                if (existingBlock is not null)
+                {
+                    throw new ConflictException("User is already blocked in this complex.");
+                }
 
-        return MapToInfo(block);
+                var block = BlockedUser.Create(
+                    command.SportsComplexId,
+                    command.UserId,
+                    command.BlockedByUserId,
+                    command.Reason,
+                    command.BlockedUntil);
+
+                await _blockedUsers.AddAsync(block, token);
+                await _unitOfWork.SaveChangesAsync(token);
+
+                return MapToInfo(block);
+            },
+            cancellationToken: cancellationToken);
     }
 
     private static BlockedUserInfo MapToInfo(BlockedUser block)

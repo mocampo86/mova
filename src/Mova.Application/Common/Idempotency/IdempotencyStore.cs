@@ -2,7 +2,7 @@ using Mova.Application.Abstractions.Persistence;
 
 namespace Mova.Application.Common.Idempotency;
 
-public sealed class IdempotencyStore(IIdempotencyRecordRepository repository) : IIdempotencyStore
+public sealed class IdempotencyStore(IIdempotencyRecordRepository repository, IUnitOfWork unitOfWork) : IIdempotencyStore
 {
     private static readonly TimeSpan DefaultTtl = TimeSpan.FromHours(24);
 
@@ -43,5 +43,6 @@ public sealed class IdempotencyStore(IIdempotencyRecordRepository repository) : 
             DefaultTtl);
 
         await repository.AddAsync(record, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

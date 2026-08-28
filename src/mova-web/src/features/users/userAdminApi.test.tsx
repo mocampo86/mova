@@ -223,6 +223,11 @@ describe('useBlockUser', () => {
         body: JSON.stringify(request)
       })
     );
+    const requestOptions = fetchSpy.mock.calls[0][1];
+    expect(requestOptions?.headers).toBeInstanceOf(Headers);
+    expect((requestOptions?.headers as Headers).get('Idempotency-Key')).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    );
   });
 });
 
