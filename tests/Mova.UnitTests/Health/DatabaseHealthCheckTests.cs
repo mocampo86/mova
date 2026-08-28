@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Mova.Api.HealthChecks;
+using Mova.Tests.Common.Health;
 
 namespace Mova.UnitTests.Health;
 

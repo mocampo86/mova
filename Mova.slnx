@@ -9,6 +9,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Mova.ArchitectureTests/Mova.ArchitectureTests.csproj" />
     <Project Path="tests/Mova.IntegrationTests/Mova.IntegrationTests.csproj" />
+    <Project Path="tests/Mova.Tests.Common/Mova.Tests.Common.csproj" />
     <Project Path="tests/Mova.UnitTests/Mova.UnitTests.csproj" />
   </Folder>
 </Solution>
