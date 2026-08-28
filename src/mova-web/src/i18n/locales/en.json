@@ -171,7 +171,7 @@
   },
   "login": {
     "userTitle": "Welcome to Mova",
-    "complexTitle": "Administra tu complejo",
+    "complexTitle": "Manage your complex",
     "userButton": "User login",
     "adminButton": "Admin login",
     "userSubtitle": "Sign in with your Google account to continue.",

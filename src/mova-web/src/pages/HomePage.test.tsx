@@ -27,6 +27,18 @@ describe('HomePage', () => {
     expect(screen.getByRole('heading', { name: 'Featured complexes' })).toBeTruthy();
   });
 
+  it('exposes login and registration entry points for visitors', () => {
+    mockUseActiveComplexes.mockReturnValue({ data: { items: [], page: 1, pageSize: 12, totalItems: 0, totalPages: 0 }, isLoading: false, isError: false } as unknown as ReturnType<typeof useActiveComplexes>);
+
+    renderWithAuth(<HomePage />);
+
+    expect(screen.getByRole('link', { name: 'Play / Book a court' }).getAttribute('href')).toBe('/login?intent=user');
+    expect(screen.getAllByRole('link', { name: 'Manage your complex' }).length).toBe(2);
+    expect(screen.getAllByRole('link', { name: 'Manage your complex' })[0].getAttribute('href')).toBe('/login?intent=complex');
+    expect(screen.getByRole('link', { name: 'Sign in to play' }).getAttribute('href')).toBe('/login?intent=user');
+    expect(screen.getByRole('link', { name: 'Register your complex' }).getAttribute('href')).toBe('/login?intent=complex');
+  });
+
   it('displays active public complexes as featured links', () => {
     mockUseActiveComplexes.mockReturnValue({
       data: {
