@@ -1,3 +1,4 @@
+using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Courts.Commands;
@@ -12,10 +13,20 @@ public sealed class CreateCourtHandler : ICreateCourtHandler
     private readonly ICourtRepository _courts;
     private readonly ISportRepository _sports;
     private readonly ICourtAvailabilityRuleRepository _rules;
+    private readonly IAuditLogRepository _auditLogs;
+    private readonly ICurrentUserContext _currentUser;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateCourtHandler(ISportsComplexRepository complexes, ICourtRepository courts, ISportRepository sports, ICourtAvailabilityRuleRepository rules, IUnitOfWork unitOfWork)
-        => (_complexes, _courts, _sports, _rules, _unitOfWork) = (complexes, courts, sports, rules, unitOfWork);
+    public CreateCourtHandler(
+        ISportsComplexRepository complexes,
+        ICourtRepository courts,
+        ISportRepository sports,
+        ICourtAvailabilityRuleRepository rules,
+        IAuditLogRepository auditLogs,
+        ICurrentUserContext currentUser,
+        IUnitOfWork unitOfWork)
+        => (_complexes, _courts, _sports, _rules, _auditLogs, _currentUser, _unitOfWork) =
+            (complexes, courts, sports, rules, auditLogs, currentUser, unitOfWork);
 
     public async Task<CourtInfo> HandleAsync(CreateCourtCommand command, CancellationToken cancellationToken = default)
     {
@@ -31,6 +42,16 @@ public sealed class CreateCourtHandler : ICreateCourtHandler
         var court = Court.Create(command.SportsComplexId, command.Name, command.Description, command.SurfaceType, command.Indoor, sportIds);
         await _courts.AddAsync(court, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var auditLog = AuditLog.Create(
+            _currentUser.UserId,
+            command.SportsComplexId,
+            "Court.Create",
+            "Court",
+            court.Id.ToString(),
+            new { name = court.Name, sportsComplexId = court.SportsComplexId });
+
+        await _auditLogs.AddAsync(auditLog, cancellationToken);
 
         foreach (DayOfWeek day in Enum.GetValues<DayOfWeek>())
         {

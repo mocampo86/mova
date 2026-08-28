@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using Mova.Application.Audit.Handlers;
 using Mova.Application.Authentication.Handlers;
 using Mova.Application.Authentication.Validators;
 using Mova.Application.Complexes.Handlers;
@@ -66,6 +67,7 @@ public static class DependencyInjection
         services.AddScoped<IGetMyBlockStatusHandler, GetMyBlockStatusHandler>();
         services.AddScoped<IBlockUserHandler, BlockUserHandler>();
         services.AddScoped<IUnblockUserHandler, UnblockUserHandler>();
+        services.AddScoped<IGetAuditLogsHandler, GetAuditLogsHandler>();
         services.AddValidatorsFromAssemblyContaining<BlockUserCommandValidator>();
         services.AddValidatorsFromAssemblyContaining<GetUserDashboardQueryValidator>();
 

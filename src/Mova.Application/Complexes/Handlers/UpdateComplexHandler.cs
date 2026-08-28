@@ -1,3 +1,4 @@
+using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Complexes.Commands;
@@ -9,11 +10,19 @@ namespace Mova.Application.Complexes.Handlers;
 public sealed class UpdateComplexHandler : IUpdateComplexHandler
 {
     private readonly ISportsComplexRepository _sportsComplexRepository;
+    private readonly IAuditLogRepository _auditLogs;
+    private readonly ICurrentUserContext _currentUser;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateComplexHandler(ISportsComplexRepository sportsComplexRepository, IUnitOfWork unitOfWork)
+    public UpdateComplexHandler(
+        ISportsComplexRepository sportsComplexRepository,
+        IAuditLogRepository auditLogs,
+        ICurrentUserContext currentUser,
+        IUnitOfWork unitOfWork)
     {
         _sportsComplexRepository = sportsComplexRepository;
+        _auditLogs = auditLogs;
+        _currentUser = currentUser;
         _unitOfWork = unitOfWork;
     }
 
@@ -33,6 +42,15 @@ public sealed class UpdateComplexHandler : IUpdateComplexHandler
             command.Email,
             command.TimeZoneId);
 
+        var auditLog = AuditLog.Create(
+            _currentUser.UserId,
+            sportsComplex.Id,
+            "SportsComplex.Update",
+            "SportsComplex",
+            sportsComplex.Id.ToString(),
+            new { name = sportsComplex.Name, city = sportsComplex.City, timeZoneId = sportsComplex.TimeZoneId });
+
+        await _auditLogs.AddAsync(auditLog, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return SportsComplexInfoMapper.ToInfo(sportsComplex);

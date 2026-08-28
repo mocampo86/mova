@@ -4,6 +4,7 @@ using Mova.Application.Courts.Commands;
 using Mova.Application.Courts.Handlers;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 using Mova.UnitTests.Application.Complexes;
 using Xunit;
@@ -14,10 +15,12 @@ public sealed class UpdateCourtHandlerTests
 {
     private readonly FakeSportsComplexRepository _sportsComplexRepository = new();
     private readonly FakeCourtRepository _courtRepository = new();
+    private readonly FakeAuditLogRepository _auditLogs = new();
+    private readonly FakeCurrentUserContext _currentUser = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private UpdateCourtHandler CreateHandler(ISportRepository? sports = null) =>
-        new(_sportsComplexRepository, _courtRepository, sports ?? new FakeSportRepository([]), _unitOfWork);
+        new(_sportsComplexRepository, _courtRepository, sports ?? new FakeSportRepository([]), _auditLogs, _currentUser, _unitOfWork);
 
     private async Task<SportsComplex> CreateComplexAsync()
     {

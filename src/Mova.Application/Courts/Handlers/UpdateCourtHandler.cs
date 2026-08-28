@@ -1,3 +1,4 @@
+using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Courts.Commands;
@@ -10,6 +11,8 @@ public sealed class UpdateCourtHandler(
     ISportsComplexRepository complexes,
     ICourtRepository courts,
     ISportRepository sports,
+    IAuditLogRepository auditLogs,
+    ICurrentUserContext currentUser,
     IUnitOfWork unitOfWork) : IUpdateCourtHandler
 {
     public async Task<CourtInfo> HandleAsync(UpdateCourtCommand command, CancellationToken cancellationToken = default)
@@ -36,6 +39,15 @@ public sealed class UpdateCourtHandler(
 
         court.Update(command.Name, command.Description, command.SurfaceType, command.Indoor, sportIds);
 
+        var auditLog = AuditLog.Create(
+            currentUser.UserId,
+            command.SportsComplexId,
+            "Court.Update",
+            "Court",
+            court.Id.ToString(),
+            new { name = court.Name, sportsComplexId = court.SportsComplexId });
+
+        await auditLogs.AddAsync(auditLog, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return CourtMapper.ToInfo(court);

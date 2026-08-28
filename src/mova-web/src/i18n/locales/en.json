@@ -9,6 +9,7 @@
     "continue": "Continue",
     "submit": "Submit",
     "select": "Select",
+    "clear": "Clear",
     "create": "Create",
     "edit": "Edit",
     "close": "Close",
@@ -510,7 +511,26 @@
     "title": "Unauthorized"
   },
   "superAdmin": {
-    "title": "Super Admin Dashboard"
+    "title": "Super Admin Dashboard",
+    "viewAuditLog": "View audit log",
+    "auditLog": {
+      "title": "Audit log",
+      "actionFilter": "Action",
+      "entityTypeFilter": "Entity type",
+      "entityIdFilter": "Entity ID",
+      "complexIdFilter": "Complex ID",
+      "userIdFilter": "User ID",
+      "fromFilter": "From",
+      "toFilter": "To",
+      "createdAt": "Created at",
+      "action": "Action",
+      "entityType": "Entity type",
+      "entityId": "Entity ID",
+      "userId": "User ID",
+      "complexId": "Complex ID",
+      "metadata": "Metadata",
+      "empty": "No audit log entries match the selected filters."
+    }
   },
   "nav": {
     "brand": "Mova",

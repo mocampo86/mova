@@ -1,12 +1,18 @@
+using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Reservations.Commands;
 using Mova.Contracts.Reservations;
+using Mova.Domain.Entities;
 using Mova.Domain.Enums;
 
 namespace Mova.Application.Reservations.Handlers;
 
-public sealed class UpdateReservationStatusHandler(IReservationRepository reservations, IUnitOfWork unitOfWork) : IUpdateReservationStatusHandler
+public sealed class UpdateReservationStatusHandler(
+    IReservationRepository reservations,
+    IAuditLogRepository auditLogs,
+    ICurrentUserContext currentUser,
+    IUnitOfWork unitOfWork) : IUpdateReservationStatusHandler
 {
     public async Task<ReservationInfo?> HandleAsync(UpdateReservationStatusCommand command, CancellationToken cancellationToken = default)
     {
@@ -36,6 +42,15 @@ public sealed class UpdateReservationStatusHandler(IReservationRepository reserv
             throw new ConflictException(exception.Message);
         }
 
+        var auditLog = AuditLog.Create(
+            currentUser.UserId,
+            command.SportsComplexId,
+            "Reservation.UpdateStatus",
+            "Reservation",
+            reservation.Id.ToString(),
+            new { status = command.Status.ToString() });
+
+        await auditLogs.AddAsync(auditLog, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return ReservationMapper.ToInfo(reservation);

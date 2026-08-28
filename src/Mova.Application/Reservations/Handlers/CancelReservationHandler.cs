@@ -2,11 +2,12 @@ using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Reservations.Commands;
 using Mova.Contracts.Reservations;
+using Mova.Domain.Entities;
 using Mova.Domain.Enums;
 
 namespace Mova.Application.Reservations.Handlers;
 
-public sealed class CancelReservationHandler(IReservationRepository reservations, IUnitOfWork unitOfWork) : ICancelReservationHandler
+public sealed class CancelReservationHandler(IReservationRepository reservations, IAuditLogRepository auditLogs, IUnitOfWork unitOfWork) : ICancelReservationHandler
 {
     public async Task<ReservationInfo?> HandleAsync(CancelReservationCommand command, CancellationToken cancellationToken = default)
     {
@@ -23,6 +24,16 @@ public sealed class CancelReservationHandler(IReservationRepository reservations
         }
 
         reservation.Cancel(command.CancelledByUserId, true, command.Reason);
+
+        var auditLog = AuditLog.Create(
+            command.CancelledByUserId,
+            command.SportsComplexId,
+            "Reservation.Cancel",
+            "Reservation",
+            reservation.Id.ToString(),
+            new { reason = command.Reason });
+
+        await auditLogs.AddAsync(auditLog, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return ReservationMapper.ToInfo(reservation);

@@ -4,6 +4,7 @@ using Mova.Application.Courts.Commands;
 using Mova.Application.Courts.Handlers;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 using Xunit;
 
@@ -12,10 +13,11 @@ namespace Mova.UnitTests.Application.Courts;
 public sealed class UpdateCourtStatusHandlerTests
 {
     private readonly FakeCourtRepository _courtRepository = new();
+    private readonly FakeAuditLogRepository _auditLogs = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private UpdateCourtStatusHandler CreateHandler() =>
-        new(_courtRepository, _unitOfWork);
+        new(_courtRepository, _auditLogs, _unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WithActiveCourt_DeactivatesAndReturnsInfo()

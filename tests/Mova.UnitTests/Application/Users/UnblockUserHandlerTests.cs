@@ -2,6 +2,7 @@ using Mova.Application.Common.Exceptions;
 using Mova.Application.Users.Commands;
 using Mova.Application.Users.Handlers;
 using Mova.Domain.Entities;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 using Mova.UnitTests.Application.Complexes;
 using Xunit;
@@ -11,9 +12,11 @@ namespace Mova.UnitTests.Application.Users;
 public sealed class UnblockUserHandlerTests
 {
     private readonly FakeBlockedUserRepository _blockedUserRepository = new();
+    private readonly FakeAuditLogRepository _auditLogs = new();
+    private readonly FakeCurrentUserContext _currentUser = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
-    private UnblockUserHandler CreateHandler() => new(_blockedUserRepository, _unitOfWork);
+    private UnblockUserHandler CreateHandler() => new(_blockedUserRepository, _auditLogs, _currentUser, _unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WithExistingBlock_LiftsBlock()

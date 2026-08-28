@@ -3,6 +3,7 @@ using Mova.Application.Complexes.Handlers;
 using Mova.Application.Common.Exceptions;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 using Xunit;
 
@@ -11,10 +12,12 @@ namespace Mova.UnitTests.Application.Complexes;
 public class UpdateComplexHandlerTests
 {
     private readonly FakeSportsComplexRepository _sportsComplexRepository = new();
+    private readonly FakeAuditLogRepository _auditLogs = new();
+    private readonly FakeCurrentUserContext _currentUser = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
     private UpdateComplexHandler CreateHandler() =>
-        new(_sportsComplexRepository, _unitOfWork);
+        new(_sportsComplexRepository, _auditLogs, _currentUser, _unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WithExistingActiveComplex_UpdatesPublicDetailsAndPreservesStatus()

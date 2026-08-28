@@ -11,17 +11,20 @@ public sealed class BlockUserHandler : IBlockUserHandler
     private readonly ISportsComplexRepository _sportsComplexes;
     private readonly IUserRepository _users;
     private readonly IBlockedUserRepository _blockedUsers;
+    private readonly IAuditLogRepository _auditLogs;
     private readonly IUnitOfWork _unitOfWork;
 
     public BlockUserHandler(
         ISportsComplexRepository sportsComplexes,
         IUserRepository users,
         IBlockedUserRepository blockedUsers,
+        IAuditLogRepository auditLogs,
         IUnitOfWork unitOfWork)
     {
         _sportsComplexes = sportsComplexes;
         _users = users;
         _blockedUsers = blockedUsers;
+        _auditLogs = auditLogs;
         _unitOfWork = unitOfWork;
     }
 
@@ -73,6 +76,16 @@ public sealed class BlockUserHandler : IBlockUserHandler
                     command.BlockedUntil);
 
                 await _blockedUsers.AddAsync(block, token);
+
+                var auditLog = AuditLog.Create(
+                    command.BlockedByUserId,
+                    command.SportsComplexId,
+                    "BlockedUser.Block",
+                    "BlockedUser",
+                    block.Id.ToString(),
+                    new { blockedUserId = command.UserId, sportsComplexId = command.SportsComplexId });
+
+                await _auditLogs.AddAsync(auditLog, token);
                 await _unitOfWork.SaveChangesAsync(token);
 
                 return MapToInfo(block);

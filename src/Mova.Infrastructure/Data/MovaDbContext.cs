@@ -26,6 +26,7 @@ public sealed class MovaDbContext : DbContext
     public DbSet<BlockedUser> BlockedUsers => Set<BlockedUser>();
     public DbSet<CancellationPolicy> CancellationPolicies => Set<CancellationPolicy>();
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
