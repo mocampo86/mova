@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { RequireComplexAdmin } from '../features/auth/RequireComplexAdmin';
 import { RequireRole } from '../features/auth/RequireRole';
+import AuthLayout from '../layouts/AuthLayout';
 import ComplexAdminLayout from '../layouts/ComplexAdminLayout';
 import PublicLayout from '../layouts/PublicLayout';
 import UserLayout from '../layouts/UserLayout';
@@ -55,12 +56,21 @@ export default function AppRouter() {
         <Route path="configuration" element={<ConfigurationPage />} />
         <Route path="*" element={<ComplexAdminPlaceholderPage />} />
       </Route>
-      <Route path="/" element={<PublicLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="complexes" element={<ComplexesPage />} />
-        <Route path="complexes/:complexId" element={<ComplexDetailPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="unauthorized" element={<UnauthorizedPage />} />
+      <Route
+        path="/user"
+        element={
+          <RequireRole allowedRoles={['User', 'ComplexAdmin', 'SuperAdmin']}>
+            <UserLayout />
+          </RequireRole>
+        }
+      >
+        <Route index element={<UserDashboardPage />} />
+        <Route path="reservations" element={<UserReservationsPage />} />
+        <Route path="recurring" element={<UserRecurringReservationsPage />} />
+        <Route path="history" element={<UserHistoryPage />} />
+        <Route path="profile" element={<UserProfilePage />} />
+      </Route>
+      <Route element={<AuthLayout />}>
         <Route
           path="complete-profile"
           element={
@@ -78,20 +88,6 @@ export default function AppRouter() {
           }
         />
         <Route
-          path="user"
-          element={
-            <RequireRole allowedRoles={['User', 'ComplexAdmin', 'SuperAdmin']}>
-              <UserLayout />
-            </RequireRole>
-          }
-        >
-          <Route index element={<UserDashboardPage />} />
-          <Route path="reservations" element={<UserReservationsPage />} />
-          <Route path="recurring" element={<UserRecurringReservationsPage />} />
-          <Route path="history" element={<UserHistoryPage />} />
-          <Route path="profile" element={<UserProfilePage />} />
-        </Route>
-        <Route
           path="admin/super"
           element={
             <RequireRole allowedRoles={['SuperAdmin']}>
@@ -99,6 +95,13 @@ export default function AppRouter() {
             </RequireRole>
           }
         />
+      </Route>
+      <Route path="/" element={<PublicLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="complexes" element={<ComplexesPage />} />
+        <Route path="complexes/:complexId" element={<ComplexDetailPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="unauthorized" element={<UnauthorizedPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

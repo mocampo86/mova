@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +13,7 @@ using Mova.Application.Courts.Validators;
 using Mova.Contracts.Common;
 using Mova.Contracts.Complexes;
 using Mova.Contracts.Courts;
+using Mova.Contracts.Errors;
 using Mova.Domain.Enums;
 
 namespace Mova.Api.Controllers;
@@ -78,7 +80,21 @@ public class ComplexesController : ControllerBase
     {
         if (page < 1 || pageSize is < 1 or > 100 || search?.Length > 100)
         {
-            return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Invalid pagination or search parameters." } });
+            var details = new Dictionary<string, object?>();
+            if (page < 1) details["page"] = page;
+            if (pageSize is < 1 or > 100) details["pageSize"] = pageSize;
+            if (search?.Length > 100) details["search"] = search;
+
+            return BadRequest(new ApiErrorResponse
+            {
+                Error = new ErrorDetails
+                {
+                    Code = "VALIDATION_ERROR",
+                    Message = "Invalid pagination or search parameters.",
+                    Details = details,
+                    TraceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+                }
+            });
         }
 
         var result = await _getActiveComplexesHandler.HandleAsync(
