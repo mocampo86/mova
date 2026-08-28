@@ -155,6 +155,31 @@ The `error-rate` check becomes `Unhealthy` when the rolling error rate (server-s
 
 Load balancers and container orchestrators use these endpoints for routing and restart decisions.
 
+## Monitoring and alerting
+
+Versioned Bicep templates in `devops/azure` deploy the monitoring and alerting resources required for production operations:
+
+- **Action group** (`<appServiceName>-mova-alerts`) with an email receiver and an optional webhook receiver.
+- **Server-error rate alert** (`<appServiceName>-server-errors`) that fires when 5xx responses exceed the configured per-minute threshold.
+- **Readiness probe alert** (`<appServiceName>-readiness-failures`) that fires when `/health/ready` returns a non-2xx response.
+- **App Service health-check path** set to `/health/ready` so the platform can remove unhealthy instances from load balancing.
+
+Default parameters match the API's `ErrorRateHealthCheck:MaxErrorRatePerMinute` (5.0) and `ErrorRateTracker:EvaluationWindow` (5 minutes) values in `src/Mova.Api/appsettings.json`.
+
+To deploy the monitoring stack:
+
+```powershell
+cp devops/azure/main.bicepparam.example devops/azure/main.bicepparam
+# Edit devops/azure/main.bicepparam with the environment-specific values
+
+az deployment group create `
+  --resource-group mova-prod-rg `
+  --template-file devops/azure/main.bicep `
+  --parameters devops/azure/main.bicepparam
+```
+
+For full parameter descriptions and smoke-test instructions, see `devops/azure/README.md`. For incident response procedures, see `operations/OPERATIONAL-RUNBOOK.md`.
+
 ## Rate limiting
 
 The API uses ASP.NET Core rate limiting on sensitive endpoints. The `RateLimiting` configuration section controls each policy:

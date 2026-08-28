@@ -102,6 +102,7 @@ For detailed architecture, domain, and workflow docs, see [.ai-kit/docs](.ai-kit
 .
 ├── .ai-kit/docs              # Architecture, domain, workflow, and agent docs
 ├── .github/workflows         # CI/CD pipelines
+├── devops/                   # Deployment, monitoring, and operational scripts
 ├── docker-compose.yml        # Local PostgreSQL container
 ├── .env.example              # Example environment variables for Docker
 ├── Mova.slnx       # .NET solution file

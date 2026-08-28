@@ -229,8 +229,8 @@ public class Program
 
         app.UseMiddleware<CorrelationIdMiddleware>();
         app.UseSerilogRequestLogging();
-        app.UseExceptionHandler();
         app.UseMiddleware<ErrorRateTrackingMiddleware>();
+        app.UseExceptionHandler();
         app.UseForwardedHeaders();
         app.UseHttpsRedirection();
 

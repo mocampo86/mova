@@ -2,7 +2,7 @@
 
 ## Status
 
-Ready
+Done
 
 ## Objective
 
@@ -29,12 +29,12 @@ Provide operational visibility, audit trails, monitoring, and basic maintenance 
 
 ## Acceptance criteria
 
-- [ ] Administrative mutations (create/update complex, court, block, cancellation) are recorded in `AuditLog`.
-- [ ] Logs are structured and contain correlation IDs.
-- [ ] `/health` and `/health/ready` endpoints exist and are used by the deployment.
-- [ ] Application Insights or equivalent observability tool is configured.
-- [ ] Sensitive endpoints (login, reservation creation) have rate limiting configured.
-- [ ] Backup and restore procedures are documented.
+- [x] Administrative mutations (create/update complex, court, block, cancellation) are recorded in `AuditLog`.
+- [x] Logs are structured and contain correlation IDs.
+- [x] `/health`, `/health/live`, and `/health/ready` endpoints exist and the deployment uses `/health/ready` for readiness probes.
+- [x] Application Insights telemetry sink and Azure Monitor alert rules (server-error rate and readiness-probe failures) are configured and versioned in `devops/azure`.
+- [x] Sensitive endpoints (login, reservation creation) have rate limiting configured.
+- [x] Backup and restore procedures are documented in `operations/BACKUP-RESTORE.md`.
 
 ## Dependencies
 

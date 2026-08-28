@@ -1,0 +1,6 @@
+using './main.bicep'
+
+param applicationInsightsName = 'mova-appinsights-prod'
+param appServiceName = 'mova-api-prod'
+param alertEmailAddress = 'ops@example.com'
+param alertWebhookUri = ''
