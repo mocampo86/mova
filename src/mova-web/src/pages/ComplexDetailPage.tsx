@@ -151,6 +151,10 @@ export default function ComplexDetailPage() {
   if (complex.isLoading || courts.isLoading) {
     return (
       <Container sx={{ py: 6 }}>
+        <Seo
+          title={`${t('common.appName')} | ${t('complexDetail.loading')}`}
+          description={t('common.noDescription')}
+        />
         <Typography>{t('complexDetail.loading')}</Typography>
       </Container>
     );
@@ -159,6 +163,10 @@ export default function ComplexDetailPage() {
   if (complex.isError || !complex.data) {
     return (
       <Container sx={{ py: 6 }}>
+        <Seo
+          title={`${t('common.appName')} | ${t('notFound.title')}`}
+          description={t('seo.notFoundDescription')}
+        />
         <Alert severity="error">{t('complexDetail.notFound')}</Alert>
       </Container>
     );
