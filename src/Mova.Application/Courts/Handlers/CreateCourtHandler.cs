@@ -41,7 +41,6 @@ public sealed class CreateCourtHandler : ICreateCourtHandler
 
         var court = Court.Create(command.SportsComplexId, command.Name, command.Description, command.SurfaceType, command.Indoor, sportIds);
         await _courts.AddAsync(court, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var auditLog = AuditLog.Create(
             _currentUser.UserId,

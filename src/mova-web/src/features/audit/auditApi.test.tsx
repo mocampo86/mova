@@ -102,6 +102,9 @@ describe('useAuditLogs', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
+    const expectedFrom = new Date(filters.from).toISOString();
+    const expectedTo = new Date(filters.to).toISOString();
+
     const calledUrl = fetchSpy.mock.calls[0][0] as string;
     expect(calledUrl).toContain('/api/v1/admin/audit-logs?');
     expect(calledUrl).toContain('page=2');
@@ -111,7 +114,7 @@ describe('useAuditLogs', () => {
     expect(calledUrl).toContain('entityId=court-1');
     expect(calledUrl).toContain('sportsComplexId=complex-1');
     expect(calledUrl).toContain('userId=user-1');
-    expect(calledUrl).toContain('from=2026-08-01T00%3A00');
-    expect(calledUrl).toContain('to=2026-08-31T23%3A59');
+    expect(calledUrl).toContain(`from=${encodeURIComponent(expectedFrom)}`);
+    expect(calledUrl).toContain(`to=${encodeURIComponent(expectedTo)}`);
   });
 });

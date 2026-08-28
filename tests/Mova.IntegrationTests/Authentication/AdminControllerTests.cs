@@ -250,6 +250,31 @@ public class AdminControllerTests : IClassFixture<MovaWebApplicationFactory>
     }
 
     [Fact]
+    public async Task GetAuditLogs_WithDateRangeFilter_ReturnsAuditLogs()
+    {
+        var superSuffix = $"super-audit-date-{Guid.NewGuid()}";
+        await SeedUserAsync(superSuffix, [Role.SuperAdmin]);
+        var entityId = Guid.NewGuid().ToString();
+        await SeedAuditLogAsync("SportsComplex.Create", "SportsComplex", entityId);
+
+        var client = _factory.CreateClient();
+        var token = await LoginAsync(client, superSuffix);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var from = DateTime.UtcNow.AddDays(-2).ToString("o");
+        var to = DateTime.UtcNow.AddHours(1).ToString("o");
+
+        var response = await client.GetAsync($"/api/v1/admin/audit-logs?from={Uri.EscapeDataString(from)}&to={Uri.EscapeDataString(to)}");
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<AuditLogInfo>>();
+        Assert.NotNull(result);
+        Assert.True(result.TotalItems >= 1);
+        Assert.Contains(result.Items, x => x.EntityId == entityId);
+    }
+
+    [Fact]
     public async Task GetAuditLogs_WithoutAuthentication_ReturnsUnauthorized()
     {
         var client = _factory.CreateClient();

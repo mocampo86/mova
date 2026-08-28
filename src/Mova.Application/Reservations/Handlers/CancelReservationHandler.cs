@@ -30,8 +30,7 @@ public sealed class CancelReservationHandler(IReservationRepository reservations
             command.SportsComplexId,
             "Reservation.Cancel",
             "Reservation",
-            reservation.Id.ToString(),
-            new { reason = command.Reason });
+            reservation.Id.ToString());
 
         await auditLogs.AddAsync(auditLog, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

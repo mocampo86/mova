@@ -40,7 +40,11 @@ public sealed class CurrentUserContext(IHttpContextAccessor httpContextAccessor)
                 return [];
             }
 
-            return user.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
+            return user.FindAll("roles")
+                .Concat(user.FindAll(ClaimTypes.Role))
+                .Select(x => x.Value)
+                .Distinct()
+                .ToList();
         }
     }
 }

@@ -3,6 +3,19 @@ import { apiClient } from '../../services/apiClient';
 import { useAuth } from '../auth/useAuth';
 import type { AuditLogFilters, AuditLogPagedResult } from './auditTypes';
 
+function toUtcIso(value: string): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString();
+}
+
 export function useAuditLogs(filters: AuditLogFilters, enabled = true) {
   const { accessToken } = useAuth();
 
@@ -31,12 +44,14 @@ export function useAuditLogs(filters: AuditLogFilters, enabled = true) {
     params.set('userId', filters.userId);
   }
 
-  if (filters.from) {
-    params.set('from', filters.from);
+  const fromUtc = toUtcIso(filters.from);
+  if (fromUtc) {
+    params.set('from', fromUtc);
   }
 
-  if (filters.to) {
-    params.set('to', filters.to);
+  const toUtc = toUtcIso(filters.to);
+  if (toUtc) {
+    params.set('to', toUtc);
   }
 
   return useQuery({

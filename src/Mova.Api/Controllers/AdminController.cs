@@ -8,6 +8,7 @@ using Mova.Application.Complexes.Queries;
 using Mova.Contracts.Audit;
 using Mova.Contracts.Common;
 using Mova.Contracts.Complexes;
+using Mova.Contracts.Errors;
 
 namespace Mova.Api.Controllers;
 
@@ -55,7 +56,50 @@ public class AdminController(
     {
         if (page < 1 || pageSize is < 1 or > 100)
         {
-            return BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Invalid pagination parameters." } });
+            return BadRequest(new ApiErrorResponse
+            {
+                Error = new ErrorDetails
+                {
+                    Code = "VALIDATION_ERROR",
+                    Message = "Invalid pagination parameters."
+                }
+            });
+        }
+
+        if (from.HasValue && from.Value.Kind != DateTimeKind.Utc)
+        {
+            return BadRequest(new ApiErrorResponse
+            {
+                Error = new ErrorDetails
+                {
+                    Code = "VALIDATION_ERROR",
+                    Message = "The 'from' value must be a UTC timestamp (e.g., '2026-08-01T00:00:00Z')."
+                }
+            });
+        }
+
+        if (to.HasValue && to.Value.Kind != DateTimeKind.Utc)
+        {
+            return BadRequest(new ApiErrorResponse
+            {
+                Error = new ErrorDetails
+                {
+                    Code = "VALIDATION_ERROR",
+                    Message = "The 'to' value must be a UTC timestamp (e.g., '2026-08-01T00:00:00Z')."
+                }
+            });
+        }
+
+        if (from.HasValue && to.HasValue && from.Value > to.Value)
+        {
+            return BadRequest(new ApiErrorResponse
+            {
+                Error = new ErrorDetails
+                {
+                    Code = "VALIDATION_ERROR",
+                    Message = "The 'from' value cannot be greater than the 'to' value."
+                }
+            });
         }
 
         var query = new GetAuditLogsQuery(
