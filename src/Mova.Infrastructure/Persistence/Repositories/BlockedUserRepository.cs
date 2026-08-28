@@ -30,6 +30,19 @@ public sealed class BlockedUserRepository(MovaDbContext context) : IBlockedUserR
                 cancellationToken);
     }
 
+    public Task<BlockedUser?> GetExpiredActiveByComplexAndUserAsync(Guid sportsComplexId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        return context.BlockedUsers
+            .FirstOrDefaultAsync(
+                b => b.SportsComplexId == sportsComplexId
+                    && b.UserId == userId
+                    && b.Status == BlockedUserStatus.Active
+                    && b.BlockedUntil.HasValue
+                    && b.BlockedUntil.Value <= now,
+                cancellationToken);
+    }
+
     public async Task<IReadOnlyList<BlockedUser>> GetActiveBlocksByComplexAndUserIdsAsync(
         Guid sportsComplexId,
         IReadOnlyCollection<Guid> userIds,

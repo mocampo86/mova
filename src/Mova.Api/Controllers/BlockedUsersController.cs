@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mova.Api.Authorization;
+using Mova.Api.Filters;
 using Mova.Application.Users.Commands;
 using Mova.Application.Users.Handlers;
 using Mova.Contracts.Users;
@@ -32,6 +33,7 @@ public sealed class BlockedUsersController : ControllerBase
     }
 
     [HttpPost]
+    [IdempotencyRequired]
     public async Task<ActionResult<BlockedUserInfo>> Block(
         Guid complexId,
         [FromBody] BlockUserRequest request,
