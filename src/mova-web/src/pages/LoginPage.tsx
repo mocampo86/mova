@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { useSearchParams, Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Seo from '../components/Seo';
 import { GoogleLoginButton } from '../features/auth/GoogleLoginButton';
 
 export default function LoginPage() {
@@ -12,6 +13,10 @@ export default function LoginPage() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, mt: 8, px: 2 }}>
+      <Seo
+        title={`${t('common.appName')} | ${isComplex ? t('seo.loginComplexTitle') : t('seo.loginUserTitle')}`}
+        description={isComplex ? t('seo.loginComplexDescription') : t('seo.loginUserDescription')}
+      />
       <Typography variant="h4">{isComplex ? t('login.complexTitle') : t('login.userTitle')}</Typography>
       <Typography variant="body1" textAlign="center">
         {isComplex ? t('login.complexSubtitle') : t('login.userSubtitle')}

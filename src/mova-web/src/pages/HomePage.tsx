@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Button, Card, CardActions, CardContent, Container, Grid, Skeleton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import Seo from '../components/Seo';
 
 const HomeFeaturedSection = lazy(() => import('./HomeFeaturedSection'));
 
@@ -24,7 +25,11 @@ export default function HomePage() {
   ];
 
   return (
-    <Box component="main">
+    <Box>
+      <Seo
+        title={`${t('common.appName')} | ${t('seo.homeTitle')}`}
+        description={t('seo.homeDescription')}
+      />
       <Box
         component="section"
         aria-labelledby="hero-title"

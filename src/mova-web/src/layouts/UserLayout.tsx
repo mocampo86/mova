@@ -111,9 +111,11 @@ export default function UserLayout() {
           {drawerContent}
         </Drawer>
       )}
-      <Box component="main" sx={{ flexGrow: 1, width: { md: 'calc(100% - 250px)' } }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, width: { md: 'calc(100% - 250px)' } }}>
         <Toolbar />
-        <Outlet />
+        <Box component="main" sx={{ flexGrow: 1 }}>
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   );

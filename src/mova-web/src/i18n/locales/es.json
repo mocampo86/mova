@@ -587,5 +587,17 @@
     "cancelledBy": "Cancelado por: {{name}}",
     "cancellationReason": "Motivo: {{reason}}",
     "noCancellationReason": "sin motivo indicado"
+  },
+  "seo": {
+    "homeTitle": "Encuentra tu próximo juego",
+    "homeDescription": "Descubre complejos deportivos cercanos, consulta la disponibilidad de canchas y reserva el horario que más te convenga.",
+    "complexesTitle": "Buscar un complejo deportivo",
+    "complexesDescription": "Busca complejos activos por nombre, ciudad o dirección.",
+    "loginUserTitle": "Iniciar sesión para jugar",
+    "loginUserDescription": "Inicia sesión con tu cuenta de Google para continuar.",
+    "loginComplexTitle": "Registrar tu complejo",
+    "loginComplexDescription": "Inicia sesión con tu cuenta de Google para registrar y administrar tu complejo deportivo.",
+    "notFoundDescription": "La página que buscas no existe.",
+    "unauthorizedDescription": "No tienes permiso para ver esta página."
   }
 }

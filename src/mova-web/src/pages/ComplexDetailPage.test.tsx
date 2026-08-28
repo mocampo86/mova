@@ -110,6 +110,36 @@ describe('ComplexDetailPage', () => {
     expect(screen.getByText(/test@complex.com/)).toBeTruthy();
     expect(screen.getByText('Padel Court')).toBeTruthy();
     expect(screen.getByText('Tennis Court')).toBeTruthy();
+    expect(document.title).toBe('Mova | Test Complex');
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('A test complex');
+  });
+
+  it('sets SEO metadata while the complex is loading', () => {
+    vi.mocked(useActiveComplex).mockReturnValue({
+      data: null,
+      isLoading: true,
+      isError: false
+    } as unknown as ReturnType<typeof useActiveComplex>);
+
+    renderWithAuth(<ComplexDetailPage />, { initialRoute: '/complexes/complex-id' });
+
+    expect(screen.getByText(/Loading complex/i)).toBeTruthy();
+    expect(document.title).toBe('Mova | Loading complex…');
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('Explore courts and availability at this complex.');
+  });
+
+  it('sets SEO metadata when the complex cannot be found', () => {
+    vi.mocked(useActiveComplex).mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: true
+    } as unknown as ReturnType<typeof useActiveComplex>);
+
+    renderWithAuth(<ComplexDetailPage />, { initialRoute: '/complexes/unknown-id' });
+
+    expect(screen.getByText(/This active complex could not be found/i)).toBeTruthy();
+    expect(document.title).toBe('Mova | 404 - Page not found');
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('The page you are looking for does not exist.');
   });
 
   it('renders an empty state when the complex has no courts', async () => {

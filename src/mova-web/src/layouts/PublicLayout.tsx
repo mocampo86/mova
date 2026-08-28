@@ -6,8 +6,8 @@ export default function PublicLayout() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppHeader />
+      <Toolbar />
       <Box component="main" sx={{ flexGrow: 1 }}>
-        <Toolbar />
         <Container maxWidth="lg">
           <Outlet />
         </Container>
