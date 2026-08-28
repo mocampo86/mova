@@ -12,6 +12,7 @@ This `.ai-kit/docs` package contains the technical knowledge base for the **Mova
 - **Before modifying the database**: read `architecture/DATABASE-DESIGN.md`.
 - **Before creating a user story**: read `workflows/DEVELOPMENT-WORKFLOW.md`.
 - **Before assigning work to an agent**: read `agents/AGENT-ROLES.md`.
+- **Before performing operational tasks**: read `operations/OPERATIONAL-RUNBOOK.md`.
 
 ## Folder structure
 
@@ -31,6 +32,9 @@ This `.ai-kit/docs` package contains the technical knowledge base for the **Mova
 │   ├── AGENT-ROLES.md
 │   ├── AGENT-COMMANDS.md
 │   └── AGENT-WORKFLOWS.md
+├── operations/
+│   ├── BACKUP-RESTORE.md
+│   └── OPERATIONAL-RUNBOOK.md
 └── workflows/
     ├── DEVELOPMENT-WORKFLOW.md
     ├── PR-WORKFLOW.md
