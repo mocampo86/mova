@@ -1,5 +1,5 @@
+using System.Net;
 using System.Text;
-using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +13,7 @@ using Mova.Api.Configuration;
 using Mova.Api.Exceptions;
 using Mova.Api.HealthChecks;
 using Mova.Api.Middleware;
+using Mova.Api.RateLimiting;
 using Mova.Application;
 using Mova.Infrastructure;
 using Mova.Infrastructure.Authentication.Options;
@@ -146,48 +147,73 @@ public class Program
         builder.Services.Configure<RateLimitingOptions>(
             builder.Configuration.GetSection(RateLimitingOptions.SectionName));
 
+        builder.Services.Configure<ForwardedHeadersSettings>(
+            builder.Configuration.GetSection(ForwardedHeadersSettings.SectionName));
+
+        builder.Services.AddOptions<ForwardedHeadersOptions>()
+            .Configure<IOptions<ForwardedHeadersSettings>>((options, settingsAccessor) =>
+            {
+                var settings = settingsAccessor.Value;
+
+                if (Enum.TryParse<Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders>(settings.ForwardedHeaders, true, out var forwardedHeaders))
+                {
+                    options.ForwardedHeaders = forwardedHeaders;
+                }
+                else
+                {
+                    options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor;
+                }
+
+                options.ForwardLimit = settings.ForwardLimit ?? 1;
+
+                foreach (var proxy in settings.KnownProxies)
+                {
+                    if (IPAddress.TryParse(proxy, out var ip))
+                    {
+                        options.KnownProxies.Add(ip);
+                    }
+                }
+
+                foreach (var network in settings.KnownNetworks)
+                {
+                    if (System.Net.IPNetwork.TryParse(network, out var ipNetwork))
+                    {
+                        options.KnownIPNetworks.Add(ipNetwork);
+                    }
+                }
+            });
+
         builder.Services.AddRateLimiter(options =>
         {
             options.AddPolicy("search", context =>
             {
                 var rateOptions = context.RequestServices.GetRequiredService<IOptions<RateLimitingOptions>>().Value;
-                var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                    ?? context.User.FindFirst("sub")?.Value
-                    ?? context.Connection.RemoteIpAddress?.ToString()
-                    ?? "anonymous";
 
                 return RateLimitPartition.GetFixedWindowLimiter(
-                    userId,
+                    RateLimitingPartitionKeyResolver.ResolveAuthenticatedPartitionKey(context),
                     _ => CreateFixedWindowOptions(rateOptions.Search));
             });
 
             options.AddPolicy("login", context =>
             {
                 var rateOptions = context.RequestServices.GetRequiredService<IOptions<RateLimitingOptions>>().Value;
-                var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                    ?? context.User.FindFirst("sub")?.Value
-                    ?? context.Connection.RemoteIpAddress?.ToString()
-                    ?? "anonymous";
 
                 return RateLimitPartition.GetFixedWindowLimiter(
-                    userId,
+                    RateLimitingPartitionKeyResolver.ResolveLoginPartitionKey(context),
                     _ => CreateFixedWindowOptions(rateOptions.Login));
             });
 
             options.AddPolicy("reservation", context =>
             {
                 var rateOptions = context.RequestServices.GetRequiredService<IOptions<RateLimitingOptions>>().Value;
-                var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                    ?? context.User.FindFirst("sub")?.Value
-                    ?? context.Connection.RemoteIpAddress?.ToString()
-                    ?? "anonymous";
 
                 return RateLimitPartition.GetFixedWindowLimiter(
-                    userId,
+                    RateLimitingPartitionKeyResolver.ResolveAuthenticatedPartitionKey(context),
                     _ => CreateFixedWindowOptions(rateOptions.Reservation));
             });
 
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.OnRejected = RateLimitingRejectionHandler.HandleRejectionAsync;
         });
 
         static FixedWindowRateLimiterOptions CreateFixedWindowOptions(RateLimitingPolicyOptions policyOptions) =>
@@ -205,6 +231,7 @@ public class Program
         app.UseSerilogRequestLogging();
         app.UseExceptionHandler();
         app.UseMiddleware<ErrorRateTrackingMiddleware>();
+        app.UseForwardedHeaders();
         app.UseHttpsRedirection();
 
         app.UseCors();
