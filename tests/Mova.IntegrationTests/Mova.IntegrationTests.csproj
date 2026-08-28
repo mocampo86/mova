@@ -26,6 +26,7 @@
     <ProjectReference Include="..\..\src\Mova.Infrastructure\Mova.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Mova.Domain\Mova.Domain.csproj" />
     <ProjectReference Include="..\..\src\Mova.Contracts\Mova.Contracts.csproj" />
+    <ProjectReference Include="..\Mova.Tests.Common\Mova.Tests.Common.csproj" />
   </ItemGroup>
 
 </Project>

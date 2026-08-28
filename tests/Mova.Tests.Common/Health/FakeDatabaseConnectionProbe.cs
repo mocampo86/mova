@@ -1,6 +1,6 @@
 using Mova.Application.Health;
 
-namespace Mova.UnitTests.Health;
+namespace Mova.Tests.Common.Health;
 
 public sealed class FakeDatabaseConnectionProbe : IDatabaseConnectionProbe
 {

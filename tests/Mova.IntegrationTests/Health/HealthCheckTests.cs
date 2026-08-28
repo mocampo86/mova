@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Mova.Api;
 using Mova.Api.HealthChecks;
 using Mova.Application.Health;
+using Mova.Tests.Common.Health;
 
 namespace Mova.IntegrationTests.Health;
 
@@ -82,7 +83,8 @@ public class HealthCheckTests : IClassFixture<WebApplicationFactory<Program>>
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using var document = await ParseResponseAsync(response);
-        var dependency = document.RootElement.GetProperty("dependencies")[0];
+        var dependency = document.RootElement.GetProperty("dependencies").EnumerateArray()
+            .First(x => x.GetProperty("name").GetString() == "database");
 
         Assert.Equal("database", dependency.GetProperty("name").GetString());
         Assert.Equal("Healthy", dependency.GetProperty("status").GetString());
@@ -108,7 +110,8 @@ public class HealthCheckTests : IClassFixture<WebApplicationFactory<Program>>
         var root = document.RootElement;
 
         Assert.Equal("Unhealthy", root.GetProperty("status").GetString());
-        var dependency = root.GetProperty("dependencies")[0];
+        var dependency = root.GetProperty("dependencies").EnumerateArray()
+            .First(x => x.GetProperty("name").GetString() == "database");
 
         Assert.Equal("database", dependency.GetProperty("name").GetString());
         Assert.Equal("Unhealthy", dependency.GetProperty("status").GetString());
