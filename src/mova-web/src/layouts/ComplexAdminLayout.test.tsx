@@ -3,22 +3,24 @@ import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import ComplexAdminLayout from './ComplexAdminLayout';
-import { useComplexDashboard } from '../features/complexes/complexApi';
+import { useAdminComplex } from '../features/complexes/complexApi';
 import { STORAGE_KEY } from '../i18n/languageStorage';
 import { renderWithAuth, type RenderWithAuthOptions } from '../test-utils';
 
 vi.mock('../features/complexes/complexApi');
 
-const mockDashboard = {
-  complex: {
-    id: 'complex-id',
-    name: 'Test Complex',
-    status: 'Active',
-    lastUpdatedAt: null
-  },
-  courts: { active: 0, inactive: 0 },
-  reservationsToday: { confirmed: 0, cancelled: 0, completed: 0 },
-  blockedUsers: 0
+const mockComplex = {
+  id: 'complex-id',
+  name: 'Test Complex',
+  description: 'A test complex',
+  address: 'Test Address',
+  city: 'Test City',
+  phoneNumber: '+598 99 123 456',
+  email: 'test@complex.com',
+  status: 'Active',
+  allowUserRecurringReservations: true,
+  timeZoneId: 'America/Montevideo',
+  updatedAt: null
 };
 
 function renderLayout(
@@ -47,11 +49,11 @@ describe('ComplexAdminLayout', () => {
   });
 
   it('renders the complex name in the header and navigation links', () => {
-    vi.mocked(useComplexDashboard).mockReturnValue({
-      data: mockDashboard,
+    vi.mocked(useAdminComplex).mockReturnValue({
+      data: mockComplex,
       isLoading: false,
       isError: false
-    } as unknown as ReturnType<typeof useComplexDashboard>);
+    } as unknown as ReturnType<typeof useAdminComplex>);
 
     renderLayout('/admin/complex/complex-id');
 
@@ -65,11 +67,11 @@ describe('ComplexAdminLayout', () => {
   });
 
   it('renders navigation links scoped to the current complex', () => {
-    vi.mocked(useComplexDashboard).mockReturnValue({
-      data: mockDashboard,
+    vi.mocked(useAdminComplex).mockReturnValue({
+      data: mockComplex,
       isLoading: false,
       isError: false
-    } as unknown as ReturnType<typeof useComplexDashboard>);
+    } as unknown as ReturnType<typeof useAdminComplex>);
 
     renderLayout('/admin/complex/complex-1');
 
@@ -90,11 +92,11 @@ describe('ComplexAdminLayout', () => {
   });
 
   it('marks the Dashboard link as active on the root admin route', () => {
-    vi.mocked(useComplexDashboard).mockReturnValue({
-      data: mockDashboard,
+    vi.mocked(useAdminComplex).mockReturnValue({
+      data: mockComplex,
       isLoading: false,
       isError: false
-    } as unknown as ReturnType<typeof useComplexDashboard>);
+    } as unknown as ReturnType<typeof useAdminComplex>);
 
     renderLayout('/admin/complex/complex-id');
 
@@ -103,11 +105,11 @@ describe('ComplexAdminLayout', () => {
   });
 
   it('updates the active link when navigating to a section', async () => {
-    vi.mocked(useComplexDashboard).mockReturnValue({
-      data: mockDashboard,
+    vi.mocked(useAdminComplex).mockReturnValue({
+      data: mockComplex,
       isLoading: false,
       isError: false
-    } as unknown as ReturnType<typeof useComplexDashboard>);
+    } as unknown as ReturnType<typeof useAdminComplex>);
 
     renderLayout('/admin/complex/complex-id');
 
@@ -123,11 +125,11 @@ describe('ComplexAdminLayout', () => {
   });
 
   it('renders the language selector in the admin header', () => {
-    vi.mocked(useComplexDashboard).mockReturnValue({
-      data: mockDashboard,
+    vi.mocked(useAdminComplex).mockReturnValue({
+      data: mockComplex,
       isLoading: false,
       isError: false
-    } as unknown as ReturnType<typeof useComplexDashboard>);
+    } as unknown as ReturnType<typeof useAdminComplex>);
 
     renderLayout('/admin/complex/complex-id');
 
@@ -138,11 +140,11 @@ describe('ComplexAdminLayout', () => {
     const user = userEvent.setup();
     window.localStorage.removeItem(STORAGE_KEY);
 
-    vi.mocked(useComplexDashboard).mockReturnValue({
-      data: mockDashboard,
+    vi.mocked(useAdminComplex).mockReturnValue({
+      data: mockComplex,
       isLoading: false,
       isError: false
-    } as unknown as ReturnType<typeof useComplexDashboard>);
+    } as unknown as ReturnType<typeof useAdminComplex>);
 
     renderLayout('/admin/complex/complex-id');
 

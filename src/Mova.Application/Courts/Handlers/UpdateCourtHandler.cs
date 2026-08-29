@@ -29,15 +29,17 @@ public sealed class UpdateCourtHandler(
         if (await courts.ExistsByNameAsync(command.SportsComplexId, command.Name, command.CourtId, cancellationToken))
             throw new ConflictException("A court with this name already exists in the sports complex.");
 
-        var sportIds = command.SportIds?.Distinct().ToArray();
-        if (sportIds is not null && sportIds.Length > 0)
+        court.Update(command.Name, command.Description, command.SurfaceType, command.Indoor);
+
+        if (command.SportIds is not null)
         {
+            var sportIds = command.SportIds.Distinct().ToArray();
             var existingSportIds = (await sports.GetByIdsAsync(sportIds, cancellationToken)).Select(x => x.Id).ToHashSet();
             if (sportIds.Any(x => !existingSportIds.Contains(x)))
                 throw new NotFoundException("One or more sports were not found.");
-        }
 
-        court.Update(command.Name, command.Description, command.SurfaceType, command.Indoor, sportIds);
+            court.AssignSports(sportIds);
+        }
 
         var auditLog = AuditLog.Create(
             currentUser.UserId,

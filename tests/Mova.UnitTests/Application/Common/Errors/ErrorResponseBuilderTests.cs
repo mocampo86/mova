@@ -32,4 +32,17 @@ public class ErrorResponseBuilderTests
         Assert.Contains("exceptionType", response.Error.Details!.Keys);
         Assert.Contains("stackTrace", response.Error.Details.Keys);
     }
+
+    [Fact]
+    public void Build_WhenArgumentException_ReturnsValidationError()
+    {
+        var exception = new ArgumentException("A court must have at least one assigned sport.");
+
+        var (response, statusCode) = ErrorResponseBuilder.BuildResponse(exception, "trace-arg", isDevelopment: false);
+
+        Assert.Equal(400, statusCode);
+        Assert.Equal("VALIDATION_ERROR", response.Error.Code);
+        Assert.Equal("A court must have at least one assigned sport.", response.Error.Message);
+        Assert.Equal("trace-arg", response.Error.TraceId);
+    }
 }

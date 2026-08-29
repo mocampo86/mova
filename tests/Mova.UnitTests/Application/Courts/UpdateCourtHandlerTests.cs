@@ -176,7 +176,7 @@ public sealed class UpdateCourtHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_WithEmptySports_ClearsSports()
+    public async Task HandleAsync_WithEmptySports_ThrowsArgumentException()
     {
         var complex = await CreateComplexAsync();
         var football = Sport.Create("Football");
@@ -184,17 +184,14 @@ public sealed class UpdateCourtHandlerTests
         await _courtRepository.AddAsync(court);
         var handler = CreateHandler(new FakeSportRepository([football]));
 
-        var result = await handler.HandleAsync(new UpdateCourtCommand(
+        await Assert.ThrowsAsync<ArgumentException>(() => handler.HandleAsync(new UpdateCourtCommand(
             complex.Id,
             court.Id,
             "Court",
             "Description",
             "Synthetic",
             false,
-            []));
-
-        Assert.NotNull(result);
-        Assert.Empty(result.SportIds);
+            [])));
     }
 
     private sealed class FakeSportRepository(IEnumerable<Sport> sports) : ISportRepository
