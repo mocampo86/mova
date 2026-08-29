@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
-import { useComplexDashboard } from '../features/complexes/complexApi';
+import { useAdminComplex } from '../features/complexes/complexApi';
 
 function isActivePath(pathname: string, to: string, exact = false): boolean {
   const normalized = to.endsWith('/') ? to.slice(0, -1) : to;
@@ -34,7 +34,7 @@ export default function ComplexAdminLayout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { data, isLoading } = useComplexDashboard(complexId);
+  const { data, isLoading } = useAdminComplex(complexId);
 
   const handleDrawerToggle = () => setMobileOpen((open) => !open);
 
@@ -81,7 +81,7 @@ export default function ComplexAdminLayout() {
   const headerTitle = isLoading ? (
     <Skeleton variant="text" width={160} />
   ) : (
-    data?.complex.name ?? t('nav.complexAdmin')
+    data?.name ?? t('nav.complexAdmin')
   );
 
   return (

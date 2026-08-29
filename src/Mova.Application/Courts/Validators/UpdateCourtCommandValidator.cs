@@ -13,5 +13,9 @@ public sealed class UpdateCourtCommandValidator : AbstractValidator<UpdateCourtC
         RuleFor(x => x.Description).NotEmpty().MaximumLength(2000);
         RuleFor(x => x.SurfaceType).NotEmpty().MaximumLength(100);
         RuleForEach(x => x.SportIds).NotEmpty();
+        RuleFor(x => x.SportIds)
+            .NotEmpty()
+            .WithMessage("At least one sport must be assigned to the court.")
+            .When(x => x.SportIds is not null);
     }
 }

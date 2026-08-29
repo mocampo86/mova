@@ -72,6 +72,12 @@ public static class ErrorResponseBuilder
                 message = exception.Message;
                 break;
 
+            case ArgumentException argumentException:
+                statusCode = 400;
+                code = "VALIDATION_ERROR";
+                message = argumentException.Message;
+                break;
+
             case ValidationException validationException:
                 statusCode = 400;
                 code = "VALIDATION_ERROR";

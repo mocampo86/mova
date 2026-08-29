@@ -90,4 +90,12 @@ public sealed class UpdateCourtCommandValidatorTests
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor("SportIds[0]");
     }
+
+    [Fact]
+    public void Validate_WithEmptySportList_Fails()
+    {
+        var command = CreateValidCommand() with { SportIds = [] };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.SportIds);
+    }
 }
