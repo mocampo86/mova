@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { useActiveComplexes } from '../features/complexes/complexApi';
 import HomePage from './HomePage';
@@ -30,6 +30,21 @@ describe('HomePage', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Featured complexes' })).toBeTruthy();
     });
+  });
+
+  it('renders a modernized hero with three visible, distinguishable calls to action', () => {
+    mockUseActiveComplexes.mockReturnValue({ data: { items: [], page: 1, pageSize: 12, totalItems: 0, totalPages: 0 }, isLoading: false, isError: false } as unknown as ReturnType<typeof useActiveComplexes>);
+
+    renderWithAuth(<HomePage />);
+
+    const hero = screen.getByTestId('hero');
+    expect(hero).toBeTruthy();
+    expect(within(hero).getByRole('heading', { name: 'Find your next game.' })).toBeTruthy();
+    expect(within(hero).getByText(/Discover nearby sports complexes/)).toBeTruthy();
+    expect(within(hero).getByRole('link', { name: 'Play / Book a court' }).getAttribute('href')).toBe('/login?intent=user');
+    expect(within(hero).getByRole('link', { name: 'Manage your complex' }).getAttribute('href')).toBe('/login?intent=complex');
+    expect(within(hero).getByRole('link', { name: 'Browse complexes' }).getAttribute('href')).toBe('/complexes');
+    expect(within(hero).getByTestId('hero-visual')).toBeTruthy();
   });
 
   it('exposes login and registration entry points for visitors', () => {

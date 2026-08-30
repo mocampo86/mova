@@ -6,6 +6,28 @@ import Seo from '../components/Seo';
 
 const HomeFeaturedSection = lazy(() => import('./HomeFeaturedSection'));
 
+function HeroVisual() {
+  return (
+    <svg viewBox="0 0 200 200" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
+      <path d="M100 10 V190" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
+      <circle cx="100" cy="100" r="35" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
+      <path d="M10 100 H190" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
+      <path d="M25 25 Q100 100 175 25" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
+      <path d="M25 175 Q100 100 175 175" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
+      <path d="M25 25 Q100 100 25 175" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
+      <path d="M175 25 Q100 100 175 175" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
+    </svg>
+  );
+}
+
+const ctaFocusOutline = {
+  '&:focus-visible': {
+    outline: '3px solid rgba(255,255,255,0.95)',
+    outlineOffset: '3px'
+  }
+};
+
 export default function HomePage() {
   const { t } = useTranslation();
 
@@ -33,33 +55,112 @@ export default function HomePage() {
       <Box
         component="section"
         aria-labelledby="hero-title"
+        data-testid="hero"
         sx={{
-          py: { xs: 7, md: 12 },
-          px: { xs: 2, md: 6 },
-          borderRadius: 4,
-          background: 'linear-gradient(135deg, #0f766e 0%, #115e59 100%)',
-          color: 'common.white'
+          position: 'relative',
+          overflow: 'hidden',
+          mx: { xs: -2, sm: -3 },
+          py: { xs: 8, sm: 10, md: 14 },
+          background: 'linear-gradient(135deg, #0A3D3A 0%, #0F5E59 50%, #14877E 100%)',
+          color: 'common.white',
+          borderRadius: { xs: '0 0 1.5rem 1.5rem', md: '0 0 2rem 2rem' }
         }}
       >
-        <Container maxWidth="md">
-          <Stack spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }} textAlign={{ xs: 'left', md: 'center' }}>
-            <Typography component="p" variant="overline" sx={{ letterSpacing: 2, opacity: 0.85 }}>
+        <Box
+          aria-hidden="true"
+          data-testid="hero-visual"
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            opacity: 0.15,
+            mixBlendMode: 'overlay',
+            backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.35) 0%, transparent 35%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.25) 0%, transparent 40%), radial-gradient(circle at 50% 100%, rgba(255,255,255,0.15) 0%, transparent 50%)'
+          }}
+        />
+        <Box
+          aria-hidden="true"
+          sx={{
+            position: 'absolute',
+            top: { xs: '5%', md: '10%' },
+            right: { xs: '-10%', sm: '-5%', md: '5%' },
+            width: { xs: 180, sm: 260, md: 340 },
+            height: { xs: 180, sm: 260, md: 340 },
+            opacity: 0.12,
+            color: 'common.white',
+            pointerEvents: 'none'
+          }}
+        >
+          <HeroVisual />
+        </Box>
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Stack spacing={{ xs: 3, md: 4 }} alignItems={{ xs: 'flex-start', md: 'center' }} textAlign={{ xs: 'left', md: 'center' }}>
+            <Typography component="p" variant="overline" sx={{ letterSpacing: 3, opacity: 0.9, fontWeight: 600 }}>
               {t('home.hero.overline')}
             </Typography>
-            <Typography id="hero-title" component="h1" variant="h2" sx={{ fontWeight: 800, fontSize: { xs: '2.5rem', md: '4rem' } }}>
+            <Typography id="hero-title" component="h1" variant="h2" sx={{ fontWeight: 900, fontSize: { xs: '2.5rem', sm: '3rem', md: '4.5rem' }, lineHeight: 1.1 }}>
               {t('home.hero.title')}
             </Typography>
-            <Typography variant="h6" sx={{ maxWidth: 650, fontWeight: 400, opacity: 0.92 }}>
+            <Typography variant="h6" sx={{ maxWidth: 680, fontWeight: 400, opacity: 0.93, fontSize: { xs: '1.1rem', md: '1.35rem' } }}>
               {t('home.hero.subtitle')}
             </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Button component={RouterLink} to="/login?intent=user" variant="contained" size="large" color="secondary">
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              useFlexGap
+              flexWrap="wrap"
+              justifyContent="center"
+              sx={{ pt: 1 }}
+            >
+              <Button
+                component={RouterLink}
+                to="/login?intent=user"
+                variant="contained"
+                size="large"
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  fontWeight: 700,
+                  bgcolor: 'common.white',
+                  color: 'primary.dark',
+                  '&:hover': { bgcolor: 'grey.100' },
+                  ...ctaFocusOutline
+                }}
+              >
                 {t('home.hero.play')}
               </Button>
-              <Button component={RouterLink} to="/login?intent=complex" variant="outlined" size="large" sx={{ color: 'common.white', borderColor: 'rgba(255,255,255,.7)' }}>
+              <Button
+                component={RouterLink}
+                to="/login?intent=complex"
+                variant="outlined"
+                size="large"
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  fontWeight: 700,
+                  color: 'common.white',
+                  borderColor: 'rgba(255,255,255,0.7)',
+                  '&:hover': { borderColor: 'common.white', bgcolor: 'rgba(255,255,255,0.08)' },
+                  ...ctaFocusOutline
+                }}
+              >
                 {t('home.hero.manage')}
               </Button>
-              <Button component={RouterLink} to="/complexes" variant="outlined" size="large" sx={{ color: 'common.white', borderColor: 'rgba(255,255,255,.7)' }}>
+              <Button
+                component={RouterLink}
+                to="/complexes"
+                variant="contained"
+                size="large"
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  fontWeight: 700,
+                  bgcolor: 'rgba(255,255,255,0.12)',
+                  color: 'common.white',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
+                  ...ctaFocusOutline
+                }}
+              >
                 {t('home.hero.browse')}
               </Button>
             </Stack>
