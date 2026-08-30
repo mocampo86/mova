@@ -1,8 +1,9 @@
 -Coplex:
 -Reservas:
 --Admin: configurar hasta que tan adelante se puede reservar
---No permitir reservar en el pasado / mostrar solo horarios posteriores a la hora actual
 --Checkear si el usuario puede ver reservaciones
+--Solo mostrar complejos de mi ciudad
+--Poder configurar si el admin tiene que aceptar la reserva de un cliente para que quede efectiva
 
 -La pagina del admin no permite cerrar sesión
 -La pagina del admin deberia tener notificaciones: ejemplo nueva reserva
@@ -19,3 +20,7 @@
 
 -Mejoras Dashboard de usuario: iconos, eliminar cards irrelevanets
 # US-032 — Cancel a reservation according to the cancellation policy (Implementar cuando se defina el policy)
+
+--Permitir buscar un horario solamente por deporte
+--Sugerir horarios mas proximos al que se desea reservar 
+
