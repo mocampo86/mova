@@ -143,7 +143,15 @@
       "subtitle": "Descubra complexos esportivos próximos, verifique a disponibilidade de quadras e reserve o horário que funciona para você.",
       "play": "Jogar / Reservar uma quadra",
       "manage": "Gerenciar seu complexo",
-      "browse": "Explorar complexos"
+      "browse": "Explorar complexos",
+      "carousel": {
+        "label": "Imagens de instalações esportivas",
+        "previous": "Slide anterior",
+        "next": "Próximo slide",
+        "goToSlide": "Ir para o slide {{index}} de {{total}}",
+        "slideLabel": "Slide {{current}} de {{total}}",
+        "announcement": "Mostrando slide {{current}} de {{total}}"
+      }
     },
     "steps": {
       "title": "Como encontrar e reservar uma quadra",

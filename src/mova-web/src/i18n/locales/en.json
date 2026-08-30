@@ -143,7 +143,15 @@
       "subtitle": "Discover nearby sports complexes, check court availability, and reserve the time that works for you.",
       "play": "Play / Book a court",
       "manage": "Manage your complex",
-      "browse": "Browse complexes"
+      "browse": "Browse complexes",
+      "carousel": {
+        "label": "Sports facility images",
+        "previous": "Previous slide",
+        "next": "Next slide",
+        "goToSlide": "Go to slide {{index}} of {{total}}",
+        "slideLabel": "Slide {{current}} of {{total}}",
+        "announcement": "Showing slide {{current}} of {{total}}"
+      }
     },
     "steps": {
       "title": "How to find and book a court",

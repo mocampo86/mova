@@ -3,23 +3,10 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Box, Button, Card, CardActions, CardContent, Container, Grid, Skeleton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Seo from '../components/Seo';
+import HeroCarousel from '../components/HeroCarousel';
+import { heroSlides } from './heroCarouselConfig';
 
 const HomeFeaturedSection = lazy(() => import('./HomeFeaturedSection'));
-
-function HeroVisual() {
-  return (
-    <svg viewBox="0 0 200 200" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
-      <path d="M100 10 V190" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
-      <circle cx="100" cy="100" r="35" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
-      <path d="M10 100 H190" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
-      <path d="M25 25 Q100 100 175 25" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
-      <path d="M25 175 Q100 100 175 175" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
-      <path d="M25 25 Q100 100 25 175" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
-      <path d="M175 25 Q100 100 175 175" stroke="currentColor" strokeWidth="2" strokeOpacity="0.6" />
-    </svg>
-  );
-}
 
 const ctaFocusOutline = {
   '&:focus-visible': {
@@ -66,33 +53,8 @@ export default function HomePage() {
           borderRadius: { xs: '0 0 1.5rem 1.5rem', md: '0 0 2rem 2rem' }
         }}
       >
-        <Box
-          aria-hidden="true"
-          data-testid="hero-visual"
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            opacity: 0.15,
-            mixBlendMode: 'overlay',
-            backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.35) 0%, transparent 35%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.25) 0%, transparent 40%), radial-gradient(circle at 50% 100%, rgba(255,255,255,0.15) 0%, transparent 50%)'
-          }}
-        />
-        <Box
-          aria-hidden="true"
-          sx={{
-            position: 'absolute',
-            top: { xs: '5%', md: '10%' },
-            right: { xs: '-10%', sm: '-5%', md: '5%' },
-            width: { xs: 180, sm: 260, md: 340 },
-            height: { xs: 180, sm: 260, md: 340 },
-            opacity: 0.12,
-            color: 'common.white',
-            pointerEvents: 'none'
-          }}
-        >
-          <HeroVisual />
-        </Box>
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+        <HeroCarousel slides={heroSlides} interval={6000} data-testid="hero-visual" />
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 3 }}>
           <Stack spacing={{ xs: 3, md: 4 }} alignItems={{ xs: 'flex-start', md: 'center' }} textAlign={{ xs: 'left', md: 'center' }}>
             <Typography component="p" variant="overline" sx={{ letterSpacing: 3, opacity: 0.9, fontWeight: 600 }}>
               {t('home.hero.overline')}

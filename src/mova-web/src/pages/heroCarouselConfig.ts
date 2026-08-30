@@ -1,0 +1,28 @@
+import type { HeroSlide } from '../components/HeroCarousel';
+
+export const heroSlides: HeroSlide[] = [
+  {
+    id: 'padel',
+    src: '/images/hero/tennis-carrousel.png',
+    alt: '',
+    decorative: true
+  },
+  {
+    id: 'basketball',
+    src: '/images/hero/basquet-carousel.png',
+    alt: '',
+    decorative: true
+  },
+  {
+    id: 'tennis',
+    src: '/images/hero/reservation-carrousel.png',
+    alt: '',
+    decorative: true
+  },
+  {
+    id: 'soccer',
+    src: '/images/hero/soccer-carrousel.png',
+    alt: '',
+    decorative: true
+  }
+];
