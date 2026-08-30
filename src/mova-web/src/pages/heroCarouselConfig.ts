@@ -9,7 +9,7 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: 'basketball',
-    src: '/images/hero/system-carrousel.png',
+    src: '/images/hero/basquet-carousel.png',
     alt: '',
     decorative: true
   },

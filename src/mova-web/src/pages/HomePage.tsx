@@ -53,7 +53,7 @@ export default function HomePage() {
           borderRadius: { xs: '0 0 1.5rem 1.5rem', md: '0 0 2rem 2rem' }
         }}
       >
-        <HeroCarousel slides={heroSlides} data-testid="hero-visual" />
+        <HeroCarousel slides={heroSlides} interval={6000} data-testid="hero-visual" />
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 3 }}>
           <Stack spacing={{ xs: 3, md: 4 }} alignItems={{ xs: 'flex-start', md: 'center' }} textAlign={{ xs: 'left', md: 'center' }}>
             <Typography component="p" variant="overline" sx={{ letterSpacing: 3, opacity: 0.9, fontWeight: 600 }}>
