@@ -1,0 +1,11 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Basketball court illustration">
+  <rect width="800" height="450" fill="#3d2616"/>
+  <rect x="100" y="75" width="600" height="300" fill="#c66b2e" stroke="#fff" stroke-width="4"/>
+  <line x1="400" y1="75" x2="400" y2="375" stroke="#fff" stroke-width="4"/>
+  <circle cx="400" cy="225" r="60" fill="none" stroke="#fff" stroke-width="4"/>
+  <line x1="100" y1="225" x2="700" y2="225" stroke="#fff" stroke-width="2"/>
+  <rect x="250" y="55" width="20" height="60" fill="none" stroke="#fff" stroke-width="4"/>
+  <rect x="530" y="55" width="20" height="60" fill="none" stroke="#fff" stroke-width="4"/>
+  <circle cx="260" cy="85" r="15" fill="none" stroke="#fff" stroke-width="3"/>
+  <circle cx="540" cy="85" r="15" fill="none" stroke="#fff" stroke-width="3"/>
+</svg>

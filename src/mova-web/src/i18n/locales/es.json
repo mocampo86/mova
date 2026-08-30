@@ -143,7 +143,15 @@
       "subtitle": "Descubre complejos deportivos cercanos, consulta la disponibilidad de canchas y reserva el horario que más te convenga.",
       "play": "Jugar / Reservar una cancha",
       "manage": "Administrar tu complejo",
-      "browse": "Explorar complejos"
+      "browse": "Explorar complejos",
+      "carousel": {
+        "label": "Imágenes de instalaciones deportivas",
+        "previous": "Diapositiva anterior",
+        "next": "Diapositiva siguiente",
+        "goToSlide": "Ir a la diapositiva {{index}} de {{total}}",
+        "slideLabel": "Diapositiva {{current}} de {{total}}",
+        "announcement": "Mostrando diapositiva {{current}} de {{total}}"
+      }
     },
     "steps": {
       "title": "Cómo encontrar y reservar una cancha",
