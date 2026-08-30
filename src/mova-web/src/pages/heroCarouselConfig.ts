@@ -9,13 +9,13 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: 'basketball',
-    src: '/images/hero/basketball.svg',
+    src: '/images/hero/system-carrousel.png',
     alt: '',
     decorative: true
   },
   {
     id: 'tennis',
-    src: '/images/hero/tennis.svg',
+    src: '/images/hero/reservation-carrousel.png',
     alt: '',
     decorative: true
   },
