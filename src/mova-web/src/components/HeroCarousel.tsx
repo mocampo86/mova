@@ -18,8 +18,8 @@ interface HeroCarouselProps {
 
 export default function HeroCarousel({
   slides,
-  interval = 6000,
-  overlayOpacity = 0.55,
+  interval = 0,
+  overlayOpacity = 0.35,
   'data-testid': testId
 }: HeroCarouselProps) {
   const { t } = useTranslation();
@@ -48,7 +48,7 @@ export default function HeroCarousel({
   }, []);
 
   useEffect(() => {
-    if (!hasMultipleSlides || prefersReducedMotion || isPaused) return;
+    if (!hasMultipleSlides || prefersReducedMotion || isPaused || interval <= 0) return;
     const timeoutId = window.setTimeout(() => {
       setActiveIndex((prev) => (prev + 1) % slides.length);
     }, interval);
@@ -121,8 +121,8 @@ export default function HeroCarousel({
           position: 'absolute',
           inset: 0,
           zIndex: 2,
-          bgcolor: `rgba(10, 61, 58, ${overlayOpacity})`,
-          backgroundImage: 'linear-gradient(135deg, rgba(10,61,58,0.95) 0%, rgba(15,94,89,0.90) 50%, rgba(20,135,126,0.88) 100%)'
+          bgcolor: `rgba(0, 0, 0, ${overlayOpacity})`,
+          backgroundImage: 'linear-gradient(180deg, rgba(0,0,0,0.12) 0%, transparent 50%, rgba(0,0,0,0.12) 100%)'
         }}
       />
 
