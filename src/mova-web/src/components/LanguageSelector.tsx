@@ -36,7 +36,7 @@ export default function LanguageSelector() {
   };
 
   return (
-    <FormControl size="small" sx={{ minWidth: { xs: 130, sm: 150 } }}>
+    <FormControl size="small" sx={{ minWidth: { xs: 120, sm: 150 } }}>
       <InputLabel id="language-selector-label">{t('language.label')}</InputLabel>
       <Select
         labelId="language-selector-label"
