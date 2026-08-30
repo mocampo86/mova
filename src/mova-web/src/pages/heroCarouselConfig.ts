@@ -3,7 +3,7 @@ import type { HeroSlide } from '../components/HeroCarousel';
 export const heroSlides: HeroSlide[] = [
   {
     id: 'padel',
-    src: '/images/hero/padel.svg',
+    src: '/images/hero/tennis-carrousel.png',
     alt: '',
     decorative: true
   },
