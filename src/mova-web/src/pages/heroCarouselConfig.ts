@@ -21,7 +21,7 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: 'soccer',
-    src: '/images/hero/soccer.svg',
+    src: '/images/hero/soccer-carrousel.png',
     alt: '',
     decorative: true
   }
