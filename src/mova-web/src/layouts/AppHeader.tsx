@@ -229,7 +229,15 @@ export default function AppHeader({ greetingName, showMenuToggle, onMenuToggle }
         </Button>
       )}
       {!isMobile && displayName && (
-        <Typography sx={{ mr: 1 }}>
+        <Typography
+          noWrap
+          sx={{
+            mr: 1,
+            maxWidth: { xs: 140, sm: 180, md: 260 },
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+        >
           {t('dashboard.welcome', { name: displayName })}
         </Typography>
       )}
@@ -257,7 +265,15 @@ export default function AppHeader({ greetingName, showMenuToggle, onMenuToggle }
             </Button>
           )}
           {!isMobile && displayName && (
-            <Typography sx={{ mr: 1 }}>
+            <Typography
+              noWrap
+              sx={{
+                mr: 1,
+                maxWidth: { xs: 140, sm: 180, md: 260 },
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
               {t('dashboard.welcome', { name: displayName })}
             </Typography>
           )}
@@ -307,7 +323,7 @@ export default function AppHeader({ greetingName, showMenuToggle, onMenuToggle }
           {t('nav.brand')}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
           {isAuthenticated ? authenticatedActions : isMobile ? mobileNav : publicDesktopActions}
         </Box>
       </Toolbar>

@@ -1,6 +1,7 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Alert, Box, Button, Card, CardActions, CardContent, Container, Grid, Skeleton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { responsiveCtaSx } from '../shared/responsive';
 import { useActiveComplexes } from '../features/complexes/complexApi';
 
 export default function HomeFeaturedSection() {
@@ -11,8 +12,8 @@ export default function HomeFeaturedSection() {
     <Box component="section" aria-labelledby="featured-title" sx={{ bgcolor: 'grey.100', py: { xs: 7, md: 10 } }}>
       <Container maxWidth="lg">
         <Stack spacing={2} alignItems="center" textAlign="center" sx={{ mb: 5 }}>
-          <Typography id="featured-title" component="h2" variant="h4" sx={{ fontWeight: 700 }}>{t('home.featured.title')}</Typography>
-          <Typography color="text.secondary">{t('home.featured.subtitle')}</Typography>
+          <Typography id="featured-title" component="h2" variant="h4" sx={{ fontWeight: 700, overflowWrap: 'break-word' }}>{t('home.featured.title')}</Typography>
+          <Typography color="text.secondary" sx={{ overflowWrap: 'break-word' }}>{t('home.featured.subtitle')}</Typography>
         </Stack>
         {isFeaturedLoading && <Grid container spacing={3}>{[0, 1, 2].map((index) => <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}><Skeleton variant="rounded" height={190} /></Grid>)}</Grid>}
         {isFeaturedError && <Alert severity="error">{t('home.featured.error')}</Alert>}
@@ -22,11 +23,11 @@ export default function HomeFeaturedSection() {
             <Grid key={complex.id} size={{ xs: 12, sm: 6, md: 4 }}>
               <Card variant="outlined" sx={{ height: '100%', borderRadius: 3 }}>
                 <CardContent>
-                  <Typography component="h3" variant="h6" sx={{ fontWeight: 700 }}>{complex.name}</Typography>
-                  <Typography color="text.secondary" sx={{ mt: 1 }}>{complex.city}{t('common.formatSeparator')}{complex.address}</Typography>
-                  <Typography sx={{ mt: 2 }}>{complex.description || t('common.noDescription')}</Typography>
+                  <Typography component="h3" variant="h6" sx={{ fontWeight: 700, overflowWrap: 'break-word' }}>{complex.name}</Typography>
+                  <Typography color="text.secondary" sx={{ mt: 1, overflowWrap: 'break-word' }}>{complex.city}{t('common.formatSeparator')}{complex.address}</Typography>
+                  <Typography sx={{ mt: 2, overflowWrap: 'break-word' }}>{complex.description || t('common.noDescription')}</Typography>
                 </CardContent>
-                <CardActions sx={{ px: 2, pb: 2 }}><Button component={RouterLink} to={`/complexes/${complex.id}`}>{t('home.featured.action')}</Button></CardActions>
+                <CardActions sx={{ px: 2, pb: 2 }}><Button component={RouterLink} to={`/complexes/${complex.id}`} sx={responsiveCtaSx}>{t('home.featured.action')}</Button></CardActions>
               </Card>
             </Grid>
           ))}
