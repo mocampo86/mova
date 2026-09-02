@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import Seo from '../components/Seo';
 import HeroCarousel from '../components/HeroCarousel';
 import { heroSlides } from './heroCarouselConfig';
+import { responsiveCtaSx } from '../shared/responsive';
 
 const HomeFeaturedSection = lazy(() => import('./HomeFeaturedSection'));
 
@@ -59,10 +60,29 @@ export default function HomePage() {
             <Typography component="p" variant="overline" sx={{ letterSpacing: 3, opacity: 0.9, fontWeight: 600 }}>
               {t('home.hero.overline')}
             </Typography>
-            <Typography id="hero-title" component="h1" variant="h2" sx={{ fontWeight: 900, fontSize: { xs: '2.5rem', sm: '3rem', md: '4.5rem' }, lineHeight: 1.1 }}>
+            <Typography
+              id="hero-title"
+              component="h1"
+              variant="h2"
+              sx={{
+                fontWeight: 900,
+                fontSize: { xs: '2.5rem', sm: '3rem', md: '4.5rem' },
+                lineHeight: 1.1,
+                overflowWrap: 'break-word'
+              }}
+            >
               {t('home.hero.title')}
             </Typography>
-            <Typography variant="h6" sx={{ maxWidth: 680, fontWeight: 400, opacity: 0.93, fontSize: { xs: '1.1rem', md: '1.35rem' } }}>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 680,
+                fontWeight: 400,
+                opacity: 0.93,
+                fontSize: { xs: '1.1rem', md: '1.35rem' },
+                overflowWrap: 'break-word'
+              }}
+            >
               {t('home.hero.subtitle')}
             </Typography>
             <Stack
@@ -71,6 +91,7 @@ export default function HomePage() {
               useFlexGap
               flexWrap="wrap"
               justifyContent="center"
+              alignItems="stretch"
               sx={{ pt: 1 }}
             >
               <Button
@@ -85,7 +106,8 @@ export default function HomePage() {
                   bgcolor: 'common.white',
                   color: 'primary.dark',
                   '&:hover': { bgcolor: 'grey.100' },
-                  ...ctaFocusOutline
+                  ...ctaFocusOutline,
+                  ...responsiveCtaSx
                 }}
               >
                 {t('home.hero.play')}
@@ -102,7 +124,8 @@ export default function HomePage() {
                   color: 'common.white',
                   borderColor: 'rgba(255,255,255,0.7)',
                   '&:hover': { borderColor: 'common.white', bgcolor: 'rgba(255,255,255,0.08)' },
-                  ...ctaFocusOutline
+                  ...ctaFocusOutline,
+                  ...responsiveCtaSx
                 }}
               >
                 {t('home.hero.manage')}
@@ -120,7 +143,8 @@ export default function HomePage() {
                   color: 'common.white',
                   border: '1px solid rgba(255,255,255,0.3)',
                   '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
-                  ...ctaFocusOutline
+                  ...ctaFocusOutline,
+                  ...responsiveCtaSx
                 }}
               >
                 {t('home.hero.browse')}
@@ -132,10 +156,10 @@ export default function HomePage() {
 
       <Container id="how-it-works" component="section" aria-labelledby="steps-title" maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>
         <Stack spacing={2} alignItems="center" textAlign="center" sx={{ mb: 5 }}>
-          <Typography id="steps-title" component="h2" variant="h4" sx={{ fontWeight: 700 }}>
+          <Typography id="steps-title" component="h2" variant="h4" sx={{ fontWeight: 700, overflowWrap: 'break-word' }}>
             {t('home.steps.title')}
           </Typography>
-          <Typography color="text.secondary" sx={{ maxWidth: 620 }}>
+          <Typography color="text.secondary" sx={{ maxWidth: 620, overflowWrap: 'break-word' }}>
             {t('home.steps.subtitle')}
           </Typography>
         </Stack>
@@ -144,46 +168,46 @@ export default function HomePage() {
             <Grid key={step.title} size={{ xs: 12, md: 4 }}>
               <Card variant="outlined" sx={{ height: '100%', borderRadius: 3 }}>
                 <CardContent sx={{ p: 3 }}>
-                  <Typography component="h3" variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                  <Typography component="h3" variant="h6" sx={{ fontWeight: 700, mb: 1, overflowWrap: 'break-word' }}>
                     {step.title}
                   </Typography>
-                  <Typography color="text.secondary">{step.description}</Typography>
+                  <Typography color="text.secondary" sx={{ overflowWrap: 'break-word' }}>{step.description}</Typography>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
         <Stack alignItems="center" sx={{ mt: 4 }}>
-          <Button component={RouterLink} to="/complexes" variant="contained" size="large">
+          <Button component={RouterLink} to="/complexes" variant="contained" size="large" sx={responsiveCtaSx}>
             {t('home.steps.action')}
           </Button>
         </Stack>
       </Container>
 
       <Container component="section" aria-labelledby="audiences-title" maxWidth="lg" sx={{ py: { xs: 7, md: 10 } }}>
-        <Typography id="audiences-title" component="h2" variant="h4" sx={{ fontWeight: 700, textAlign: 'center', mb: 5 }}>
+        <Typography id="audiences-title" component="h2" variant="h4" sx={{ fontWeight: 700, textAlign: 'center', mb: 5, overflowWrap: 'break-word' }}>
           {t('home.audiences.title')}
         </Typography>
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Card variant="outlined" sx={{ height: '100%', borderRadius: 3 }}>
               <CardContent sx={{ p: 4 }}>
-                <Typography component="h3" variant="h5" sx={{ fontWeight: 700, mb: 1 }}>{t('home.audiences.playersTitle')}</Typography>
-                <Typography color="text.secondary">{t('home.audiences.playersDescription')}</Typography>
+                <Typography component="h3" variant="h5" sx={{ fontWeight: 700, mb: 1, overflowWrap: 'break-word' }}>{t('home.audiences.playersTitle')}</Typography>
+                <Typography color="text.secondary" sx={{ overflowWrap: 'break-word' }}>{t('home.audiences.playersDescription')}</Typography>
               </CardContent>
               <CardActions sx={{ px: 3, pb: 3 }}>
-                <Button component={RouterLink} to="/complexes">{t('home.audiences.playersAction')}</Button>
+                <Button component={RouterLink} to="/complexes" sx={responsiveCtaSx}>{t('home.audiences.playersAction')}</Button>
               </CardActions>
             </Card>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <Card variant="outlined" sx={{ height: '100%', borderRadius: 3 }}>
               <CardContent sx={{ p: 4 }}>
-                <Typography component="h3" variant="h5" sx={{ fontWeight: 700, mb: 1 }}>{t('home.audiences.ownersTitle')}</Typography>
-                <Typography color="text.secondary">{t('home.audiences.ownersDescription')}</Typography>
+                <Typography component="h3" variant="h5" sx={{ fontWeight: 700, mb: 1, overflowWrap: 'break-word' }}>{t('home.audiences.ownersTitle')}</Typography>
+                <Typography color="text.secondary" sx={{ overflowWrap: 'break-word' }}>{t('home.audiences.ownersDescription')}</Typography>
               </CardContent>
               <CardActions sx={{ px: 3, pb: 3 }}>
-                <Button component={RouterLink} to="/login?intent=complex">{t('home.audiences.ownersAction')}</Button>
+                <Button component={RouterLink} to="/login?intent=complex" sx={responsiveCtaSx}>{t('home.audiences.ownersAction')}</Button>
               </CardActions>
             </Card>
           </Grid>
@@ -208,15 +232,21 @@ export default function HomePage() {
 
       <Box component="section" aria-labelledby="cta-title" sx={{ py: 7, px: 2, textAlign: 'center' }}>
         <Stack spacing={2} alignItems="center">
-          <Typography id="cta-title" component="h2" variant="h5" sx={{ fontWeight: 700 }}>
+          <Typography id="cta-title" component="h2" variant="h5" sx={{ fontWeight: 700, overflowWrap: 'break-word' }}>
             {t('home.cta.title')}
           </Typography>
-          <Typography color="text.secondary">{t('home.cta.subtitle')}</Typography>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-            <Button component={RouterLink} to="/login?intent=user" variant="contained" size="large">
+          <Typography color="text.secondary" sx={{ overflowWrap: 'break-word' }}>{t('home.cta.subtitle')}</Typography>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            useFlexGap
+            flexWrap="wrap"
+            alignItems="stretch"
+          >
+            <Button component={RouterLink} to="/login?intent=user" variant="contained" size="large" sx={responsiveCtaSx}>
               {t('home.cta.signIn')}
             </Button>
-            <Button component={RouterLink} to="/login?intent=complex" variant="outlined" size="large">
+            <Button component={RouterLink} to="/login?intent=complex" variant="outlined" size="large" sx={responsiveCtaSx}>
               {t('home.cta.register')}
             </Button>
           </Stack>

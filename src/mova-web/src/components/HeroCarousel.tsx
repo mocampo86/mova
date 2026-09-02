@@ -142,6 +142,7 @@ export default function HeroCarousel({
             }}
           >
             <IconButton
+              size="large"
               onClick={goPrev}
               aria-label={t('home.hero.carousel.previous')}
               sx={{
@@ -152,7 +153,7 @@ export default function HeroCarousel({
                 '&:focus-visible': { outline: '3px solid rgba(255,255,255,0.95)', outlineOffset: '3px' }
               }}
             >
-              <Typography component="span" aria-hidden="true" sx={{ fontSize: '1.5rem', lineHeight: 1, px: 0.5 }}>
+              <Typography component="span" aria-hidden="true" sx={{ fontSize: '1.5rem', lineHeight: 1 }}>
                 {'‹'}
               </Typography>
             </IconButton>
@@ -164,19 +165,33 @@ export default function HeroCarousel({
                 aria-label={t('home.hero.carousel.goToSlide', { index: index + 1, total: slides.length })}
                 aria-pressed={index === activeIndex}
                 sx={{
-                  width: 12,
-                  height: 12,
+                  width: 44,
+                  height: 44,
                   borderRadius: '50%',
-                  bgcolor: index === activeIndex ? 'common.white' : 'rgba(255,255,255,0.35)',
-                  border: '1px solid rgba(255,255,255,0.45)',
                   minWidth: 'auto',
-                  '&:hover': { bgcolor: 'rgba(255,255,255,0.75)' },
+                  p: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  '&:hover .carousel-dot': { bgcolor: 'rgba(255,255,255,0.75)' },
                   '&:focus-visible': { outline: '3px solid rgba(255,255,255,0.95)', outlineOffset: '3px' }
                 }}
-              />
+              >
+                <Box
+                  className="carousel-dot"
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    bgcolor: index === activeIndex ? 'common.white' : 'rgba(255,255,255,0.35)',
+                    border: '1px solid rgba(255,255,255,0.45)'
+                  }}
+                />
+              </ButtonBase>
             ))}
 
             <IconButton
+              size="large"
               onClick={goNext}
               aria-label={t('home.hero.carousel.next')}
               sx={{
@@ -187,7 +202,7 @@ export default function HeroCarousel({
                 '&:focus-visible': { outline: '3px solid rgba(255,255,255,0.95)', outlineOffset: '3px' }
               }}
             >
-              <Typography component="span" aria-hidden="true" sx={{ fontSize: '1.5rem', lineHeight: 1, px: 0.5 }}>
+              <Typography component="span" aria-hidden="true" sx={{ fontSize: '1.5rem', lineHeight: 1 }}>
                 {'›'}
               </Typography>
             </IconButton>
