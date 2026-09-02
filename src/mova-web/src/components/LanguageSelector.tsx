@@ -44,6 +44,7 @@ export default function LanguageSelector() {
         label={t('language.label')}
         onChange={handleChange}
         renderValue={renderSelectedValue}
+        sx={{ minHeight: { xs: 44, sm: 40 } }}
       >
         {LANGUAGES.map((language) => (
           <MenuItem key={language.code} value={language.code}>

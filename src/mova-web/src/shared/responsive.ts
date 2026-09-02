@@ -7,7 +7,3 @@ export const responsiveCtaSx: SxProps<Theme> = {
   height: 'auto',
   width: { xs: '100%', sm: 'auto' }
 };
-
-export const breakWord: SxProps<Theme> = {
-  overflowWrap: 'break-word'
-};
