@@ -2,6 +2,7 @@ using System.Data;
 using Mova.Application.Abstractions.Authentication;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
+using Mova.Application.Pricing;
 using Mova.Application.Reservations.Commands;
 using Mova.Contracts.Reservations;
 using Mova.Domain.Entities;
@@ -19,6 +20,7 @@ public sealed class CreateRecurringReservationHandler(
     IRecurringReservationRepository recurringReservations,
     IReservationRepository reservations,
     ICourtBlockRepository courtBlocks,
+    ICourtRateRepository courtRates,
     IAuditLogRepository auditLogs,
     ICurrentUserContext currentUser,
     IUnitOfWork unitOfWork) : ICreateRecurringReservationHandler
@@ -62,6 +64,14 @@ public sealed class CreateRecurringReservationHandler(
                 {
                     throw new ConflictException("The recurrence period does not contain any matching weekly occurrences.");
                 }
+
+                var seriesTotal = await ReservationPricer.ApplyAsync(courtRates, occurrences, complex.Currency, timeZone, token);
+
+                PriceExpectation.EnsureMatches(
+                    command.ExpectedTotalPrice,
+                    command.ExpectedCurrency,
+                    seriesTotal,
+                    complex.Currency);
 
                 await EnsureAvailableAsync(command.CourtId, occurrences, null, token);
 

@@ -1,7 +1,35 @@
 import { test, expect } from '@playwright/test';
 
+const API_BASE_URL = process.env.E2E_API_BASE_URL ?? 'http://localhost:5098';
+
 test.describe('US-079 Search and select a user when creating a manual reservation', () => {
   test('administrator searches for a user by email, name, and phone number and creates a manual reservation', async ({ page }) => {
+    await page.route(new RegExp(`${API_BASE_URL}/api/v1/complexes/complex-1/courts/[^/]+/price-quote(\\?.*)?$`), (route) => {
+      if (route.request().method() !== 'GET') {
+        route.continue();
+        return;
+      }
+
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          totalAmount: 1200,
+          currency: 'UYU',
+          isFullyCovered: true,
+          lines: [
+            {
+              startAt: '2026-01-01T00:00:00Z',
+              endAt: '2026-01-01T01:00:00Z',
+              hourlyRate: 1200,
+              amount: 1200
+            }
+          ],
+          gaps: []
+        })
+      });
+    });
+
     await page.goto('/admin/complex/complex-1/reservations');
 
     await page.getByRole('button', { name: 'Create reservation' }).click();

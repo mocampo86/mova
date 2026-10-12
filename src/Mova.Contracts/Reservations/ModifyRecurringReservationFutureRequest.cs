@@ -21,4 +21,10 @@ public sealed class ModifyRecurringReservationFutureRequest
 
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }
+
+    [JsonPropertyName("expectedTotalPrice")]
+    public decimal? ExpectedTotalPrice { get; set; }
+
+    [JsonPropertyName("expectedCurrency")]
+    public string? ExpectedCurrency { get; set; }
 }

@@ -53,6 +53,30 @@ vi.mock('../features/reservations/reservationApi', () => ({
   useCreateMyRecurringReservation: () => createMutation
 }));
 
+const priceQuote = {
+  data: {
+    totalAmount: 1200,
+    currency: 'UYU',
+    isFullyCovered: true,
+    lines: [
+      {
+        startAt: '2026-01-05T20:00:00Z',
+        endAt: '2026-01-05T21:00:00Z',
+        hourlyRate: 1200,
+        amount: 1200
+      }
+    ],
+    gaps: []
+  },
+  isLoading: false,
+  isError: false,
+  refetch: vi.fn()
+};
+
+vi.mock('../features/rates/rateApi', () => ({
+  usePriceQuote: () => priceQuote
+}));
+
 import { useRecurringReservationSettings } from '../features/complexes/complexApi';
 
 function setSelectValue(testId: string, value: string) {

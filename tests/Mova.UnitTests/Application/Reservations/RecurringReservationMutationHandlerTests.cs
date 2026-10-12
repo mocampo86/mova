@@ -16,6 +16,7 @@ public sealed class RecurringReservationMutationHandlerTests
     private readonly FakeRecurringReservationRepository _recurringReservationRepository = new();
     private readonly FakeReservationRepository _reservationRepository = new();
     private readonly FakeCourtBlockRepository _courtBlockRepository = new();
+    private readonly FakeCourtRateRepository _courtRateRepository = new();
     private readonly FakeSportsComplexRepository _sportsComplexRepository = new();
     private readonly FakeAuditLogRepository _auditLogs = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
@@ -33,6 +34,7 @@ public sealed class RecurringReservationMutationHandlerTests
             _recurringReservationRepository,
             _reservationRepository,
             _courtBlockRepository,
+            _courtRateRepository,
             _sportsComplexRepository,
             _auditLogs,
             _unitOfWork);
@@ -292,6 +294,13 @@ public sealed class RecurringReservationMutationHandlerTests
             "+598 99 123 456",
             $"test-{Guid.NewGuid()}@example.com");
         await _sportsComplexRepository.AddAsync(sportsComplex);
+
+        await _courtRateRepository.AddAsync(CourtRate.Create(
+            courtId,
+            0b1111111,
+            TimeSpan.Zero,
+            TimeSpan.FromHours(24),
+            100m));
 
         var series = RecurringReservation.Create(
             sportsComplex.Id,

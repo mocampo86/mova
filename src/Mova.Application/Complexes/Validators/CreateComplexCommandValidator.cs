@@ -81,5 +81,10 @@ public sealed class CreateComplexCommandValidator : AbstractValidator<CreateComp
             .WithMessage($"Time zone must not exceed {MaxTimeZoneIdLength} characters.")
             .Must(TimeZoneConverter.IsValidTimeZoneId)
             .WithMessage("Time zone is not supported by the runtime.");
+
+        RuleFor(x => x.Currency)
+            .Matches("^[A-Za-z]{3}$")
+            .WithMessage("Currency must be a 3-letter ISO 4217 code.")
+            .When(x => x.Currency is not null);
     }
 }

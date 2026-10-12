@@ -22,6 +22,8 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.UpdatedAt);
         builder.Property(x => x.CancelledByUserId);
+        builder.Property(x => x.TotalPrice).HasPrecision(18, 2);
+        builder.Property(x => x.Currency).HasMaxLength(3);
         builder.HasIndex(x => x.SportsComplexId);
         builder.HasIndex(x => new { x.CourtId, x.StartAt, x.EndAt, x.Status });
         builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);

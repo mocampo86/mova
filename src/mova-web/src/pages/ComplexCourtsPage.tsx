@@ -221,6 +221,13 @@ export default function ComplexCourtsPage() {
                             </Button>
                             <Button
                               component={RouterLink}
+                              to={`/admin/complex/${complexId}/courts/${court.id}/rates`}
+                              size="small"
+                            >
+                              {t('admin.courts.rates')}
+                            </Button>
+                            <Button
+                              component={RouterLink}
                               to={`/admin/complex/${complexId}/courts/${court.id}/edit`}
                               size="small"
                             >

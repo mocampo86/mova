@@ -10,4 +10,6 @@ public sealed record CreateRecurringReservationCommand(
     DateOnly StartDate,
     DateOnly EndDate,
     string? Notes,
-    bool IsAdmin);
+    bool IsAdmin,
+    decimal? ExpectedTotalPrice = null,
+    string? ExpectedCurrency = null);

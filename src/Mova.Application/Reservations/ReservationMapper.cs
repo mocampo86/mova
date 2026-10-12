@@ -24,6 +24,18 @@ public static class ReservationMapper
         CancelledAt = reservation.CancelledAt,
         CancellationReason = reservation.CancellationReason,
         CancelledByUserId = reservation.CancelledByUserId,
-        CancelledByUserName = reservation.CancelledByUser?.FullName ?? string.Empty
+        CancelledByUserName = reservation.CancelledByUser?.FullName ?? string.Empty,
+        TotalPrice = reservation.TotalPrice,
+        Currency = reservation.Currency,
+        PriceLines = reservation.PriceLines
+            .OrderBy(l => l.StartAt)
+            .Select(l => new ReservationPriceLineInfo
+            {
+                StartAt = l.StartAt,
+                EndAt = l.EndAt,
+                HourlyRate = l.HourlyRate,
+                Amount = l.Amount
+            })
+            .ToArray()
     };
 }

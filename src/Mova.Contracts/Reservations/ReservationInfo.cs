@@ -57,4 +57,15 @@ public sealed class ReservationInfo
 
     [JsonPropertyName("cancelledByUserName")]
     public string CancelledByUserName { get; set; } = string.Empty;
+
+    [JsonPropertyName("totalPrice")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public decimal? TotalPrice { get; set; }
+
+    [JsonPropertyName("currency")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Currency { get; set; }
+
+    [JsonPropertyName("priceLines")]
+    public IReadOnlyCollection<ReservationPriceLineInfo> PriceLines { get; set; } = [];
 }

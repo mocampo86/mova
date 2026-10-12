@@ -127,8 +127,13 @@
       "concurrency": "The data has changed. Please refresh and try again.",
       "rateLimit": "Too many requests. Please wait and try again.",
       "blockedUser": "You are blocked in this complex.",
-      "recurringDisabled": "Recurring reservations are not enabled for this complex."
-    }
+      "recurringDisabled": "Recurring reservations are not enabled for this complex.",
+      "priceNotConfigured": "This time slot has no configured rate and cannot be booked.",
+      "priceChanged": "The price changed since it was displayed. Review the new price and try again.",
+      "rateOverlap": "The time range overlaps another rate for the same day.",
+      "timezoneNotConfigured": "The complex does not have a valid time zone configured."
+    },
+    "price": "Price"
   },
   "language": {
     "label": "Language",
@@ -237,7 +242,11 @@
       "message": "Confirm reservation for {{court}} on {{date}} from {{start}} to {{end}}?",
       "notesLabel": "Notes (optional)",
       "confirm": "Confirm booking",
-      "loginPrompt": "Log in to book this slot."
+      "loginPrompt": "Log in to book this slot.",
+      "priceLoading": "Calculating price...",
+      "priceError": "Could not calculate the price.",
+      "priceNotConfigured": "This time slot has no configured rate and cannot be booked.",
+      "total": "Total: {{amount}}"
     }
   },
   "userHome": {
@@ -300,7 +309,8 @@
       "configure": "Configure",
       "deactivate": "Deactivate",
       "activate": "Activate",
-      "edit": "Edit"
+      "edit": "Edit",
+      "rates": "Rates"
     },
     "createCourt": {
       "title": "Create court",
@@ -387,7 +397,12 @@
       "calendarEmpty": "No slots to display for the selected date.",
       "slotDetailsTitle": "Slot details",
       "reservationDetailsTitle": "Reservation details",
-      "reserveSlot": "Reserve slot"
+      "reserveSlot": "Reserve slot",
+      "priceHeader": "Price",
+      "priceLoading": "Calculating price...",
+      "priceError": "Could not calculate the price.",
+      "priceNotConfigured": "The selected time slot has no configured rate.",
+      "priceTotal": "Total: {{amount}}"
     },
     "profile": {
       "title": "Edit complex profile",
@@ -405,7 +420,9 @@
       "timeZoneHelper": "Select the time zone for this complex.",
       "status": "Status",
       "success": "The complex profile has been updated successfully.",
-      "save": "Save changes"
+      "save": "Save changes",
+      "currency": "Currency (ISO code)",
+      "currencyHelper": "3-letter ISO 4217 code, e.g. USD."
     },
     "users": {
       "title": "Users",
@@ -468,7 +485,11 @@
       "selectCustomer": "Select a customer",
       "usersError": "The customers could not be loaded. Please try again later.",
       "create": "Create recurring booking",
-      "success": "Created {{count}} recurring bookings successfully."
+      "success": "Created {{count}} recurring bookings successfully.",
+      "priceLoading": "Calculating price...",
+      "priceError": "Could not calculate the price for the occurrences.",
+      "priceNotConfigured": "This time slot has no configured rate for all occurrences.",
+      "priceSummary": "Price per occurrence: {{perOccurrence}} — Estimated series total ({{count}}): {{total}}"
     },
     "recurringList": {
       "title": "Recurring bookings",
@@ -497,6 +518,24 @@
     "placeholder": {
       "title": "Section under construction",
       "subtitle": "This admin section is not yet available."
+    },
+    "rates": {
+      "title": "Rates",
+      "subtitle": "Hourly prices by day and time range",
+      "create": "New rate",
+      "createTitle": "Create rate",
+      "editTitle": "Edit rate",
+      "days": "Applicable days",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "endTimeHint": "Use 00:00 to indicate end of day (24:00).",
+      "amountPerHour": "Amount per hour",
+      "daysHeader": "Days",
+      "timeRangeHeader": "Time range",
+      "amountPerHourHeader": "Amount / hour",
+      "statusHeader": "Status",
+      "empty": "No rates configured for this court.",
+      "error": "Could not load the rates."
     }
   },
   "days": {
@@ -601,7 +640,11 @@
       "courtsError": "Courts could not be loaded.",
       "settingsError": "Complex settings could not be loaded.",
       "disabledForComplex": "Recurring reservations are not available for this complex.",
-      "disabledTooltip": "Recurring reservations are disabled for this complex."
+      "disabledTooltip": "Recurring reservations are disabled for this complex.",
+      "priceLoading": "Calculating price...",
+      "priceError": "Could not calculate the price for the occurrences.",
+      "priceNotConfigured": "This time slot has no configured rate for all occurrences.",
+      "priceSummary": "Price per occurrence: {{perOccurrence}} — Estimated series total ({{count}}): {{total}}"
     },
     "exploreComplexesTitle": "Find a complex",
     "exploreComplexesDescription": "Search active sports complexes and check court availability.",

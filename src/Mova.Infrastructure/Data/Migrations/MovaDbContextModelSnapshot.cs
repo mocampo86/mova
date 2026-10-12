@@ -320,6 +320,51 @@ namespace Mova.Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Mova.Domain.Entities.CourtRate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AmountPerHour")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("CourtId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DaysOfWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("interval");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("interval");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourtId");
+
+                    b.ToTable("CourtRates", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_court_rate_amount", "\"AmountPerHour\" > 0");
+
+                            t.HasCheckConstraint("chk_court_rate_days_of_week", "\"DaysOfWeek\" BETWEEN 1 AND 127");
+
+                            t.HasCheckConstraint("chk_court_rate_time", "\"StartTime\" >= interval '0 hours' AND \"StartTime\" < \"EndTime\" AND \"EndTime\" <= interval '24 hours'");
+                        });
+                });
+
             modelBuilder.Entity("Mova.Domain.Entities.CourtSport", b =>
                 {
                     b.Property<Guid>("CourtId")
@@ -454,6 +499,10 @@ namespace Mova.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Currency")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
                     b.Property<DateTime>("EndAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -477,6 +526,10 @@ namespace Mova.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<decimal?>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -498,6 +551,44 @@ namespace Mova.Infrastructure.Data.Migrations
                     b.ToTable("Reservations", null, t =>
                         {
                             t.HasCheckConstraint("chk_reservation_time", "\"StartAt\" < \"EndAt\"");
+                        });
+                });
+
+            modelBuilder.Entity("Mova.Domain.Entities.ReservationPriceLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid?>("CourtRateId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("HourlyRate")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("ReservationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourtRateId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("ReservationPriceLines", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_reservation_price_line_time", "\"StartAt\" < \"EndAt\"");
                         });
                 });
 
@@ -547,6 +638,12 @@ namespace Mova.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character(3)")
+                        .IsFixedLength();
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -719,6 +816,17 @@ namespace Mova.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Mova.Domain.Entities.CourtRate", b =>
+                {
+                    b.HasOne("Mova.Domain.Entities.Court", "Court")
+                        .WithMany()
+                        .HasForeignKey("CourtId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Court");
+                });
+
             modelBuilder.Entity("Mova.Domain.Entities.CourtSport", b =>
                 {
                     b.HasOne("Mova.Domain.Entities.Court", "Court")
@@ -790,9 +898,30 @@ namespace Mova.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Mova.Domain.Entities.ReservationPriceLine", b =>
+                {
+                    b.HasOne("Mova.Domain.Entities.CourtRate", null)
+                        .WithMany()
+                        .HasForeignKey("CourtRateId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Mova.Domain.Entities.Reservation", "Reservation")
+                        .WithMany("PriceLines")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+                });
+
             modelBuilder.Entity("Mova.Domain.Entities.Court", b =>
                 {
                     b.Navigation("CourtSports");
+                });
+
+            modelBuilder.Entity("Mova.Domain.Entities.Reservation", b =>
+                {
+                    b.Navigation("PriceLines");
                 });
 
             modelBuilder.Entity("Mova.Domain.Entities.Sport", b =>

@@ -32,4 +32,7 @@ public sealed class CreateComplexRequest
 
     [JsonPropertyName("timeZoneId")]
     public string TimeZoneId { get; set; } = string.Empty;
+
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
 }

@@ -54,7 +54,8 @@ public sealed class CreateComplexHandler : ICreateComplexHandler
                     command.Longitude,
                     command.PhoneNumber,
                     command.Email,
-                    command.TimeZoneId);
+                    command.TimeZoneId,
+                    currency: command.Currency ?? "UYU");
 
                 var administrator = ComplexAdministrator.Create(sportsComplex.Id, user.Id, Role.ComplexAdmin);
 

@@ -127,8 +127,13 @@
       "concurrency": "Los datos han cambiado. Actualiza la página e inténtalo de nuevo.",
       "rateLimit": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
       "blockedUser": "Estás bloqueado en este complejo.",
-      "recurringDisabled": "Las reservas recurrentes no están habilitadas en este complejo."
-    }
+      "recurringDisabled": "Las reservas recurrentes no están habilitadas en este complejo.",
+      "priceNotConfigured": "Este horario no tiene una tarifa configurada. No es posible reservarlo.",
+      "priceChanged": "El precio cambió desde que se mostró. Revisa el nuevo precio e inténtalo de nuevo.",
+      "rateOverlap": "La franja horaria se superpone con otra tarifa para el mismo día.",
+      "timezoneNotConfigured": "El complejo no tiene una zona horaria válida configurada."
+    },
+    "price": "Precio"
   },
   "language": {
     "label": "Idioma",
@@ -237,7 +242,11 @@
       "message": "¿Confirmar reserva para {{court}} el {{date}} de {{start}} a {{end}}?",
       "notesLabel": "Notas (opcional)",
       "confirm": "Confirmar reserva",
-      "loginPrompt": "Inicia sesión para reservar este turno."
+      "loginPrompt": "Inicia sesión para reservar este turno.",
+      "priceLoading": "Calculando precio...",
+      "priceError": "No se pudo calcular el precio.",
+      "priceNotConfigured": "Este horario no tiene tarifa configurada y no puede reservarse.",
+      "total": "Total: {{amount}}"
     }
   },
   "userHome": {
@@ -300,7 +309,8 @@
       "configure": "Configurar",
       "deactivate": "Desactivar",
       "activate": "Activar",
-      "edit": "Editar"
+      "edit": "Editar",
+      "rates": "Tarifas"
     },
     "createCourt": {
       "title": "Crear cancha",
@@ -387,7 +397,12 @@
       "calendarEmpty": "No hay franjas horarias para mostrar en la fecha seleccionada.",
       "slotDetailsTitle": "Detalles del turno",
       "reservationDetailsTitle": "Detalles de la reserva",
-      "reserveSlot": "Reservar turno"
+      "reserveSlot": "Reservar turno",
+      "priceHeader": "Precio",
+      "priceLoading": "Calculando precio...",
+      "priceError": "No se pudo calcular el precio.",
+      "priceNotConfigured": "El horario seleccionado no tiene tarifa configurada.",
+      "priceTotal": "Total: {{amount}}"
     },
     "profile": {
       "title": "Editar perfil del complejo",
@@ -405,7 +420,9 @@
       "timeZoneHelper": "Selecciona la zona horaria de este complejo.",
       "status": "Estado",
       "success": "El perfil del complejo se actualizó correctamente.",
-      "save": "Guardar cambios"
+      "save": "Guardar cambios",
+      "currency": "Moneda (código ISO)",
+      "currencyHelper": "Código ISO 4217 de 3 letras, por ejemplo UYU."
     },
     "users": {
       "title": "Usuarios",
@@ -468,7 +485,11 @@
       "selectCustomer": "Selecciona un cliente",
       "usersError": "No se pudieron cargar los clientes. Inténtalo de nuevo más tarde.",
       "create": "Crear reserva recurrente",
-      "success": "Se crearon {{count}} reservas recurrentes correctamente."
+      "success": "Se crearon {{count}} reservas recurrentes correctamente.",
+      "priceLoading": "Calculando precio...",
+      "priceError": "No se pudo calcular el precio de las ocurrencias.",
+      "priceNotConfigured": "Este horario no tiene tarifa configurada para todas las ocurrencias.",
+      "priceSummary": "Precio por ocurrencia: {{perOccurrence}} — Total estimado de la serie ({{count}}): {{total}}"
     },
     "recurringList": {
       "title": "Reservas recurrentes",
@@ -497,6 +518,24 @@
     "placeholder": {
       "title": "Sección en construcción",
       "subtitle": "Esta sección de administración aún no está disponible."
+    },
+    "rates": {
+      "title": "Tarifas",
+      "subtitle": "Precios por hora según día y franja horaria",
+      "create": "Nueva tarifa",
+      "createTitle": "Crear tarifa",
+      "editTitle": "Editar tarifa",
+      "days": "Días de aplicación",
+      "startTime": "Hora de inicio",
+      "endTime": "Hora de fin",
+      "endTimeHint": "Usa 00:00 para indicar fin de día (24:00).",
+      "amountPerHour": "Importe por hora",
+      "daysHeader": "Días",
+      "timeRangeHeader": "Horario",
+      "amountPerHourHeader": "Importe / hora",
+      "statusHeader": "Estado",
+      "empty": "No hay tarifas configuradas para esta cancha.",
+      "error": "No se pudieron cargar las tarifas."
     }
   },
   "days": {
@@ -601,7 +640,11 @@
       "courtsError": "No se pudieron cargar las canchas.",
       "settingsError": "No se pudieron cargar las opciones del complejo.",
       "disabledForComplex": "Las reservas recurrentes no están disponibles para este complejo.",
-      "disabledTooltip": "Las reservas recurrentes están desactivadas para este complejo."
+      "disabledTooltip": "Las reservas recurrentes están desactivadas para este complejo.",
+      "priceLoading": "Calculando precio...",
+      "priceError": "No se pudo calcular el precio de las ocurrencias.",
+      "priceNotConfigured": "Este horario no tiene tarifa configurada para todas las ocurrencias.",
+      "priceSummary": "Precio por ocurrencia: {{perOccurrence}} — Total estimado de la serie ({{count}}): {{total}}"
     },
     "exploreComplexesTitle": "Buscar complejo",
     "exploreComplexesDescription": "Busca complejos deportivos activos y consulta disponibilidad.",

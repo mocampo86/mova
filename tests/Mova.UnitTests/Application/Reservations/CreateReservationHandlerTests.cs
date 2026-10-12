@@ -20,6 +20,7 @@ public sealed class CreateReservationHandlerTests
     private readonly FakeBlockedUserRepository _blockedUserRepository = new();
     private readonly FakeReservationRepository _reservationRepository = new();
     private readonly FakeCourtBlockRepository _courtBlockRepository = new();
+    private readonly FakeCourtRateRepository _courtRateRepository = new();
     private readonly FakeAuditLogRepository _auditLogs = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
 
@@ -31,6 +32,7 @@ public sealed class CreateReservationHandlerTests
             _blockedUserRepository,
             _reservationRepository,
             _courtBlockRepository,
+            _courtRateRepository,
             _auditLogs,
             _unitOfWork);
 
@@ -49,6 +51,13 @@ public sealed class CreateReservationHandlerTests
 
         var court = Court.Create(complex.Id, "Court 1", "Description", "Synthetic", false);
         await _courtRepository.AddAsync(court);
+
+        await _courtRateRepository.AddAsync(CourtRate.Create(
+            court.Id,
+            0b1111111,
+            TimeSpan.Zero,
+            TimeSpan.FromHours(24),
+            100m));
 
         var user = User.CreateFromGoogle(Guid.NewGuid(), $"sub-{Guid.NewGuid()}", $"user-{Guid.NewGuid()}@example.com", "Test User");
         await _userRepository.AddAsync(user);
@@ -251,5 +260,90 @@ public sealed class CreateReservationHandlerTests
             start,
             end,
             null)));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithoutConfiguredRate_ThrowsPriceNotConfiguredException()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        _courtRateRepository.Clear();
+        var handler = CreateHandler();
+
+        var exception = await Assert.ThrowsAsync<PriceNotConfiguredException>(() => handler.HandleAsync(new CreateReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            Guid.NewGuid(),
+            new DateTime(2026, 8, 10, 14, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 8, 10, 15, 0, 0, DateTimeKind.Utc),
+            null)));
+
+        Assert.Single(exception.Gaps);
+    }
+
+    [Fact]
+    public async Task HandleAsync_PersistsTotalCurrencyAndPriceLines()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        var start = new DateTime(2026, 8, 10, 14, 0, 0, DateTimeKind.Utc);
+        var end = start.AddHours(2);
+        var handler = CreateHandler();
+
+        var result = await handler.HandleAsync(new CreateReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            Guid.NewGuid(),
+            start,
+            end,
+            null));
+
+        Assert.Equal(200m, result.TotalPrice);
+        Assert.Equal("UYU", result.Currency);
+        var line = Assert.Single(result.PriceLines);
+        Assert.Equal(100m, line.HourlyRate);
+        Assert.Equal(200m, line.Amount);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithMatchingExpectedPrice_Confirms()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        var start = new DateTime(2026, 8, 10, 14, 0, 0, DateTimeKind.Utc);
+        var handler = CreateHandler();
+
+        var result = await handler.HandleAsync(new CreateReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            Guid.NewGuid(),
+            start,
+            start.AddHours(1),
+            null,
+            ReservationSource.Web,
+            expectedTotalPrice: 100m,
+            expectedCurrency: "UYU"));
+
+        Assert.Equal(100m, result.TotalPrice);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithMismatchedExpectedPrice_ThrowsPriceChangedException()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        var start = new DateTime(2026, 8, 10, 14, 0, 0, DateTimeKind.Utc);
+        var handler = CreateHandler();
+
+        await Assert.ThrowsAsync<PriceChangedException>(() => handler.HandleAsync(new CreateReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            Guid.NewGuid(),
+            start,
+            start.AddHours(1),
+            null,
+            ReservationSource.Web,
+            expectedTotalPrice: 50m,
+            expectedCurrency: "UYU")));
     }
 }

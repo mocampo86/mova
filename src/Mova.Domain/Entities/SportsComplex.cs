@@ -17,6 +17,7 @@ public sealed class SportsComplex
     public ComplexStatus Status { get; private set; }
     public bool AllowUserRecurringReservations { get; private set; }
     public string? TimeZoneId { get; private set; }
+    public string Currency { get; private set; } = null!;
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
@@ -36,9 +37,10 @@ public sealed class SportsComplex
         string phoneNumber,
         string email,
         string? timeZoneId = "America/Montevideo",
-        ComplexStatus status = ComplexStatus.Active)
+        ComplexStatus status = ComplexStatus.Active,
+        string currency = "UYU")
     {
-        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, timeZoneId);
+        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, timeZoneId, currency);
 
         return new SportsComplex
         {
@@ -54,6 +56,7 @@ public sealed class SportsComplex
             Status = status,
             AllowUserRecurringReservations = true,
             TimeZoneId = timeZoneId!.Trim(),
+            Currency = currency.Trim().ToUpperInvariant(),
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -67,9 +70,10 @@ public sealed class SportsComplex
         decimal? longitude,
         string phoneNumber,
         string email,
-        string? timeZoneId = "America/Montevideo")
+        string? timeZoneId = "America/Montevideo",
+        string currency = "UYU")
     {
-        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, timeZoneId);
+        ValidateFields(name, description, address, city, latitude, longitude, phoneNumber, email, timeZoneId, currency);
 
         Name = name.Trim();
         Description = description.Trim();
@@ -80,6 +84,7 @@ public sealed class SportsComplex
         PhoneNumber = phoneNumber.Trim();
         Email = email.Trim();
         TimeZoneId = timeZoneId!.Trim();
+        Currency = currency.Trim().ToUpperInvariant();
         UpdatedAt = DateTime.UtcNow;
     }
 
@@ -120,7 +125,8 @@ public sealed class SportsComplex
         decimal? longitude,
         string phoneNumber,
         string email,
-        string? timeZoneId)
+        string? timeZoneId,
+        string currency)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(description);
@@ -172,6 +178,11 @@ public sealed class SportsComplex
         if (!TimeZoneConverter.IsValidTimeZoneId(timeZoneId))
         {
             throw new ArgumentException("A valid IANA time zone is required.", nameof(timeZoneId));
+        }
+
+        if (string.IsNullOrWhiteSpace(currency) || currency.Trim().Length != 3 || !currency.Trim().All(c => c is >= 'A' and <= 'Z' or >= 'a' and <= 'z'))
+        {
+            throw new ArgumentException("A valid ISO 4217 currency code is required.", nameof(currency));
         }
     }
 }

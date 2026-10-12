@@ -177,7 +177,8 @@ public class ComplexesController : ControllerBase
             request.Longitude,
             request.PhoneNumber,
             request.Email,
-            request.TimeZoneId);
+            request.TimeZoneId,
+            request.Currency);
 
         await _createValidator.ValidateAndThrowAsync(command, cancellationToken);
 
@@ -202,7 +203,8 @@ public class ComplexesController : ControllerBase
             request.Longitude,
             request.PhoneNumber,
             request.Email,
-            request.TimeZoneId);
+            request.TimeZoneId,
+            request.Currency);
 
         await _updateValidator.ValidateAndThrowAsync(command, cancellationToken);
 

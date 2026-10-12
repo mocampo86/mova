@@ -16,13 +16,22 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import ApiErrorMessage from '../components/ApiErrorMessage';
-import { useActiveCourts } from '../features/complexes/complexApi';
+import { useActiveCourts, useAdminComplex } from '../features/complexes/complexApi';
+import { usePriceQuote } from '../features/rates/rateApi';
+import { formatMoney } from '../features/rates/rateUtils';
+import { ApiError } from '../shared/utils/apiError';
 import { useCreateRecurringReservationForCustomer } from '../features/reservations/reservationApi';
 import { useComplexUsers } from '../features/users/userAdminApi';
 import type { UserListFilters } from '../features/users/userAdminTypes';
+import { localDateTimeToUtc } from '../utils/timezones';
 
 function todayIso() {
   return new Date().toISOString().split('T')[0];
+}
+
+function toLocalIsoDate(date: Date) {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 function addWeeksIso(weeks: number) {
@@ -42,6 +51,8 @@ export default function AdminRecurringReservationsPage() {
   });
   const users = useComplexUsers(complexId, userFilters);
   const courts = useActiveCourts(complexId);
+  const complex = useAdminComplex(complexId);
+  const timeZoneId = complex.data?.timeZoneId ?? undefined;
   const createRecurring = useCreateRecurringReservationForCustomer(complexId);
 
   const [userId, setUserId] = useState('');
@@ -76,25 +87,67 @@ export default function AdminRecurringReservationsPage() {
     return Math.floor((end.getTime() - first.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
   }, [dayOfWeek, endDate, startDate]);
 
+  // Quotes the first occurrence; every occurrence falls on the same weekday/time,
+  // so the per-occurrence price is uniform and the expected series total is unit × count.
+  const firstOccurrenceUtc = useMemo(() => {
+    if (!courtId || !startDate || !endDate || !startTime || Number(durationMinutes) <= 0) return null;
+
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T00:00:00`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) return null;
+
+    const targetDay = Number(dayOfWeek);
+    const first = new Date(start);
+    first.setDate(start.getDate() + ((targetDay - start.getDay() + 7) % 7));
+    if (first > end) return null;
+
+    const startUtc = localDateTimeToUtc(timeZoneId, `${toLocalIsoDate(first)}T${startTime}`);
+    const endUtc = new Date(new Date(startUtc).getTime() + Number(durationMinutes) * 60000).toISOString();
+    return { startUtc, endUtc };
+  }, [courtId, startDate, endDate, startTime, durationMinutes, dayOfWeek, timeZoneId]);
+
+  const occurrenceQuote = usePriceQuote(
+    complexId,
+    courtId,
+    firstOccurrenceUtc?.startUtc,
+    firstOccurrenceUtc?.endUtc
+  );
+
+  const quote = occurrenceQuote.data;
+  const expectedSeriesTotal =
+    quote?.isFullyCovered && occurrencesCount > 0
+      ? Math.round(quote.totalAmount * occurrencesCount * 100) / 100
+      : undefined;
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    await createRecurring.mutateAsync({
-      userId,
-      courtId,
-      dayOfWeek: Number(dayOfWeek),
-      startTime: `${startTime}:00`,
-      durationMinutes: Number(durationMinutes),
-      startDate,
-      endDate,
-      notes: notes.trim() || undefined
-    });
+    try {
+      await createRecurring.mutateAsync({
+        userId,
+        courtId,
+        dayOfWeek: Number(dayOfWeek),
+        startTime: `${startTime}:00`,
+        durationMinutes: Number(durationMinutes),
+        startDate,
+        endDate,
+        notes: notes.trim() || undefined,
+        expectedTotalPrice: expectedSeriesTotal,
+        expectedCurrency: quote?.currency
+      });
+    } catch (err) {
+      if (err instanceof ApiError && err.code === 'PRICE_CHANGED') {
+        occurrenceQuote.refetch();
+      }
+    }
   };
 
   const canSubmit =
     Boolean(complexId && userId && courtId && startTime && startDate && endDate) &&
     Number(durationMinutes) > 0 &&
     occurrencesCount > 0 &&
+    Boolean(quote?.isFullyCovered) &&
+    !occurrenceQuote.isLoading &&
     !createRecurring.isPending;
 
   return (
@@ -242,6 +295,33 @@ export default function AdminRecurringReservationsPage() {
                 <Alert severity="warning">{t('dashboard.recurringPage.noOccurrences')}</Alert>
               )}
             </Grid>
+
+            {courtId && occurrenceQuote.isLoading && (
+              <Grid size={{ xs: 12 }}>
+                <Alert severity="info" variant="outlined">{t('admin.recurringPage.priceLoading')}</Alert>
+              </Grid>
+            )}
+            {courtId && occurrenceQuote.isError && (
+              <Grid size={{ xs: 12 }}>
+                <Alert severity="error">{t('admin.recurringPage.priceError')}</Alert>
+              </Grid>
+            )}
+            {quote && !quote.isFullyCovered && (
+              <Grid size={{ xs: 12 }}>
+                <Alert severity="warning">{t('admin.recurringPage.priceNotConfigured')}</Alert>
+              </Grid>
+            )}
+            {quote?.isFullyCovered && occurrencesCount > 0 && (
+              <Grid size={{ xs: 12 }}>
+                <Alert severity="info" variant="outlined">
+                  {t('admin.recurringPage.priceSummary', {
+                    perOccurrence: formatMoney(quote.totalAmount, quote.currency),
+                    total: formatMoney(expectedSeriesTotal ?? 0, quote.currency),
+                    count: occurrencesCount
+                  })}
+                </Alert>
+              </Grid>
+            )}
 
             <Grid size={{ xs: 12 }}>
               <Stack direction="row" justifyContent="flex-end" spacing={2}>

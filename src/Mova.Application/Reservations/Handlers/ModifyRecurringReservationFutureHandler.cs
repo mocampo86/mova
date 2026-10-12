@@ -1,6 +1,7 @@
 using System.Data;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
+using Mova.Application.Pricing;
 using Mova.Application.Reservations.Commands;
 using Mova.Contracts.Reservations;
 using Mova.Domain.Entities;
@@ -14,6 +15,7 @@ public sealed class ModifyRecurringReservationFutureHandler(
     IRecurringReservationRepository recurringReservations,
     IReservationRepository reservations,
     ICourtBlockRepository courtBlocks,
+    ICourtRateRepository courtRates,
     ISportsComplexRepository sportsComplexes,
     IAuditLogRepository auditLogs,
     IUnitOfWork unitOfWork) : IModifyRecurringReservationFutureHandler
@@ -67,6 +69,14 @@ public sealed class ModifyRecurringReservationFutureHandler(
                 {
                     throw new ConflictException("The recurrence period does not contain any matching weekly occurrences.");
                 }
+
+                var seriesTotal = await ReservationPricer.ApplyAsync(courtRates, newOccurrences, complex.Currency, timeZone, token);
+
+                PriceExpectation.EnsureMatches(
+                    command.ExpectedTotalPrice,
+                    command.ExpectedCurrency,
+                    seriesTotal,
+                    complex.Currency);
 
                 await EnsureAvailableAsync(recurringReservation.CourtId, newOccurrences, recurringReservation.Id, token);
 

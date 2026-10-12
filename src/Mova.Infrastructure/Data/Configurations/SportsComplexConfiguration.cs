@@ -53,6 +53,11 @@ public sealed class SportsComplexConfiguration : IEntityTypeConfiguration<Sports
         builder.Property(s => s.TimeZoneId)
             .HasMaxLength(100);
 
+        builder.Property(s => s.Currency)
+            .IsRequired()
+            .HasMaxLength(3)
+            .IsFixedLength();
+
         builder.Property(s => s.CreatedAt)
             .IsRequired();
 

@@ -6,4 +6,6 @@ public sealed class CreateMyReservationRequest
     public DateTime StartAt { get; set; }
     public DateTime EndAt { get; set; }
     public string? Notes { get; set; }
+    public decimal? ExpectedTotalPrice { get; set; }
+    public string? ExpectedCurrency { get; set; }
 }

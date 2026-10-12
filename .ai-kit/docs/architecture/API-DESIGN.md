@@ -44,6 +44,12 @@ GET    /api/v1/complexes/{complexId}/availability?courtId=&date=   # date is loc
 PUT    /api/v1/complexes/{complexId}/courts/{courtId}/availability
 GET    /api/v1/complexes/{complexId}/courts/{courtId}/availability
 
+GET    /api/v1/complexes/{complexId}/courts/{courtId}/rates          # ComplexAdmin
+POST   /api/v1/complexes/{complexId}/courts/{courtId}/rates          # ComplexAdmin
+PUT    /api/v1/complexes/{complexId}/courts/{courtId}/rates/{rateId} # ComplexAdmin
+PATCH  /api/v1/complexes/{complexId}/courts/{courtId}/rates/{rateId}/status # ComplexAdmin
+GET    /api/v1/complexes/{complexId}/courts/{courtId}/price-quote?startAt=&endAt= # public
+
 PUT    /api/v1/complexes/{complexId}/business-hours
 GET    /api/v1/complexes/{complexId}/business-hours
 
@@ -143,9 +149,13 @@ Idempotency-Key: <uuid>
   "courtId": "...",
   "startAt": "2026-08-10T20:00:00Z",
   "endAt": "2026-08-10T21:00:00Z",
-  "notes": "Traer pelota"
+  "notes": "Traer pelota",
+  "expectedTotalPrice": 1200.00,
+  "expectedCurrency": "UYU"
 }
 ```
+
+`expectedTotalPrice`/`expectedCurrency` carry the price previously shown by `price-quote`. If the recalculated price differs at confirmation time, the request is rejected with `409 PRICE_CHANGED`. If the interval is not fully covered by active rates, it is rejected with `422 PRICE_NOT_CONFIGURED` and the uncovered `gaps` are returned in `error.details`.
 
 ### Create recurring reservation
 
@@ -162,9 +172,13 @@ Idempotency-Key: <uuid>
   "durationMinutes": 60,
   "startDate": "2026-08-10",
   "endDate": "2026-08-31",
-  "notes": "Fixed weekly slot"
+  "notes": "Fixed weekly slot",
+  "expectedTotalPrice": 4800.00,
+  "expectedCurrency": "UYU"
 }
 ```
+
+Each generated occurrence is priced independently; if any occurrence lacks rate coverage the whole series is rejected. `expectedTotalPrice` is the expected total for the entire series.
 
 The response contains the recurring reservation rule plus the generated confirmed `Reservation` occurrences. Each occurrence has `source = "Recurring"` and `recurringReservationId` populated.
 
@@ -275,6 +289,10 @@ Common error codes:
 |------|-------------|---------|
 | VALIDATION_ERROR | 400 | Request fails FluentValidation or Zod validation |
 | RESERVATION_CONFLICT | 409 | Overlapping reservation or block |
+| PRICE_NOT_CONFIGURED | 422 | Reservation interval not fully covered by active court rates |
+| PRICE_CHANGED | 409 | Quoted price no longer matches the current calculation |
+| RATE_OVERLAP | 409 | Overlapping active rates for the same court and weekday |
+| TIMEZONE_NOT_CONFIGURED | 422 | Complex has no resolvable IANA time zone |
 || RECURRING_RESERVATIONS_DISABLED | 409 | User recurring reservations are disabled for the complex |
 | USER_BLOCKED | 403 | User is blocked in the complex |
 | UNAUTHORIZED | 401 | Missing or invalid JWT |

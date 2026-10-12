@@ -19,6 +19,8 @@ public sealed class Reservation
     public DateTime? CancelledAt { get; private set; }
     public string? CancellationReason { get; private set; }
     public Guid? CancelledByUserId { get; private set; }
+    public decimal? TotalPrice { get; private set; }
+    public string? Currency { get; private set; }
 
     public Court? Court { get; private set; }
 
@@ -27,6 +29,8 @@ public sealed class Reservation
     public User? CancelledByUser { get; private set; }
 
     public RecurringReservation? RecurringReservation { get; private set; }
+
+    public ICollection<ReservationPriceLine> PriceLines { get; private set; } = [];
 
     private Reservation()
     {
@@ -72,6 +76,35 @@ public sealed class Reservation
         }
 
         Status = ReservationStatus.Confirmed;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void ApplyPrice(decimal totalPrice, string currency, IEnumerable<ReservationPriceLine> priceLines)
+    {
+        if (totalPrice < 0)
+        {
+            throw new ArgumentException("TotalPrice cannot be negative.", nameof(totalPrice));
+        }
+
+        if (string.IsNullOrWhiteSpace(currency))
+        {
+            throw new ArgumentException("Currency is required.", nameof(currency));
+        }
+
+        if (TotalPrice is not null)
+        {
+            throw new InvalidOperationException("The price of a reservation cannot be modified once applied.");
+        }
+
+        var lines = priceLines.ToArray();
+        if (lines.Length == 0)
+        {
+            throw new ArgumentException("At least one price line is required.", nameof(priceLines));
+        }
+
+        TotalPrice = totalPrice;
+        Currency = currency.Trim().ToUpperInvariant();
+        PriceLines = lines;
         UpdatedAt = DateTime.UtcNow;
     }
 

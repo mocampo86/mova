@@ -66,6 +66,37 @@ public static class ErrorResponseBuilder
                 message = exception.Message;
                 break;
 
+            case PriceNotConfiguredException priceNotConfiguredException:
+                statusCode = 422;
+                code = "PRICE_NOT_CONFIGURED";
+                message = exception.Message;
+                details = new Dictionary<string, object?>
+                {
+                    ["gaps"] = priceNotConfiguredException.Gaps
+                        .Select(g => new { startAt = g.StartAt, endAt = g.EndAt })
+                        .ToArray()
+                };
+                break;
+
+            case RateOverlapException:
+                statusCode = 409;
+                code = "RATE_OVERLAP";
+                message = exception.Message;
+                break;
+
+            case PriceChangedException priceChangedException:
+                statusCode = 409;
+                code = "PRICE_CHANGED";
+                message = exception.Message;
+                details = new Dictionary<string, object?>
+                {
+                    ["expectedTotalPrice"] = priceChangedException.ExpectedTotalPrice,
+                    ["expectedCurrency"] = priceChangedException.ExpectedCurrency,
+                    ["actualTotalPrice"] = priceChangedException.ActualTotalPrice,
+                    ["actualCurrency"] = priceChangedException.ActualCurrency
+                };
+                break;
+
             case ConflictException:
                 statusCode = 409;
                 code = "CONFLICT";

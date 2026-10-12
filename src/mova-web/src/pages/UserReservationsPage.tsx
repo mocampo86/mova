@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import ApiErrorMessage from '../components/ApiErrorMessage';
 import { useCancelMyReservation, useMyReservations } from '../features/reservations/reservationApi';
 import { getReservationStatusKey } from '../features/reservations/reservationStatus';
+import { formatMoney } from '../features/rates/rateUtils';
 import type { Reservation, UserReservationsFilters } from '../features/reservations/reservationTypes';
 
 function formatLocalDateTime(isoString: string): string {
@@ -98,6 +99,7 @@ export default function UserReservationsPage() {
                 <TableCell>{t('common.court')}</TableCell>
                 <TableCell>{t('common.start')}</TableCell>
                 <TableCell>{t('common.end')}</TableCell>
+                <TableCell>{t('common.price')}</TableCell>
                 <TableCell>{t('common.status')}</TableCell>
                 <TableCell align="right">{t('common.actions')}</TableCell>
               </TableRow>
@@ -105,14 +107,14 @@ export default function UserReservationsPage() {
             <TableBody>
               {isLoading && (
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <Skeleton variant="rectangular" height={120} />
                   </TableCell>
                 </TableRow>
               )}
               {!isLoading && !isError && data?.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <Alert severity="info">{t('dashboard.noUpcomingReservations')}</Alert>
                   </TableCell>
                 </TableRow>
@@ -124,6 +126,11 @@ export default function UserReservationsPage() {
                     <TableCell>{reservation.courtName}</TableCell>
                     <TableCell>{formatLocalDateTime(reservation.startAt)}</TableCell>
                     <TableCell>{formatLocalDateTime(reservation.endAt)}</TableCell>
+                    <TableCell>
+                      {reservation.totalPrice != null && reservation.currency
+                        ? formatMoney(reservation.totalPrice, reservation.currency)
+                        : '—'}
+                    </TableCell>
                     <TableCell>{t(`status.${getReservationStatusKey(reservation.status)}`)}</TableCell>
                     <TableCell align="right">
                       <Button

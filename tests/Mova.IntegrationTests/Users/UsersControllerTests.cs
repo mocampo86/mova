@@ -6,6 +6,7 @@ using Mova.Contracts.Auth;
 using Mova.Contracts.Complexes;
 using Mova.Contracts.Common;
 using Mova.Contracts.Courts;
+using Mova.Contracts.CourtRates;
 using Mova.Contracts.Reservations;
 using Mova.Contracts.Users;
 using Mova.Domain.Entities;
@@ -566,7 +567,23 @@ public class UsersControllerTests : IClassFixture<MovaWebApplicationFactory>
             SportIds = []
         });
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<CourtInfo>())!;
+        var court = (await response.Content.ReadFromJsonAsync<CourtInfo>())!;
+        await CreateFullCoverageRateAsync(client, complexId, court.Id);
+        return court;
+    }
+
+    private static async Task CreateFullCoverageRateAsync(HttpClient client, Guid complexId, Guid courtId)
+    {
+        var response = await client.PostAsJsonAsync(
+            $"/api/v1/complexes/{complexId}/courts/{courtId}/rates",
+            new CreateCourtRateRequest
+            {
+                DaysOfWeek = [0, 1, 2, 3, 4, 5, 6],
+                StartTime = TimeSpan.Zero,
+                EndTime = TimeSpan.FromHours(24),
+                AmountPerHour = 100m
+            });
+        response.EnsureSuccessStatusCode();
     }
 
     private static async Task<string> LoginAsync(HttpClient client)

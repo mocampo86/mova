@@ -2,10 +2,12 @@ using System.Data;
 using Mova.Application.Abstractions.Persistence;
 using Mova.Application.Common.Exceptions;
 using Mova.Application.Reservations.Commands;
+using Mova.Application.Pricing;
 using Mova.Contracts.Reservations;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
 using Mova.Domain.Exceptions;
+using Mova.Domain.Helpers;
 
 namespace Mova.Application.Reservations.Handlers;
 
@@ -17,6 +19,7 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
     private readonly IBlockedUserRepository _blockedUsers;
     private readonly IReservationRepository _reservations;
     private readonly ICourtBlockRepository _courtBlocks;
+    private readonly ICourtRateRepository _courtRates;
     private readonly IAuditLogRepository _auditLogs;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -27,6 +30,7 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
         IBlockedUserRepository blockedUsers,
         IReservationRepository reservations,
         ICourtBlockRepository courtBlocks,
+        ICourtRateRepository courtRates,
         IAuditLogRepository auditLogs,
         IUnitOfWork unitOfWork)
     {
@@ -36,6 +40,7 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
         _blockedUsers = blockedUsers;
         _reservations = reservations;
         _courtBlocks = courtBlocks;
+        _courtRates = courtRates;
         _auditLogs = auditLogs;
         _unitOfWork = unitOfWork;
     }
@@ -74,6 +79,11 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
             throw new UserBlockedException();
         }
 
+        if (!TimeZoneConverter.TryGetTimeZone(complex.TimeZoneId, out var timeZone))
+        {
+            throw new UnresolvedTimeZoneException();
+        }
+
         return await _unitOfWork.ExecuteInTransactionAsync(
             async token =>
             {
@@ -89,6 +99,20 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
                     throw new ConflictException("The selected time is blocked.");
                 }
 
+                var activeRates = await _courtRates.GetActiveByCourtIdAsync(command.CourtId, token);
+                var calculation = PriceCalculator.Calculate(activeRates, timeZone, command.StartAt, command.EndAt);
+
+                if (!calculation.IsFullyCovered)
+                {
+                    throw new PriceNotConfiguredException(calculation.Gaps);
+                }
+
+                PriceExpectation.EnsureMatches(
+                    command.ExpectedTotalPrice,
+                    command.ExpectedCurrency,
+                    calculation.Total,
+                    complex.Currency);
+
                 var reservation = Reservation.Create(
                     command.SportsComplexId,
                     command.CourtId,
@@ -97,6 +121,8 @@ public sealed class CreateReservationHandler : ICreateReservationHandler
                     command.EndAt,
                     command.Source,
                     command.Notes);
+
+                ReservationPricer.ApplyCalculation(reservation, calculation, complex.Currency);
 
                 reservation.Confirm();
 

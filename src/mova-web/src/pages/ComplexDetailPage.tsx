@@ -32,7 +32,11 @@ import {
 import type { CourtAvailabilitySlot } from '../features/complexes/complexTypes';
 import { useAuth } from '../features/auth/useAuth';
 import { useMyBlockStatus } from '../features/users/useMyBlockStatus';
+import { usePriceQuote } from '../features/rates/rateApi';
+import type { PriceQuote } from '../features/rates/rateTypes';
+import { formatMoney } from '../features/rates/rateUtils';
 import { useCreateMyReservation } from '../features/reservations/reservationApi';
+import { ApiError } from '../shared/utils/apiError';
 import { todayInTimeZone } from '../utils/timezones';
 
 function formatLocalTime(isoString: string) {
@@ -60,6 +64,9 @@ interface BookingDialogProps {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: Error | null;
+  quote?: PriceQuote;
+  quoteLoading: boolean;
+  quoteError: boolean;
   onConfirm: () => Promise<void>;
   onCancel: () => void;
   t: (key: string, options?: Record<string, unknown>) => string;
@@ -73,10 +80,15 @@ function BookingDialog({
   isAuthenticated,
   isLoading,
   error,
+  quote,
+  quoteLoading,
+  quoteError,
   onConfirm,
   onCancel,
   t
 }: BookingDialogProps) {
+  const priceBlocked = !quote || !quote.isFullyCovered;
+
   return (
     <Dialog open onClose={onCancel} maxWidth="sm" fullWidth>
       <DialogTitle>{t('complexDetail.booking.title')}</DialogTitle>
@@ -94,6 +106,24 @@ function BookingDialog({
               end: formatLocalTime(slot.endAt)
             })}
           </Typography>
+          {quoteLoading && <Typography color="text.secondary">{t('complexDetail.booking.priceLoading')}</Typography>}
+          {quoteError && <Alert severity="error">{t('complexDetail.booking.priceError')}</Alert>}
+          {quote && !quote.isFullyCovered && (
+            <Alert severity="warning">{t('complexDetail.booking.priceNotConfigured')}</Alert>
+          )}
+          {quote && quote.isFullyCovered && (
+            <Stack spacing={0.5}>
+              {quote.lines.map((line, index) => (
+                <Typography key={index} variant="body2" color="text.secondary">
+                  {formatLocalTime(line.startAt)} – {formatLocalTime(line.endAt)}:{' '}
+                  {formatMoney(line.hourlyRate, quote.currency)}/h → {formatMoney(line.amount, quote.currency)}
+                </Typography>
+              ))}
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                {t('complexDetail.booking.total', { amount: formatMoney(quote.totalAmount, quote.currency) })}
+              </Typography>
+            </Stack>
+          )}
           {isAuthenticated && (
             <TextField
               label={t('complexDetail.booking.notesLabel')}
@@ -111,7 +141,7 @@ function BookingDialog({
           {t('common.cancel')}
         </Button>
         {isAuthenticated && (
-          <Button onClick={onConfirm} variant="contained" disabled={isLoading}>
+          <Button onClick={onConfirm} variant="contained" disabled={isLoading || quoteLoading || priceBlocked}>
             {t('complexDetail.booking.confirm')}
           </Button>
         )}
@@ -144,6 +174,13 @@ export default function ComplexDetailPage() {
   }, [complex.data]);
 
   const availability = useCourtAvailability(complexId, selectedCourtId, selectedDate);
+
+  const priceQuote = usePriceQuote(
+    complexId,
+    selectedSlot?.courtId ?? '',
+    selectedSlot?.startAt,
+    selectedSlot?.endAt
+  );
 
   useEffect(() => {
     setSelectedCourtId('');
@@ -358,15 +395,30 @@ export default function ComplexDetailPage() {
               isAuthenticated={isAuthenticated}
               isLoading={createMyReservation.isPending}
               error={createMyReservation.error}
+              quote={priceQuote.data}
+              quoteLoading={priceQuote.isLoading}
+              quoteError={priceQuote.isError}
               onConfirm={async () => {
-                await createMyReservation.mutateAsync({
-                  courtId: selectedSlot.courtId,
-                  startAt: selectedSlot.startAt,
-                  endAt: selectedSlot.endAt,
-                  notes: bookingNotes.trim() || undefined
-                });
-                setSelectedSlot(null);
-                setBookingNotes('');
+                const quote = priceQuote.data;
+                if (!quote?.isFullyCovered) return;
+
+                try {
+                  await createMyReservation.mutateAsync({
+                    courtId: selectedSlot.courtId,
+                    startAt: selectedSlot.startAt,
+                    endAt: selectedSlot.endAt,
+                    notes: bookingNotes.trim() || undefined,
+                    expectedTotalPrice: quote.totalAmount,
+                    expectedCurrency: quote.currency
+                  });
+                  setSelectedSlot(null);
+                  setBookingNotes('');
+                } catch (err) {
+                  if (err instanceof ApiError && err.code === 'PRICE_CHANGED') {
+                    priceQuote.refetch();
+                  }
+                  // Error is surfaced through createMyReservation.error
+                }
               }}
               onCancel={() => {
                 setSelectedSlot(null);

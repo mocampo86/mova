@@ -4,6 +4,7 @@ using Mova.Application.Audit.Handlers;
 using Mova.Application.Authentication.Handlers;
 using Mova.Application.Authentication.Validators;
 using Mova.Application.Complexes.Handlers;
+using Mova.Application.CourtRates.Handlers;
 using Mova.Application.Courts.Handlers;
 using Mova.Application.Reservations.Handlers;
 using Mova.Application.Reservations.Validators;
@@ -44,6 +45,12 @@ public static class DependencyInjection
         services.AddScoped<IGetBusinessHoursHandler, GetBusinessHoursHandler>();
         services.AddScoped<IGetCourtAvailabilityHandler, GetCourtAvailabilityHandler>();
         services.AddScoped<IGetActiveSportsHandler, GetActiveSportsHandler>();
+
+        services.AddScoped<IGetCourtRatesHandler, GetCourtRatesHandler>();
+        services.AddScoped<ICreateCourtRateHandler, CreateCourtRateHandler>();
+        services.AddScoped<IUpdateCourtRateHandler, UpdateCourtRateHandler>();
+        services.AddScoped<IUpdateCourtRateStatusHandler, UpdateCourtRateStatusHandler>();
+        services.AddScoped<IGetPriceQuoteHandler, GetPriceQuoteHandler>();
 
         services.AddScoped<ICreateReservationHandler, CreateReservationHandler>();
         services.AddScoped<ICreateRecurringReservationHandler, CreateRecurringReservationHandler>();

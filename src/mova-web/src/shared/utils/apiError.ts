@@ -41,7 +41,11 @@ const ERROR_CODE_KEY_MAP: Record<string, string> = {
   RESERVATION_CONFLICT: 'common.error.conflict',
   RECURRING_RESERVATIONS_DISABLED: 'common.error.recurringDisabled',
   CONCURRENCY_ERROR: 'common.error.concurrency',
-  RATE_LIMIT_EXCEEDED: 'common.error.rateLimit'
+  RATE_LIMIT_EXCEEDED: 'common.error.rateLimit',
+  PRICE_NOT_CONFIGURED: 'common.error.priceNotConfigured',
+  PRICE_CHANGED: 'common.error.priceChanged',
+  RATE_OVERLAP: 'common.error.rateOverlap',
+  TIMEZONE_NOT_CONFIGURED: 'common.error.timezoneNotConfigured'
 };
 
 export function getApiErrorTranslationKey(code?: string): string | undefined {
