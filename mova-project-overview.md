@@ -4,7 +4,7 @@
 
 **Nombre provisional:** Mova  
 **Tipo de producto:** Plataforma web para gestión y reserva de canchas deportivas  
-**Estado:** Definición inicial del MVP  
+**Estado:** MVP en implementación  
 **Plataformas:** Web responsive para PC, tablet y dispositivos móviles  
 
 ## 2. Visión del producto
@@ -69,12 +69,17 @@ El sistema deberá cubrir como mínimo el siguiente flujo:
 - Bloqueo de horarios.
 - Bloqueo y desbloqueo de usuarios.
 - Historial básico de reservas.
+- Política de cancelación configurable por complejo.
+- Zona horaria por complejo.
+- Idempotencia en mutaciones de reservas.
 - Roles y autorización.
 - Registro básico de auditoría.
+- Dashboard de administrador de complejo y de usuario.
+- Internacionalización de la interfaz.
 - Manejo global de errores.
 - Logging estructurado.
 - Health checks.
-- Documentación de la API mediante OpenAPI/Swagger.
+- Documentación de la API mediante OpenAPI.
 
 ### 4.2 Fuera del alcance del MVP
 
@@ -304,19 +309,18 @@ No se recomienda separar inicialmente el panel administrativo y el portal del us
 
 ### 8.1 Backend
 
-- .NET 10, o .NET 8 LTS si se prioriza una plataforma más conservadora.
+- .NET 10.
 - ASP.NET Core Web API.
 - Entity Framework Core.
 - Npgsql.
 - PostgreSQL.
 - FluentValidation.
 - Serilog.
-- OpenAPI / Swagger.
-- Google OpenID Connect.
+- OpenAPI (`MapOpenApi`, documento JSON; sin Swagger UI).
+- Google OpenID Connect mediante `Google.Apis.Auth` para validación de ID tokens.
 - JWT Bearer Authentication.
 - xUnit.
-- FluentAssertions.
-- Testcontainers para pruebas con PostgreSQL.
+- `Microsoft.AspNetCore.Mvc.Testing` (`WebApplicationFactory`) para pruebas de integración contra PostgreSQL real (base `mova_test`).
 
 ### 8.2 Frontend
 
@@ -328,6 +332,8 @@ No se recomienda separar inicialmente el panel administrativo y el portal del us
 - React Hook Form.
 - Zod.
 - Material UI.
+- `@react-oauth/google` para Google Sign-In.
+- `i18next` / `react-i18next` para internacionalización (implementada en `src/i18n`).
 - Vitest.
 - React Testing Library.
 - Playwright para pruebas end-to-end críticas.
@@ -371,18 +377,24 @@ Esta arquitectura permite:
 
 ### 9.1 Estructura del backend
 
+El repositorio es un **monorepo** con solución `Mova.slnx` en la raíz:
+
 ```text
 src/
 ├── Mova.Api
 ├── Mova.Application
 ├── Mova.Domain
 ├── Mova.Infrastructure
-└── Mova.Contracts
+├── Mova.Contracts
+└── mova-web              # aplicación React
 
 tests/
 ├── Mova.UnitTests
 ├── Mova.IntegrationTests
-└── Mova.ArchitectureTests
+├── Mova.ArchitectureTests
+└── Mova.Tests.Common     # helpers compartidos de prueba
+
+devops/                   # infraestructura (Azure, scripts)
 ```
 
 ### 9.2 Responsabilidades
@@ -444,10 +456,13 @@ src/
 │   ├── availability/
 │   ├── reservations/
 │   ├── recurring-reservations/
-│   └── administration/
+│   ├── administration/
+│   └── audit/
+├── i18n/                 # internacionalización (i18next + locales)
 ├── services/
 ├── hooks/
-└── shared/
+├── shared/
+└── utils/
 ```
 
 ---
@@ -484,8 +499,9 @@ Una base por cliente agregaría complejidad innecesaria en:
 - `GoogleSubjectId`
 - `Email`
 - `FullName`
-- `PhoneNumber`
+- `PhoneNumber` (nullable hasta completar el perfil)
 - `PhoneVerified`
+- `Roles` (`User`, `ComplexAdmin`, `SuperAdmin`)
 - `Status`
 - `CreatedAt`
 - `UpdatedAt`
@@ -502,6 +518,8 @@ Una base por cliente agregaría complejidad innecesaria en:
 - `PhoneNumber`
 - `Email`
 - `Status`
+- `TimeZoneId` (zona horaria del complejo, ej. `America/Argentina/Buenos_Aires`)
+- `AllowUserRecurringReservations`
 - `CreatedAt`
 - `UpdatedAt`
 
@@ -569,8 +587,10 @@ Una base por cliente agregaría complejidad innecesaria en:
 - `RecurringReservationId`
 - `Notes`
 - `CreatedAt`
+- `UpdatedAt`
 - `CancelledAt`
 - `CancellationReason`
+- `CancelledByUserId`
 
 ### 11.10 RecurringReservation
 
@@ -585,6 +605,7 @@ Una base por cliente agregaría complejidad innecesaria en:
 - `EndDate`
 - `Status`
 - `CreatedAt`
+- `UpdatedAt`
 
 ### 11.11 CourtBlock
 
@@ -618,6 +639,24 @@ Una base por cliente agregaría complejidad innecesaria en:
 - `EntityId`
 - `CreatedAt`
 - `Metadata`
+
+### 11.14 CancellationPolicy
+
+- `Id`
+- `SportsComplexId`
+- `MinimumHours` (horas mínimas de anticipación para cancelar)
+- `AllowUserCancellation`
+
+### 11.15 IdempotencyRecord
+
+- `Id`
+- `ActorKey`
+- `Scope`
+- `IdempotencyKey`
+- `StatusCode`
+- `ResponseBody`
+- `CreatedAt`
+- `ExpiresAt`
 
 ---
 
@@ -682,38 +721,17 @@ Roles iniciales sugeridos:
 
 ---
 
-## 14. Repositorios
+## 14. Repositorio
 
-Se recomiendan dos repositorios:
+El proyecto utiliza un **monorepo** único que contiene:
 
-```text
-reserva-canchas-api
-reserva-canchas-web
-```
-
-### 14.1 reserva-canchas-api
-
-Contendrá:
-
-- API .NET.
-- Dominio.
-- Aplicación.
-- Infraestructura.
-- Migraciones.
-- Tests.
-- Dockerfile.
-- Documentación técnica de backend.
-
-### 14.2 reserva-canchas-web
-
-Contendrá:
-
-- React.
-- Landing page.
-- Portal de usuario.
-- Panel administrativo.
-- Tests.
-- Configuración de despliegue.
+- API .NET (`src/Mova.Api`, `Mova.Application`, `Mova.Domain`, `Mova.Infrastructure`, `Mova.Contracts`).
+- Aplicación web React (`src/mova-web`): landing page, portal de usuario y panel administrativo.
+- Migraciones de Entity Framework Core (`src/Mova.Infrastructure/Data/Migrations`).
+- Tests (`tests/`).
+- Infraestructura y despliegue (`devops/`, `docker-compose.yml`).
+- Documentación (`docs/` y `.ai-kit/docs/`).
+- Solución `Mova.slnx` en la raíz.
 
 ---
 
@@ -823,6 +841,35 @@ Contendrá:
 - Métricas básicas.
 - Documentación operativa.
 - Backup y recuperación.
+
+### Epic 11 — Internacionalización
+
+- Soporte multi-idioma con i18next.
+- Detección de idioma del navegador.
+- Traducción de la interfaz.
+- Selector de idioma.
+
+### Epic 12 — Dashboard de administrador de complejo
+
+- Página central `/admin/complex/:complexId` con navegación persistente.
+- Resumen del estado del complejo.
+- Gestión de perfil, canchas, disponibilidad, reservas y usuarios bloqueados.
+- Configuración del complejo (política de cancelación).
+
+### Epic 13 — Dashboard de usuario
+
+- Página central `/user` con navegación persistente.
+- Acceso a búsqueda de complejos, reservas, reservas recurrentes e historial.
+- Widgets de resumen del estado de la cuenta.
+
+### Epic 14 — Modernización visual
+
+- Hero section modernizado.
+- Carrusel de imágenes por deporte.
+- Navegación principal mejorada.
+- Diseño responsive reforzado.
+- Sistema de diseño visual reutilizable.
+- Accesibilidad básica.
 
 ---
 
@@ -1005,29 +1052,37 @@ Una historia se considera terminada cuando:
 
 ---
 
-## 20. Decisiones pendientes
+## 20. Decisiones
+
+### 20.1 Decisiones ya tomadas
+
+- **.NET 10** como plataforma backend.
+- **Zona horaria por complejo**: `SportsComplex.TimeZoneId` (las reglas `BusinessHours` y `CourtAvailabilityRule` se interpretan en esa zona horaria).
+- **Política de cancelación configurable por complejo**: entidad `CancellationPolicy` (`MinimumHours`, `AllowUserCancellation`).
+- **Un administrador puede gestionar varios complejos**: `ComplexAdministrator` permite múltiples asignaciones por usuario.
+- **Máximo de semanas para reservas recurrentes**: límite global de 52 semanas (validadores de `Create`/`Modify` en `Mova.Application`).
+- **Monorepo** para API y frontend (ver §14).
+- **Idempotencia** en mutaciones de reservas mediante `IdempotencyRecord`.
+- **Internacionalización** implementada en el frontend (i18next, EPIC-11).
+
+### 20.2 Decisiones pendientes
 
 Las siguientes decisiones deberán resolverse durante el refinamiento:
 
 - Nombre definitivo del producto.
-- Uso de .NET 10 o .NET 8 LTS.
 - Proveedor definitivo de hosting.
-- Política inicial de cancelación.
-- Duración configurable por cancha o por complejo.
-- Cantidad máxima de semanas para reservas recurrentes.
-- Posibilidad de que un administrador gestione varios complejos.
+- Duración de turno configurable por cancha o por complejo (hoy `SlotDurationMinutes` vive en `CourtAvailabilityRule`).
 - Flujo para registrar el primer administrador de un complejo.
 - Moderación o aprobación de nuevos complejos.
-- Zona horaria por complejo.
 - Gestión de precios, aunque no existan pagos en línea.
 - Envío de correos de confirmación dentro o después del MVP.
 - Política de eliminación y conservación de datos.
 
 ---
 
-## 21. Próximos documentos recomendados
+## 21. Estructura de documentación
 
-A partir de este documento general, se recomienda crear:
+La documentación del proyecto ya existe y se distribuye en dos carpetas:
 
 ```text
 docs/
@@ -1037,13 +1092,7 @@ docs/
 │   ├── ROLES-AND-PERMISSIONS.md
 │   ├── BUSINESS-RULES.md
 │   └── GLOSSARY.md
-├── architecture/
-│   ├── SOLUTION-ARCHITECTURE.md
-│   ├── DOMAIN-MODEL.md
-│   ├── DATABASE-DESIGN.md
-│   ├── AUTHENTICATION.md
-│   ├── MULTI-TENANCY.md
-│   └── DEPLOYMENT.md
+├── decisions/                     # ADRs (0001-0006, ADR-001)
 ├── development/
 │   ├── DEVELOPMENT-GUIDELINES.md
 │   ├── TESTING-STRATEGY.md
@@ -1052,93 +1101,39 @@ docs/
 │   └── DEVIN-INSTRUCTIONS.md
 ├── backlog/
 │   ├── EPIC-01-TECHNICAL-FOUNDATION/
-│   │   ├── EPIC-01-TECHNICAL-FOUNDATION.md
-│   │   ├── US-001.md
-│   │   ├── US-002.md
-│   │   ├── US-003.md
-│   │   ├── US-004.md
-│   │   ├── US-005.md
-│   │   ├── US-006.md
-│   │   └── US-007.md
 │   ├── EPIC-02-IDENTITY/
-│   │   ├── EPIC-02-IDENTITY.md
-│   │   ├── US-008.md
-│   │   ├── US-009.md
-│   │   ├── US-010.md
-│   │   ├── US-011.md
-│   │   └── US-012.md
 │   ├── EPIC-03-COMPLEXES/
-│   │   ├── EPIC-03-COMPLEXES.md
-│   │   ├── US-013.md
-│   │   ├── US-014.md
-│   │   ├── US-015.md
-│   │   ├── US-016.md
-│   │   └── US-017.md
 │   ├── EPIC-04-COURTS/
-│   │   ├── EPIC-04-COURTS.md
-│   │   ├── US-018.md
-│   │   ├── US-019.md
-│   │   ├── US-020.md
-│   │   ├── US-021.md
-│   │   └── US-022.md
 │   ├── EPIC-05-AVAILABILITY/
-│   │   ├── EPIC-05-AVAILABILITY.md
-│   │   ├── US-023.md
-│   │   ├── US-024.md
-│   │   ├── US-025.md
-│   │   ├── US-026.md
-│   │   ├── US-027.md
-│   │   └── US-028.md
 │   ├── EPIC-06-RESERVATIONS/
-│   │   ├── EPIC-06-RESERVATIONS.md
-│   │   ├── US-029.md
-│   │   ├── US-030.md
-│   │   ├── US-031.md
-│   │   ├── US-032.md
-│   │   ├── US-033.md
-│   │   ├── US-034.md
-│   │   ├── US-035.md
-│   │   └── US-036.md
 │   ├── EPIC-07-RECURRING-RESERVATIONS/
-│   │   ├── EPIC-07-RECURRING-RESERVATIONS.md
-│   │   ├── US-037.md
-│   │   ├── US-038.md
-│   │   ├── US-039.md
-│   │   ├── US-040.md
-│   │   └── US-041.md
 │   ├── EPIC-08-USERS/
-│   │   ├── EPIC-08-USERS.md
-│   │   ├── US-042.md
-│   │   ├── US-043.md
-│   │   ├── US-044.md
-│   │   ├── US-045.md
-│   │   ├── US-046.md
-│   │   └── US-047.md
 │   ├── EPIC-09-LANDING/
-│   │   ├── EPIC-09-LANDING.md
-│   │   ├── US-048.md
-│   │   ├── US-049.md
-│   │   ├── US-050.md
-│   │   ├── US-051.md
-│   │   ├── US-052.md
-│   │   └── US-053.md
 │   ├── EPIC-10-OPERATIONS/
-│   │   ├── EPIC-10-OPERATIONS.md
-│   │   ├── US-054.md
-│   │   ├── US-055.md
-│   │   ├── US-056.md
-│   │   ├── US-057.md
-│   │   └── US-058.md
-│   └── EPIC-11-INTERNATIONALIZATION/
-│       ├── EPIC-11-INTERNATIONALIZATION.md
-│       ├── US-059.md
-│       ├── US-060.md
-│       └── US-061.md
+│   ├── EPIC-11-INTERNATIONALIZATION/
+│   ├── EPIC-12-COMPLEX-ADMIN-DASHBOARD/
+│   ├── EPIC-13-USER-DASHBOARD/
+│   ├── EPIC-14-VISUAL-MODERNIZATION/
+│   ├── BUGFIX-BACKLOG/
+│   └── US-BACKLOG/
 └── api/
     ├── API-CONVENTIONS.md
     ├── ERROR-CONTRACT.md
     ├── PAGINATION.md
     └── IDEMPOTENCY.md
+
+.ai-kit/docs/                      # documentación técnica para agentes
+├── architecture/
+│   ├── SOLUTION-ARCHITECTURE.md
+│   ├── DOMAIN-MODEL.md
+│   ├── DATABASE-DESIGN.md
+│   ├── AUTHENTICATION.md
+│   ├── MULTI-TENANCY.md
+│   ├── API-DESIGN.md
+│   └── DEPLOYMENT.md
+├── agents/                        # roles, comandos y workflows de agentes
+├── workflows/                     # desarrollo, testing, PR, release, revisión
+└── operations/                    # backup/restore, runbook operativo
 ```
 
 ---
@@ -1147,8 +1142,8 @@ docs/
 
 | Área | Decisión |
 |---|---|
-| Backend | ASP.NET Core Web API en .NET |
-| Frontend | React con TypeScript |
+| Backend | ASP.NET Core Web API en .NET 10 |
+| Frontend | React con TypeScript y Vite |
 | Diseño | Responsive y mobile first |
 | Base de datos | PostgreSQL |
 | Arquitectura | Monolito modular |
@@ -1157,6 +1152,11 @@ docs/
 | Pagos en línea | Fuera del MVP |
 | Verificación telefónica | Preparada, pero fuera del MVP |
 | Aplicaciones web | Una aplicación React con layouts por rol |
-| Repositorios | API y web separados |
+| Repositorio | Monorepo (API y web en el mismo repo) |
 | Entorno local | Docker Compose |
+| Zona horaria | Por complejo (`TimeZoneId`) |
+| Cancelaciones | Política configurable por complejo (`CancellationPolicy`) |
+| Idempotencia | `IdempotencyRecord` en mutaciones de reservas |
+| Internacionalización | i18next implementada en el frontend |
+| Auditoría | `AuditLog` para acciones administrativas |
 
