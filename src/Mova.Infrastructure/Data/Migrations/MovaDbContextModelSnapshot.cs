@@ -746,6 +746,26 @@ namespace Mova.Infrastructure.Data.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("Mova.Domain.Entities.UserFavoriteComplex", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SportsComplexId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "SportsComplexId");
+
+                    b.HasIndex("SportsComplexId");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("UserFavoriteComplexes", (string)null);
+                });
+
             modelBuilder.Entity("Mova.Domain.Entities.BusinessHours", b =>
                 {
                     b.HasOne("Mova.Domain.Entities.SportsComplex", "SportsComplex")
@@ -912,6 +932,25 @@ namespace Mova.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("Mova.Domain.Entities.UserFavoriteComplex", b =>
+                {
+                    b.HasOne("Mova.Domain.Entities.SportsComplex", "SportsComplex")
+                        .WithMany()
+                        .HasForeignKey("SportsComplexId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Mova.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SportsComplex");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Mova.Domain.Entities.Court", b =>

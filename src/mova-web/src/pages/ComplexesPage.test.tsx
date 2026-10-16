@@ -54,6 +54,7 @@ describe('ComplexesPage', () => {
     expect(screen.getByRole('heading', { name: 'Available complexes' })).toBeTruthy();
     expect(screen.getByText('1 complex available')).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Central Padel' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Add to favorites' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'View courts and times' }).getAttribute('href')).toBe('/complexes/complex-1');
     expect(document.title).toBe('Mova | Find a sports complex');
     expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('Search active complexes by name, city, or address.');

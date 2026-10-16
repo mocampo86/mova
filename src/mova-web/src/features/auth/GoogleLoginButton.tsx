@@ -5,10 +5,11 @@ import { useGoogleLogin } from './useGoogleLogin';
 
 interface GoogleLoginButtonProps {
   intent?: 'user' | 'complex';
+  returnTo?: string | null;
 }
 
-export function GoogleLoginButton({ intent = 'user' }: GoogleLoginButtonProps) {
-  const { mutate, isPending, error } = useGoogleLogin(intent);
+export function GoogleLoginButton({ intent = 'user', returnTo }: GoogleLoginButtonProps) {
+  const { mutate, isPending, error } = useGoogleLogin(intent, returnTo);
 
   const handleSuccess = (credentialResponse: CredentialResponse) => {
     if (credentialResponse.credential) {

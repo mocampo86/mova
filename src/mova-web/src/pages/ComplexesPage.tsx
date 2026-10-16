@@ -3,6 +3,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Alert, Box, Button, Card, CardContent, Grid, IconButton, InputAdornment, Pagination, Skeleton, Stack, TextField, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Seo from '../components/Seo';
+import FavoriteToggleButton from '../features/favorites/FavoriteToggleButton';
 import { useActiveComplexes } from '../features/complexes/complexApi';
 import UserContentContainer from '../layouts/UserContentContainer';
 
@@ -98,7 +99,7 @@ export default function ComplexesPage() {
                       <Box aria-hidden="true" sx={{ width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: 'grey.100', color: 'primary.main', fontWeight: 900, fontSize: '1.1rem', flexShrink: 0 }}>
                         {complex.name.slice(0, 1).toUpperCase()}
                       </Box>
-                      <Box sx={{ minWidth: 0 }}>
+                      <Box sx={{ minWidth: 0, flexGrow: 1 }}>
                         <Typography component="h3" sx={{ fontWeight: 800, overflowWrap: 'anywhere' }}>{complex.name}</Typography>
                         {(complex.city || complex.address) && (
                           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, overflowWrap: 'anywhere' }}>
@@ -106,6 +107,7 @@ export default function ComplexesPage() {
                           </Typography>
                         )}
                       </Box>
+                      <FavoriteToggleButton complexId={complex.id} />
                     </Stack>
                     {complex.description && (
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, overflowWrap: 'anywhere', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>

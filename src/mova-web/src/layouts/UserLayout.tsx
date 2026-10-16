@@ -20,6 +20,7 @@ export default function UserLayout() {
   const desktopNav = [
     { label: t('dashboard.nav.home'), to: '/user', exact: true },
     { label: t('dashboard.nav.complexes'), to: '/complexes' },
+    { label: t('dashboard.nav.favorites'), to: '/user/favorites' },
     { label: t('dashboard.nav.reservations'), to: '/user/reservations' },
     { label: t('dashboard.nav.history'), to: '/user/history' },
     { label: t('dashboard.nav.recurring'), to: '/user/recurring' },

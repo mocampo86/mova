@@ -4,9 +4,11 @@ import { googleLogin } from '../../services/authApi';
 import { mapJwtToUser } from '../../shared/utils/jwtParser';
 import { useAuth } from './useAuth';
 
-export function useGoogleLogin(intent: 'user' | 'complex' = 'user') {
+export function useGoogleLogin(intent: 'user' | 'complex' = 'user', returnTo?: string | null) {
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  const safeReturnTo = returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : null;
 
   return useMutation({
     mutationFn: googleLogin,
@@ -27,7 +29,7 @@ export function useGoogleLogin(intent: 'user' | 'complex' = 'user') {
       } else if (response.requiresProfileCompletion) {
         navigate('/complete-profile', { replace: true });
       } else {
-        navigate('/user', { replace: true });
+        navigate(safeReturnTo ?? '/user', { replace: true });
       }
     }
   });

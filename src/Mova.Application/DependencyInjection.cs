@@ -72,6 +72,10 @@ public static class DependencyInjection
         services.AddScoped<ISearchUsersHandler, SearchUsersHandler>();
         services.AddScoped<IGetUserDashboardHandler, GetUserDashboardHandler>();
         services.AddScoped<IGetMyBlockStatusHandler, GetMyBlockStatusHandler>();
+        services.AddScoped<IGetMyFavoriteComplexesHandler, GetMyFavoriteComplexesHandler>();
+        services.AddScoped<IGetMyFavoriteComplexIdsHandler, GetMyFavoriteComplexIdsHandler>();
+        services.AddScoped<IAddFavoriteComplexHandler, AddFavoriteComplexHandler>();
+        services.AddScoped<IRemoveFavoriteComplexHandler, RemoveFavoriteComplexHandler>();
         services.AddScoped<IBlockUserHandler, BlockUserHandler>();
         services.AddScoped<IUnblockUserHandler, UnblockUserHandler>();
         services.AddScoped<IGetAuditLogsHandler, GetAuditLogsHandler>();

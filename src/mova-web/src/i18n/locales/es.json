@@ -219,6 +219,24 @@
     "availableCount_one": "{{count}} complejo disponible",
     "availableCount_other": "{{count}} complejos disponibles"
   },
+  "favorites": {
+    "title": "Mis favoritos",
+    "subtitle": "Accedé rápidamente a tus complejos deportivos preferidos.",
+    "sectionTitle": "Mis favoritos",
+    "viewAll": "Ver todos",
+    "add": "Agregar a favoritos",
+    "remove": "Quitar de favoritos",
+    "added": "Agregado a favoritos",
+    "removed": "Quitado de favoritos",
+    "error": "No se pudo actualizar tus favoritos. Inténtalo de nuevo.",
+    "loadError": "No se pudieron cargar tus favoritos. Inténtalo de nuevo.",
+    "emptyTitle": "Todavía no tenés complejos favoritos.",
+    "emptyDescription": "Explorá complejos y guardá los que más te gusten para encontrarlos rápidamente.",
+    "emptyInvite": "Guardá complejos con el corazón para encontrarlos rápidamente.",
+    "explore": "Explorar complejos",
+    "viewCourts": "Ver canchas y horarios",
+    "unavailable": "No disponible"
+  },
   "complexDetail": {
     "loading": "Cargando complejo…",
     "notFound": "No se pudo encontrar este complejo activo.",
@@ -644,11 +662,20 @@
     "nav": {
       "home": "Inicio",
       "complexes": "Buscar complejo",
+      "favorites": "Mis favoritos",
       "reservations": "Mis reservas",
       "history": "Mi historial",
       "recurring": "Reservas recurrentes",
       "profile": "Mi perfil"
     },
+    "mobileNav": {
+      "home": "Inicio",
+      "search": "Buscar",
+      "favorites": "Favoritos",
+      "reservations": "Reservas",
+      "profile": "Perfil"
+    },
+
     "upcomingTitle": "Reservas próximas",
     "historyTitle": "Historial de reservas",
     "historyCount": "{{count}} reservas anteriores",

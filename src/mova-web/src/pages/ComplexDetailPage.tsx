@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import ApiErrorMessage from '../components/ApiErrorMessage';
 import Seo from '../components/Seo';
 import UserContentContainer from '../layouts/UserContentContainer';
+import FavoriteToggleButton from '../features/favorites/FavoriteToggleButton';
 import {
   useActiveComplex,
   useActiveCourts,
@@ -229,9 +230,12 @@ export default function ComplexDetailPage() {
         </Button>
 
         <Box>
-          <Typography component="h1" variant="h3" sx={{ fontWeight: 800 }}>
-            {complex.data.name}
-          </Typography>
+          <Stack direction="row" spacing={1.5} alignItems="flex-start" sx={{ minWidth: 0 }}>
+            <Typography component="h1" variant="h3" sx={{ fontWeight: 800, minWidth: 0, overflowWrap: 'anywhere', flexGrow: 1 }}>
+              {complex.data.name}
+            </Typography>
+            <FavoriteToggleButton complexId={complex.data.id} />
+          </Stack>
           <Typography color="text.secondary">
             {complex.data.city}{t('common.formatSeparator')}{complex.data.address}
           </Typography>
