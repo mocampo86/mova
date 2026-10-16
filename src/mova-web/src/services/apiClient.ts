@@ -52,5 +52,6 @@ export async function apiClient<T>(
     throw new ApiError(response.status, message, code, traceId, details);
   }
 
-  return response.json() as Promise<T>;
+  const text = await response.text();
+  return (text ? JSON.parse(text) : null) as T;
 }

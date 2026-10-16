@@ -90,6 +90,7 @@ public static class DependencyInjection
         services.AddScoped<IRecurringReservationRepository, RecurringReservationRepository>();
         services.AddScoped<ICourtBlockRepository, CourtBlockRepository>();
         services.AddScoped<IBlockedUserRepository, BlockedUserRepository>();
+        services.AddScoped<IUserFavoriteComplexRepository, UserFavoriteComplexRepository>();
         services.AddScoped<ICancellationPolicyRepository, CancellationPolicyRepository>();
         services.AddScoped<IIdempotencyRecordRepository, IdempotencyRecordRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();

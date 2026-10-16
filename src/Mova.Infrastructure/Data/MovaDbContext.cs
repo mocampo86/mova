@@ -26,6 +26,7 @@ public sealed class MovaDbContext : DbContext
     public DbSet<RecurringReservation> RecurringReservations => Set<RecurringReservation>();
     public DbSet<CourtBlock> CourtBlocks => Set<CourtBlock>();
     public DbSet<BlockedUser> BlockedUsers => Set<BlockedUser>();
+    public DbSet<UserFavoriteComplex> UserFavoriteComplexes => Set<UserFavoriteComplex>();
     public DbSet<CancellationPolicy> CancellationPolicies => Set<CancellationPolicy>();
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();

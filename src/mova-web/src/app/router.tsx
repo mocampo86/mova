@@ -28,6 +28,7 @@ import NotFoundPage from '../pages/NotFoundPage';
 import SuperAdminPage from '../pages/SuperAdminPage';
 import UnauthorizedPage from '../pages/UnauthorizedPage';
 import UserDashboardPage from '../pages/UserDashboardPage';
+import UserFavoritesPage from '../pages/UserFavoritesPage';
 import UserHistoryPage from '../pages/UserHistoryPage';
 import UserProfilePage from '../pages/UserProfilePage';
 import AdminRecurringReservationsListPage from '../pages/AdminRecurringReservationsListPage';
@@ -69,6 +70,7 @@ export default function AppRouter() {
         }
       >
         <Route index element={<UserDashboardPage />} />
+        <Route path="favorites" element={<UserFavoritesPage />} />
         <Route path="reservations" element={<UserReservationsPage />} />
         <Route path="recurring" element={<UserRecurringReservationsPage />} />
         <Route path="history" element={<UserHistoryPage />} />

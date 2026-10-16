@@ -64,6 +64,10 @@ GET    /api/v1/users/me/reservations
 GET    /api/v1/users/me/reservations/history
 PATCH  /api/v1/users/me/reservations/{id}/cancel
 GET    /api/v1/users/me/blocks/{complexId}
+GET    /api/v1/users/me/favorites
+GET    /api/v1/users/me/favorites/ids
+PUT    /api/v1/users/me/favorites/{complexId}
+DELETE /api/v1/users/me/favorites/{complexId}
 
 GET    /api/v1/complexes/{complexId}/users
 GET    /api/v1/complexes/{complexId}/users/search

@@ -8,6 +8,7 @@ export default function LoginPage() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const intent = searchParams.get('intent') === 'complex' ? 'complex' : 'user';
+  const returnTo = searchParams.get('returnTo');
 
   const isComplex = intent === 'complex';
 
@@ -21,7 +22,7 @@ export default function LoginPage() {
       <Typography variant="body1" textAlign="center">
         {isComplex ? t('login.complexSubtitle') : t('login.userSubtitle')}
       </Typography>
-      <GoogleLoginButton intent={intent} />
+      <GoogleLoginButton intent={intent} returnTo={returnTo} />
       <Typography variant="body2" color="text.secondary">
         {isComplex ? (
           <>{t('login.switchToUser')} <RouterLink to="/login?intent=user">{t('login.switchToUserLink')}</RouterLink></>

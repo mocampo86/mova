@@ -29,12 +29,24 @@ describe('UserLayout mobile navigation', () => {
     } as unknown as ReturnType<typeof useUserDashboard>);
   });
 
-  it('renders all four persistent player destinations from the shared layout', () => {
+  it('renders all five persistent player destinations from the shared layout', () => {
     renderWithAuth(<Routes><Route element={<UserLayout />}><Route path="/user" element={<div>Home content</div>} /></Route></Routes>, { initialRoute: '/user' });
     const mobileNavigation = screen.getByRole('navigation', { name: 'Home' });
     expect(within(mobileNavigation).getByRole('link', { name: 'Home' }).getAttribute('href')).toBe('/user');
-    expect(within(mobileNavigation).getByRole('link', { name: 'Find a complex' }).getAttribute('href')).toBe('/complexes');
-    expect(within(mobileNavigation).getByRole('link', { name: 'My reservations' }).getAttribute('href')).toBe('/user/reservations');
-    expect(within(mobileNavigation).getByRole('link', { name: 'My profile' }).getAttribute('href')).toBe('/user/profile');
+    expect(within(mobileNavigation).getByRole('link', { name: 'Search' }).getAttribute('href')).toBe('/complexes');
+    expect(within(mobileNavigation).getByRole('link', { name: 'Favorites' }).getAttribute('href')).toBe('/user/favorites');
+    expect(within(mobileNavigation).getByRole('link', { name: 'Bookings' }).getAttribute('href')).toBe('/user/reservations');
+    expect(within(mobileNavigation).getByRole('link', { name: 'Profile' }).getAttribute('href')).toBe('/user/profile');
+  });
+
+  it('marks Favorites as active on /user/favorites', () => {
+    renderWithAuth(<Routes><Route element={<UserLayout />}><Route path="/user/favorites" element={<div>Favorites content</div>} /></Route></Routes>, { initialRoute: '/user/favorites' });
+    const mobileNavigation = screen.getByRole('navigation', { name: 'Home' });
+    expect(within(mobileNavigation).getByRole('link', { name: 'Favorites' }).getAttribute('aria-current')).toBe('page');
+  });
+
+  it('shows My favorites in the desktop sidebar', () => {
+    renderWithAuth(<Routes><Route element={<UserLayout />}><Route path="/user" element={<div>Home content</div>} /></Route></Routes>, { initialRoute: '/user' });
+    expect(screen.getAllByRole('link', { name: 'My favorites' })[0].getAttribute('href')).toBe('/user/favorites');
   });
 });

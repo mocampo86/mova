@@ -249,6 +249,22 @@ CREATE TABLE BlockedUsers (
 );
 ```
 
+### UserFavoriteComplexes
+
+Many-to-many relation between users and the sports complexes they mark as favorites. Composite primary key prevents duplicates; both foreign keys cascade so the relation is removed when the user or the complex is permanently deleted. Deactivating a complex keeps the relation.
+
+```sql
+CREATE TABLE UserFavoriteComplexes (
+    UserId UUID NOT NULL REFERENCES Users(Id) ON DELETE CASCADE,
+    SportsComplexId UUID NOT NULL REFERENCES SportsComplexes(Id) ON DELETE CASCADE,
+    CreatedAt TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY (UserId, SportsComplexId)
+);
+
+CREATE INDEX IX_UserFavoriteComplexes_UserId_CreatedAt ON UserFavoriteComplexes (UserId, CreatedAt);
+CREATE INDEX IX_UserFavoriteComplexes_SportsComplexId ON UserFavoriteComplexes (SportsComplexId);
+```
+
 ### AuditLogs
 
 ```sql

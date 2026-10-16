@@ -219,6 +219,24 @@
     "availableCount_one": "{{count}} complex available",
     "availableCount_other": "{{count}} complexes available"
   },
+  "favorites": {
+    "title": "My favorites",
+    "subtitle": "Quickly access your favorite sports complexes.",
+    "sectionTitle": "My favorites",
+    "viewAll": "View all",
+    "add": "Add to favorites",
+    "remove": "Remove from favorites",
+    "added": "Added to favorites",
+    "removed": "Removed from favorites",
+    "error": "We couldn't update your favorites. Please try again.",
+    "loadError": "We couldn't load your favorites. Please try again.",
+    "emptyTitle": "You don't have any favorite complexes yet.",
+    "emptyDescription": "Explore complexes and save the ones you like most to find them quickly.",
+    "emptyInvite": "Save complexes with the heart to find them quickly.",
+    "explore": "Explore complexes",
+    "viewCourts": "View courts and hours",
+    "unavailable": "Unavailable"
+  },
   "complexDetail": {
     "loading": "Loading complex…",
     "notFound": "This active complex could not be found.",
@@ -644,10 +662,18 @@
     "nav": {
       "home": "Home",
       "complexes": "Find a complex",
+      "favorites": "My favorites",
       "reservations": "My reservations",
       "history": "My history",
       "recurring": "Recurring bookings",
       "profile": "My profile"
+    },
+    "mobileNav": {
+      "home": "Home",
+      "search": "Search",
+      "favorites": "Favorites",
+      "reservations": "Bookings",
+      "profile": "Profile"
     },
     "upcomingTitle": "Upcoming reservations",
     "historyTitle": "Reservation history",
