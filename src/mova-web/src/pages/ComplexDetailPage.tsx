@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import {
   Alert,
@@ -6,7 +6,6 @@ import {
   Button,
   Card,
   CardContent,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -23,6 +22,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import ApiErrorMessage from '../components/ApiErrorMessage';
 import Seo from '../components/Seo';
+import UserContentContainer from '../layouts/UserContentContainer';
 import {
   useActiveComplex,
   useActiveCourts,
@@ -52,6 +52,12 @@ function formatLocalDate(isoString: string) {
 function formatLocalDateTime(isoString: string) {
   const date = new Date(isoString);
   return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+function addDays(date: string, days: number): string {
+  const result = new Date(`${date}T12:00:00`);
+  result.setDate(result.getDate() + days);
+  return `${result.getFullYear()}-${String(result.getMonth() + 1).padStart(2, '0')}-${String(result.getDate()).padStart(2, '0')}`;
 }
 
 
@@ -174,6 +180,7 @@ export default function ComplexDetailPage() {
   }, [complex.data]);
 
   const availability = useCourtAvailability(complexId, selectedCourtId, selectedDate);
+  const dateOptions = useMemo(() => Array.from({ length: 7 }, (_, index) => addDays(selectedDate, index)), [selectedDate]);
 
   const priceQuote = usePriceQuote(
     complexId,
@@ -188,30 +195,30 @@ export default function ComplexDetailPage() {
 
   if (complex.isLoading || courts.isLoading) {
     return (
-      <Container sx={{ py: 6 }}>
+      <UserContentContainer width="form" sx={{ py: 6 }}>
         <Seo
           title={`${t('common.appName')} | ${t('complexDetail.loading')}`}
           description={t('common.noDescription')}
         />
         <Typography>{t('complexDetail.loading')}</Typography>
-      </Container>
+      </UserContentContainer>
     );
   }
 
   if (complex.isError || !complex.data) {
     return (
-      <Container sx={{ py: 6 }}>
+      <UserContentContainer width="form" sx={{ py: 6 }}>
         <Seo
           title={`${t('common.appName')} | ${t('notFound.title')}`}
           description={t('seo.notFoundDescription')}
         />
         <Alert severity="error">{t('complexDetail.notFound')}</Alert>
-      </Container>
+      </UserContentContainer>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <UserContentContainer width="form" sx={{ py: { xs: 2, sm: 5 } }}>
       <Seo
         title={`${t('common.appName')} | ${complex.data.name}`}
         description={complex.data.description || t('common.noDescription')}
@@ -284,13 +291,19 @@ export default function ComplexDetailPage() {
             </Alert>
           )}
 
-          <Grid container spacing={3} sx={{ mt: 1 }}>
+          <Grid container spacing={{ xs: 1.5, sm: 3 }} sx={{ mt: 1 }}>
             {(courts.data?.items ?? []).map((court) => (
               <Grid key={court.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card
                   variant="outlined"
+                  component="button"
+                  type="button"
                   onClick={() => setSelectedCourtId(court.id)}
+                  aria-pressed={selectedCourtId === court.id}
                   sx={{
+                    width: '100%',
+                    textAlign: 'left',
+                    font: 'inherit',
                     borderRadius: 3,
                     cursor: 'pointer',
                     borderColor: selectedCourtId === court.id ? 'primary.main' : 'divider',
@@ -318,7 +331,7 @@ export default function ComplexDetailPage() {
             {t('complexDetail.checkAvailability')}
           </Typography>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 3 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
             <FormControl sx={{ minWidth: 240 }}>
               <InputLabel id="court-select-label">{t('complexDetail.courtLabel')}</InputLabel>
               <Select
@@ -345,6 +358,15 @@ export default function ComplexDetailPage() {
               sx={{ minWidth: 160 }}
             />
           </Stack>
+          <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1.25, mb: 1 }}>
+            {dateOptions.map((date) => {
+              const selected = date === selectedDate;
+              return <Button key={date} variant={selected ? 'contained' : 'outlined'} onClick={() => setSelectedDate(date)} aria-pressed={selected} sx={{ flex: '0 0 auto', minWidth: 72, minHeight: 52, display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+                <span>{new Intl.DateTimeFormat(undefined, { weekday: 'short' }).format(new Date(`${date}T12:00:00`))}</span>
+                <strong>{new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short' }).format(new Date(`${date}T12:00:00`))}</strong>
+              </Button>;
+            })}
+          </Stack>
 
           {!selectedCourtId && (
             <Alert severity="info">{t('complexDetail.selectPrompt')}</Alert>
@@ -364,8 +386,13 @@ export default function ComplexDetailPage() {
                 <Grid key={index} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
                   <Card
                     variant="outlined"
+                    component="button"
+                    type="button"
                     onClick={() => setSelectedSlot(slot)}
+                    aria-pressed={selectedSlot?.startAt === slot.startAt && selectedSlot.courtId === slot.courtId}
                     sx={{
+                      width: '100%',
+                      font: 'inherit',
                       textAlign: 'center',
                       borderRadius: 2,
                       cursor: 'pointer',
@@ -429,6 +456,6 @@ export default function ComplexDetailPage() {
           )}
         </Box>
       </Stack>
-    </Container>
+    </UserContentContainer>
   );
 }

@@ -133,7 +133,8 @@
       "rateOverlap": "La franja horaria se superpone con otra tarifa para el mismo día.",
       "timezoneNotConfigured": "El complejo no tiene una zona horaria válida configurada."
     },
-    "price": "Precio"
+    "price": "Precio",
+    "retry": "Reintentar"
   },
   "language": {
     "label": "Idioma",
@@ -205,13 +206,18 @@
     "switchToComplexLink": "Inicia sesión como propietario"
   },
   "complexes": {
-    "title": "Buscar un complejo deportivo",
-    "subtitle": "Busca complejos activos por nombre, ciudad o dirección.",
-    "searchPlaceholder": "Buscar complejos",
+    "title": "Encontrá tu cancha",
+    "subtitle": "Explorá complejos y elegí dónde jugar.",
+    "searchPlaceholder": "Nombre, ciudad o dirección",
     "searchButton": "Buscar",
     "loading": "Cargando complejos…",
     "error": "No se pudieron cargar los complejos. Inténtalo de nuevo.",
-    "empty": "No hay complejos activos que coincidan con tu búsqueda."
+    "empty": "No encontramos complejos con esa búsqueda.",
+    "searchLabel": "Buscar complejos",
+    "clearSearch": "Limpiar búsqueda",
+    "availableTitle": "Complejos disponibles",
+    "availableCount_one": "{{count}} complejo disponible",
+    "availableCount_other": "{{count}} complejos disponibles"
   },
   "complexDetail": {
     "loading": "Cargando complejo…",
@@ -287,7 +293,24 @@
       "confirmedToday": "Confirmadas hoy",
       "completedToday": "Completadas hoy",
       "cancelledToday": "Canceladas hoy",
-      "blockedUsers": "Usuarios bloqueados"
+      "blockedUsers": "Usuarios bloqueados",
+      "overview": "Resumen operativo de hoy",
+      "bookingsToday": "Reservas de hoy",
+      "bookingsDetail": "Confirmadas y completadas",
+      "courtsDetail": "Canchas activas",
+      "occupancyToday": "Ocupación de hoy",
+      "occupancyDetail": "Tiempo reservado / reservable",
+      "bookedHours": "Horas reservadas",
+      "bookedHoursDetail": "Según la duración real",
+      "agenda": "Agenda de reservas",
+      "previousDay": "Día anterior",
+      "nextDay": "Día siguiente",
+      "today": "Hoy",
+      "activity": "Actividad de hoy",
+      "cancelled": "Canceladas",
+      "upcoming": "Próximas reservas",
+      "noUpcoming": "No hay próximas reservas para este día.",
+      "currentTime": "Hora actual"
     },
     "courts": {
       "title": "Canchas",
@@ -489,7 +512,19 @@
       "priceLoading": "Calculando precio...",
       "priceError": "No se pudo calcular el precio de las ocurrencias.",
       "priceNotConfigured": "Este horario no tiene tarifa configurada para todas las ocurrencias.",
-      "priceSummary": "Precio por ocurrencia: {{perOccurrence}} — Total estimado de la serie ({{count}}): {{total}}"
+      "priceSummary": "Precio por ocurrencia: {{perOccurrence}} — Total estimado de la serie ({{count}}): {{total}}",
+      "sectionCustomerCourt": "Cliente y cancha",
+      "sectionSchedule": "Configuración del turno",
+      "sectionNotes": "Notas adicionales",
+      "summaryTitle": "Resumen de la recurrencia",
+      "summaryDescription": "Revisa lo que se creará antes de confirmar.",
+      "summaryFrequency": "Frecuencia",
+      "summaryWeekly": "Semanal los {{day}}",
+      "summarySchedule": "Horario",
+      "summaryPeriod": "Período",
+      "summaryOccurrences": "Ocurrencias estimadas",
+      "summaryPerOccurrence": "Precio por ocurrencia",
+      "summaryTotal": "Total estimado"
     },
     "recurringList": {
       "title": "Reservas recurrentes",
@@ -602,7 +637,7 @@
     "openMenu": "abrir menú"
   },
   "dashboard": {
-    "welcome": "Bienvenido, {{name}}",
+    "welcome": "¡Hola, {{name}}!",
     "logout": "Cerrar sesión",
     "errorTitle": "No se pudo cargar el panel",
     "errorMessage": "El panel no pudo cargarse. Inténtalo de nuevo más tarde.",
@@ -644,7 +679,22 @@
       "priceLoading": "Calculando precio...",
       "priceError": "No se pudo calcular el precio de las ocurrencias.",
       "priceNotConfigured": "Este horario no tiene tarifa configurada para todas las ocurrencias.",
-      "priceSummary": "Precio por ocurrencia: {{perOccurrence}} — Total estimado de la serie ({{count}}): {{total}}"
+      "priceSummary": "Precio por ocurrencia: {{perOccurrence}} — Total estimado de la serie ({{count}}): {{total}}",
+      "sectionWhere": "¿Dónde querés jugar?",
+      "sectionWhen": "¿Cuándo querés jugar?",
+      "sectionPeriod": "¿Durante qué período?",
+      "sectionNotes": "Notas adicionales",
+      "periodSummary": "Se crearán {{count}} reservas, todos los {{day}} de {{start}} a {{end}}.",
+      "viewDates": "Ver fechas de mis reservas",
+      "moreDates": "+{{count}} más",
+      "occurrenceNoRate": "Sin tarifa",
+      "summaryTitle": "Resumen de tu reserva",
+      "summarySchedule": "Horario",
+      "summaryPeriod": "Período",
+      "summaryOccurrences": "Reservas",
+      "summaryPerOccurrence": "Precio por reserva",
+      "summaryTotal": "Total estimado",
+      "confirm": "Confirmar reservas"
     },
     "exploreComplexesTitle": "Buscar complejo",
     "exploreComplexesDescription": "Busca complejos deportivos activos y consulta disponibilidad.",
@@ -666,7 +716,11 @@
     "historyDetailsHeader": "Detalles",
     "cancelledBy": "Cancelado por: {{name}}",
     "cancellationReason": "Motivo: {{reason}}",
-    "noCancellationReason": "sin motivo indicado"
+    "noCancellationReason": "sin motivo indicado",
+    "homeQuestion": "¿Dónde jugamos hoy?",
+    "noUpcomingDescription": "Explora complejos deportivos y encuentra una cancha para jugar.",
+    "whereToPlay": "Dónde jugar",
+    "viewAvailability": "Ver canchas y horarios"
   },
   "seo": {
     "homeTitle": "Encuentra tu próximo juego",

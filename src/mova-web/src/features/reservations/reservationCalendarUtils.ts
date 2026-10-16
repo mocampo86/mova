@@ -7,10 +7,10 @@ export { getReservationStatusColor };
 
 const MINUTES_IN_MS = 60 * 1000;
 
-export function formatTimeRange(startAt: string, endAt: string): string {
+export function formatTimeRange(startAt: string, endAt: string, timeZoneId?: string): string {
   const start = new Date(startAt);
   const end = new Date(endAt);
-  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', timeZone: timeZoneId };
   return `${start.toLocaleTimeString([], options)} - ${end.toLocaleTimeString([], options)}`;
 }
 

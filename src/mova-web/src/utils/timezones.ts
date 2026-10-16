@@ -115,6 +115,13 @@ export function todayInTimeZone(timeZoneId?: string | null): string {
   }
 }
 
+export function endTimeLabel(startTime: string, durationMinutes: number): string {
+  const [hours, minutes] = startTime.split(':').map(Number);
+  const totalMinutes = (hours || 0) * 60 + (minutes || 0) + durationMinutes;
+  const normalized = Math.min(Math.max(totalMinutes, 0), 24 * 60);
+  return `${pad(Math.floor(normalized / 60))}:${pad(normalized % 60)}`;
+}
+
 function pad(value: number): string {
   return String(value).padStart(2, '0');
 }

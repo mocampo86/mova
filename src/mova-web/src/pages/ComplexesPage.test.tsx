@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useActiveComplexes } from '../features/complexes/complexApi';
 import ComplexesPage from './ComplexesPage';
@@ -49,9 +49,12 @@ describe('ComplexesPage', () => {
 
     renderWithAuth(<ComplexesPage />);
 
-    expect(screen.getByRole('heading', { name: 'Find a sports complex' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Search' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Find your court' })).toBeTruthy();
+    expect(screen.getByRole('searchbox', { name: 'Search complexes' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Available complexes' })).toBeTruthy();
+    expect(screen.getByText('1 complex available')).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Central Padel' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'View courts and times' }).getAttribute('href')).toBe('/complexes/complex-1');
     expect(document.title).toBe('Mova | Find a sports complex');
     expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('Search active complexes by name, city, or address.');
   });
@@ -92,5 +95,34 @@ describe('ComplexesPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go to page 2' }));
 
     expect(mockUseActiveComplexes).toHaveBeenLastCalledWith('', 2);
+  });
+
+  it('searches while typing after a debounce', () => {
+    vi.useFakeTimers();
+    mockUseActiveComplexes.mockReturnValue({
+      data: emptyPagedResult,
+      isLoading: false,
+      isError: false
+    } as unknown as ReturnType<typeof useActiveComplexes>);
+
+    renderWithAuth(<ComplexesPage />);
+
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search complexes' }), { target: { value: 'padel' } });
+    act(() => { vi.advanceTimersByTime(400); });
+
+    expect(mockUseActiveComplexes).toHaveBeenLastCalledWith('padel', 1);
+    vi.useRealTimers();
+  });
+
+  it('renders an empty state message when there are no matches', () => {
+    mockUseActiveComplexes.mockReturnValue({
+      data: emptyPagedResult,
+      isLoading: false,
+      isError: false
+    } as unknown as ReturnType<typeof useActiveComplexes>);
+
+    renderWithAuth(<ComplexesPage />);
+
+    expect(screen.getByText('We could not find complexes matching that search.')).toBeTruthy();
   });
 });

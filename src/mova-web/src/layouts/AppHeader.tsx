@@ -297,7 +297,7 @@ export default function AppHeader({ greetingName, showMenuToggle, onMenuToggle }
       <Toolbar
         component="nav"
         aria-label={t('nav.brand')}
-        sx={{ gap: 1, flexWrap: 'nowrap' }}
+        sx={{ gap: { xs: 0.5, sm: 1 }, flexWrap: 'nowrap', minHeight: { xs: 'calc(56px + env(safe-area-inset-top))', sm: 64 }, pt: { xs: 'env(safe-area-inset-top)', sm: 0 } }}
       >
         {showMenuToggle && onMenuToggle && (
           <IconButton
@@ -324,7 +324,7 @@ export default function AppHeader({ greetingName, showMenuToggle, onMenuToggle }
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-          {isAuthenticated ? authenticatedActions : isMobile ? mobileNav : publicDesktopActions}
+          {isAuthenticated ? authenticatedActions : isMobile ? <><Button component={RouterLink} to="/login?intent=user" color="inherit" size="small" sx={{ ...focusVisibleSx, minHeight: 40 }}>{t('login.userButton')}</Button>{mobileNav}</> : publicDesktopActions}
         </Box>
       </Toolbar>
     </AppBar>

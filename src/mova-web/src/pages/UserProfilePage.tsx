@@ -1,14 +1,15 @@
 import { Link as RouterLink } from 'react-router-dom';
-import { Alert, Button, Card, CardContent, Container, Skeleton, Stack, Typography } from '@mui/material';
+import { Alert, Button, Card, CardContent, Skeleton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useUserDashboard } from '../features/users/useUserDashboard';
+import UserContentContainer from '../layouts/UserContentContainer';
 
 export default function UserProfilePage() {
   const { t } = useTranslation();
   const { data, isLoading, isError } = useUserDashboard();
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
+    <UserContentContainer width="compact">
       <Typography component="h1" variant="h4" sx={{ fontWeight: 800, mb: 3 }}>
         {t('dashboard.profileTitle')}
       </Typography>
@@ -48,6 +49,6 @@ export default function UserProfilePage() {
           </Stack>
         </CardContent>
       </Card>
-    </Container>
+    </UserContentContainer>
   );
 }

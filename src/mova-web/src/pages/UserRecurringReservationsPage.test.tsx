@@ -115,12 +115,17 @@ describe('UserRecurringReservationsPage', () => {
     });
 
     expect(screen.getByRole('heading', { name: 'Recurring bookings' })).toBeTruthy();
+    expect(screen.getByText('Where do you want to play?')).toBeTruthy();
+    expect(screen.getByText('When do you want to play?')).toBeTruthy();
+    expect(screen.getByText('For what period?')).toBeTruthy();
+    expect(screen.getByText('Additional notes')).toBeTruthy();
+    expect(screen.getByText('Booking summary')).toBeTruthy();
 
     setSelectValue('recurring-complex-select', 'complex-1');
 
     expect(screen.getByTestId('recurring-court-select')).toBeTruthy();
     expect(screen.getByRole('combobox', { name: 'Day of week' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Create recurring booking' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Confirm bookings' })).toBeTruthy();
   });
 
   it('disables the form and shows a message when the setting is disabled', () => {
@@ -139,7 +144,7 @@ describe('UserRecurringReservationsPage', () => {
 
     expect(screen.getByText('Recurring reservations are not available for this complex.')).toBeTruthy();
 
-    const createButton = screen.getByRole('button', { name: 'Create recurring booking' }) as HTMLButtonElement;
+    const createButton = screen.getByRole('button', { name: 'Confirm bookings' }) as HTMLButtonElement;
     expect(createButton.disabled).toBe(true);
   });
 
@@ -180,7 +185,7 @@ describe('UserRecurringReservationsPage', () => {
     setSelectValue('recurring-complex-select', 'complex-1');
     setSelectValue('recurring-court-select', 'court-1');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Create recurring booking' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm bookings' }));
 
     await waitFor(() => {
       expect(createMutation.mutateAsync).toHaveBeenCalled();
@@ -189,5 +194,23 @@ describe('UserRecurringReservationsPage', () => {
     expect(createMutation.mutateAsync).toHaveBeenCalledWith(expect.objectContaining({
       courtId: 'court-1'
     }));
+  });
+
+  it('shows the occurrence dates preview when expanded', () => {
+    setupSettings(true);
+    renderWithAuth(<UserRecurringReservationsPage />, {
+      authState: {
+        accessToken: 'token',
+        isAuthenticated: true
+      },
+      initialRoute: '/user/recurring'
+    });
+
+    setSelectValue('recurring-complex-select', 'complex-1');
+    setSelectValue('recurring-court-select', 'court-1');
+
+    fireEvent.click(screen.getByRole('button', { name: 'View my booking dates' }));
+
+    expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0);
   });
 });

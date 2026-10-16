@@ -4,7 +4,6 @@ import {
   Alert,
   Box,
   Button,
-  Container,
   Paper,
   Skeleton,
   Stack,
@@ -22,6 +21,7 @@ import { useMyReservationHistory } from '../features/reservations/reservationApi
 import { getReservationStatusKey, isCancelledStatus } from '../features/reservations/reservationStatus';
 import { formatMoney } from '../features/rates/rateUtils';
 import type { UserReservationsFilters } from '../features/reservations/reservationTypes';
+import UserContentContainer from '../layouts/UserContentContainer';
 
 function formatLocalDateTime(isoString: string): string {
   const date = new Date(isoString);
@@ -42,7 +42,7 @@ export default function UserHistoryPage() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <UserContentContainer>
       <Stack spacing={3}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }} justifyContent="space-between">
           <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>
@@ -131,6 +131,6 @@ export default function UserHistoryPage() {
           </Box>
         )}
       </Stack>
-    </Container>
+    </UserContentContainer>
   );
 }

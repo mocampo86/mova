@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import {
   Alert,
+  Box,
   Button,
   Container,
+  Divider,
   FormControl,
   Grid,
   InputLabel,
@@ -23,7 +25,7 @@ import { ApiError } from '../shared/utils/apiError';
 import { useCreateRecurringReservationForCustomer } from '../features/reservations/reservationApi';
 import { useComplexUsers } from '../features/users/userAdminApi';
 import type { UserListFilters } from '../features/users/userAdminTypes';
-import { localDateTimeToUtc } from '../utils/timezones';
+import { endTimeLabel, localDateTimeToUtc } from '../utils/timezones';
 
 function todayIso() {
   return new Date().toISOString().split('T')[0];
@@ -118,6 +120,9 @@ export default function AdminRecurringReservationsPage() {
     quote?.isFullyCovered && occurrencesCount > 0
       ? Math.round(quote.totalAmount * occurrencesCount * 100) / 100
       : undefined;
+  const selectedCustomer = users.data?.items.find((user) => user.id === userId);
+  const selectedCourt = courts.data?.items.find((court) => court.id === courtId);
+  const scheduleEndTime = endTimeLabel(startTime, Number(durationMinutes) || 0);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -173,109 +178,132 @@ export default function AdminRecurringReservationsPage() {
           </Alert>
         )}
 
-        <Paper component="form" variant="outlined" onSubmit={handleSubmit} sx={{ p: 3 }}>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormControl fullWidth disabled={!complexId || users.isLoading}>
-                <InputLabel id="recurring-customer-label">{t('admin.recurringPage.customer')}</InputLabel>
-                <Select
-                  labelId="recurring-customer-label"
-                  label={t('admin.recurringPage.customer')}
-                  value={userId}
-                  onChange={(event) => setUserId(event.target.value)}
-                >
-                  <MenuItem value="">{t('admin.recurringPage.selectCustomer')}</MenuItem>
-                  {(users.data?.items ?? []).map((user) => (
-                    <MenuItem key={user.id} value={user.id}>
-                      {user.fullName} ({user.email})
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+        <Paper
+          component="form"
+          variant="outlined"
+          onSubmit={handleSubmit}
+          sx={{ p: { xs: 2, sm: 3 }, maxWidth: 900 }}
+        >
+          <Stack spacing={3} divider={<Divider flexItem />}>
+            <Box component="fieldset" sx={{ m: 0, p: 0, border: 0, minWidth: 0 }}>
+              <Typography component="legend" variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
+                {t('admin.recurringPage.sectionCustomerCourt')}
+              </Typography>
+              <Grid container spacing={2.5}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FormControl fullWidth required disabled={!complexId || users.isLoading}>
+                    <InputLabel id="recurring-customer-label">{t('admin.recurringPage.customer')}</InputLabel>
+                    <Select
+                      labelId="recurring-customer-label"
+                      label={t('admin.recurringPage.customer')}
+                      value={userId}
+                      onChange={(event) => setUserId(event.target.value)}
+                    >
+                      <MenuItem value="">{t('admin.recurringPage.selectCustomer')}</MenuItem>
+                      {(users.data?.items ?? []).map((user) => (
+                        <MenuItem key={user.id} value={user.id}>
+                          {user.fullName} ({user.email})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FormControl fullWidth required disabled={!complexId || courts.isLoading}>
+                    <InputLabel id="recurring-court-label">{t('common.court')}</InputLabel>
+                    <Select
+                      labelId="recurring-court-label"
+                      label={t('common.court')}
+                      value={courtId}
+                      onChange={(event) => setCourtId(event.target.value)}
+                    >
+                      <MenuItem value="">{t('dashboard.recurringPage.selectCourt')}</MenuItem>
+                      {(courts.data?.items ?? []).map((court) => (
+                        <MenuItem key={court.id} value={court.id}>
+                          {court.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </Box>
 
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormControl fullWidth disabled={!complexId || courts.isLoading}>
-                <InputLabel id="recurring-court-label">{t('common.court')}</InputLabel>
-                <Select
-                  labelId="recurring-court-label"
-                  label={t('common.court')}
-                  value={courtId}
-                  onChange={(event) => setCourtId(event.target.value)}
-                >
-                  <MenuItem value="">{t('dashboard.recurringPage.selectCourt')}</MenuItem>
-                  {(courts.data?.items ?? []).map((court) => (
-                    <MenuItem key={court.id} value={court.id}>
-                      {court.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+            <Box component="fieldset" sx={{ m: 0, p: 0, border: 0, minWidth: 0 }}>
+              <Typography component="legend" variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
+                {t('admin.recurringPage.sectionSchedule')}
+              </Typography>
+              <Grid container spacing={2.5}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <FormControl fullWidth required>
+                    <InputLabel id="recurring-day-label">{t('dashboard.recurringPage.dayOfWeek')}</InputLabel>
+                    <Select
+                      labelId="recurring-day-label"
+                      label={t('dashboard.recurringPage.dayOfWeek')}
+                      value={dayOfWeek}
+                      onChange={(event) => setDayOfWeek(event.target.value)}
+                    >
+                      {[0, 1, 2, 3, 4, 5, 6].map((day) => (
+                        <MenuItem key={day} value={String(day)}>
+                          {t(`days.${day}`)}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField
+                    label={t('dashboard.recurringPage.startTime')}
+                    type="time"
+                    value={startTime}
+                    onChange={(event) => setStartTime(event.target.value)}
+                    fullWidth
+                    required
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField
+                    label={t('dashboard.recurringPage.duration')}
+                    type="number"
+                    value={durationMinutes}
+                    onChange={(event) => setDurationMinutes(event.target.value)}
+                    fullWidth
+                    required
+                    inputProps={{ min: 1, max: 1440 }}
+                    error={Number(durationMinutes) <= 0 && durationMinutes !== ''}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    label={t('dashboard.recurringPage.startDate')}
+                    type="date"
+                    value={startDate}
+                    onChange={(event) => setStartDate(event.target.value)}
+                    fullWidth
+                    required
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    label={t('dashboard.recurringPage.endDate')}
+                    type="date"
+                    value={endDate}
+                    onChange={(event) => setEndDate(event.target.value)}
+                    fullWidth
+                    required
+                    InputLabelProps={{ shrink: true }}
+                    error={Boolean(startDate && endDate && startDate > endDate)}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <FormControl fullWidth>
-                <InputLabel id="recurring-day-label">{t('dashboard.recurringPage.dayOfWeek')}</InputLabel>
-                <Select
-                  labelId="recurring-day-label"
-                  label={t('dashboard.recurringPage.dayOfWeek')}
-                  value={dayOfWeek}
-                  onChange={(event) => setDayOfWeek(event.target.value)}
-                >
-                  {[0, 1, 2, 3, 4, 5, 6].map((day) => (
-                    <MenuItem key={day} value={String(day)}>
-                      {t(`days.${day}`)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
-                label={t('dashboard.recurringPage.startTime')}
-                type="time"
-                value={startTime}
-                onChange={(event) => setStartTime(event.target.value)}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
-                label={t('dashboard.recurringPage.duration')}
-                type="number"
-                value={durationMinutes}
-                onChange={(event) => setDurationMinutes(event.target.value)}
-                fullWidth
-                inputProps={{ min: 1, max: 1440 }}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
-                label={t('dashboard.recurringPage.startDate')}
-                type="date"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
-                label={t('dashboard.recurringPage.endDate')}
-                type="date"
-                value={endDate}
-                onChange={(event) => setEndDate(event.target.value)}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 9 }}>
+            <Box component="fieldset" sx={{ m: 0, p: 0, border: 0, minWidth: 0 }}>
+              <Typography component="legend" variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
+                {t('admin.recurringPage.sectionNotes')}
+              </Typography>
               <TextField
                 label={t('common.notes')}
                 value={notes}
@@ -284,56 +312,138 @@ export default function AdminRecurringReservationsPage() {
                 multiline
                 rows={2}
               />
-            </Grid>
+            </Box>
 
-            <Grid size={{ xs: 12 }}>
-              {occurrencesCount > 0 ? (
-                <Alert severity="info">
-                  {t('dashboard.recurringPage.preview', { count: occurrencesCount })}
-                </Alert>
-              ) : (
-                <Alert severity="warning">{t('dashboard.recurringPage.noOccurrences')}</Alert>
-              )}
-            </Grid>
+            <Box
+              sx={{
+                bgcolor: 'background.default',
+                border: 1,
+                borderColor: 'divider',
+                borderRadius: 2,
+                p: { xs: 2, sm: 2.5 }
+              }}
+            >
+              <Stack spacing={2}>
+                <Stack spacing={0.5}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    {t('admin.recurringPage.summaryTitle')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('admin.recurringPage.summaryDescription')}
+                  </Typography>
+                </Stack>
 
-            {courtId && occurrenceQuote.isLoading && (
-              <Grid size={{ xs: 12 }}>
-                <Alert severity="info" variant="outlined">{t('admin.recurringPage.priceLoading')}</Alert>
-              </Grid>
-            )}
-            {courtId && occurrenceQuote.isError && (
-              <Grid size={{ xs: 12 }}>
-                <Alert severity="error">{t('admin.recurringPage.priceError')}</Alert>
-              </Grid>
-            )}
-            {quote && !quote.isFullyCovered && (
-              <Grid size={{ xs: 12 }}>
-                <Alert severity="warning">{t('admin.recurringPage.priceNotConfigured')}</Alert>
-              </Grid>
-            )}
-            {quote?.isFullyCovered && occurrencesCount > 0 && (
-              <Grid size={{ xs: 12 }}>
-                <Alert severity="info" variant="outlined">
-                  {t('admin.recurringPage.priceSummary', {
-                    perOccurrence: formatMoney(quote.totalAmount, quote.currency),
-                    total: formatMoney(expectedSeriesTotal ?? 0, quote.currency),
-                    count: occurrencesCount
-                  })}
-                </Alert>
-              </Grid>
-            )}
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {t('admin.recurringPage.customer')}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {selectedCustomer?.fullName ?? '—'}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {t('common.court')}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {selectedCourt?.name ?? '—'}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {t('admin.recurringPage.summaryFrequency')}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {t('admin.recurringPage.summaryWeekly', { day: t(`days.${dayOfWeek}`) })}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {t('admin.recurringPage.summarySchedule')}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {startTime}–{scheduleEndTime} ({durationMinutes} min)
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {t('admin.recurringPage.summaryPeriod')}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {startDate} → {endDate}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {t('admin.recurringPage.summaryOccurrences')}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {occurrencesCount}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {t('admin.recurringPage.summaryPerOccurrence')}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {quote?.isFullyCovered
+                        ? formatMoney(quote.totalAmount, quote.currency)
+                        : courtId && occurrenceQuote.isLoading
+                          ? t('common.loading')
+                          : '—'}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {t('admin.recurringPage.summaryTotal')}
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                      {expectedSeriesTotal !== undefined && quote
+                        ? formatMoney(expectedSeriesTotal, quote.currency)
+                        : '—'}
+                    </Typography>
+                  </Grid>
+                </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <Stack direction="row" justifyContent="flex-end" spacing={2}>
-                <Button component={RouterLink} to={`/admin/complex/${complexId}/recurring`} variant="outlined">
-                  {t('common.cancel')}
-                </Button>
-                <Button type="submit" variant="contained" disabled={!canSubmit}>
-                  {t('admin.recurringPage.create')}
-                </Button>
+                {occurrencesCount === 0 && startDate && endDate && (
+                  <Alert severity="warning">{t('dashboard.recurringPage.noOccurrences')}</Alert>
+                )}
+                {courtId && occurrenceQuote.isLoading && (
+                  <Alert severity="info" variant="outlined">{t('admin.recurringPage.priceLoading')}</Alert>
+                )}
+                {courtId && occurrenceQuote.isError && (
+                  <Alert severity="error">{t('admin.recurringPage.priceError')}</Alert>
+                )}
+                {quote && !quote.isFullyCovered && (
+                  <Alert severity="warning">{t('admin.recurringPage.priceNotConfigured')}</Alert>
+                )}
               </Stack>
-            </Grid>
-          </Grid>
+            </Box>
+
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              justifyContent="flex-end"
+              spacing={2}
+            >
+              <Button
+                component={RouterLink}
+                to={`/admin/complex/${complexId}/recurring`}
+                variant="outlined"
+                sx={{ width: { xs: '100%', sm: 'auto' } }}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={!canSubmit}
+                sx={{ width: { xs: '100%', sm: 'auto' } }}
+              >
+                {createRecurring.isPending ? t('common.loading') : t('admin.recurringPage.create')}
+              </Button>
+            </Stack>
+          </Stack>
         </Paper>
       </Stack>
     </Container>

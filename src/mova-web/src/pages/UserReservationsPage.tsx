@@ -4,7 +4,9 @@ import {
   Alert,
   Box,
   Button,
-  Container,
+  Card,
+  CardContent,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -28,6 +30,7 @@ import { useCancelMyReservation, useMyReservations } from '../features/reservati
 import { getReservationStatusKey } from '../features/reservations/reservationStatus';
 import { formatMoney } from '../features/rates/rateUtils';
 import type { Reservation, UserReservationsFilters } from '../features/reservations/reservationTypes';
+import UserContentContainer from '../layouts/UserContentContainer';
 
 function formatLocalDateTime(isoString: string): string {
   const date = new Date(isoString);
@@ -79,7 +82,7 @@ export default function UserReservationsPage() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <UserContentContainer>
       <Stack spacing={3}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }} justifyContent="space-between">
           <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>
@@ -92,7 +95,21 @@ export default function UserReservationsPage() {
 
         {isError && <Alert severity="error">{t('dashboard.reservationsError')}</Alert>}
 
-        <TableContainer component={Paper} variant="outlined">
+        <Stack spacing={1.5} sx={{ display: { xs: 'flex', sm: 'none' } }}>
+          {isLoading && <Skeleton variant="rounded" height={144} />}
+          {!isLoading && !isError && data?.items.length === 0 && <Alert severity="info">{t('dashboard.noUpcomingReservations')}</Alert>}
+          {!isLoading && !isError && data?.items.map((reservation) => (
+            <Card key={reservation.id} variant="outlined">
+              <CardContent><Stack spacing={1}>
+                <Stack direction="row" justifyContent="space-between" gap={1} alignItems="flex-start" sx={{ flexWrap: 'wrap' }}><Typography fontWeight={800} sx={{ minWidth: 0, overflowWrap: 'anywhere' }}>{reservation.courtName}</Typography><Chip sx={{ maxWidth: '100%' }} label={t(`status.${getReservationStatusKey(reservation.status)}`)} size="small" color={reservation.status === 'Confirmed' ? 'primary' : 'default'} /></Stack>
+                <Typography color="text.secondary" variant="body2">{formatLocalDateTime(reservation.startAt)} - {new Date(reservation.endAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Typography>
+                {reservation.totalPrice != null && reservation.currency && <Typography fontWeight={700}>{formatMoney(reservation.totalPrice, reservation.currency)}</Typography>}
+                <Button size="small" variant="outlined" sx={{ alignSelf: 'flex-start', minHeight: 40 }} disabled={!canCancel(reservation.status) || cancelMyReservation.isPending} onClick={() => { cancelMyReservation.reset(); setCancelDialog({ open: true, reservation }); }}>{t('common.cancel')}</Button>
+              </Stack></CardContent>
+            </Card>
+          ))}
+        </Stack>
+        <TableContainer component={Paper} variant="outlined" sx={{ display: { xs: 'none', sm: 'block' } }}>
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -196,6 +213,6 @@ export default function UserReservationsPage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </UserContentContainer>
   );
 }

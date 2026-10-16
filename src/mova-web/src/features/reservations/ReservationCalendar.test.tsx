@@ -84,27 +84,19 @@ describe('ReservationCalendar', () => {
     expect(screen.getByRole('alert').textContent).toContain('No slots to display');
   });
 
-  it('renders the calendar legend and court columns', async () => {
+  it('renders the calendar legend and court columns', () => {
     renderCalendar();
 
-    await waitFor(() => {
-      expect(screen.getByText('Legend:')).toBeTruthy();
-    });
-
+    expect(screen.getAllByText('Confirmed').length).toBeGreaterThan(0);
     expect(screen.getByText('Court One')).toBeTruthy();
-    expect(screen.getAllByText('Free').length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: /Free:/i })).toBeTruthy();
     expect(screen.getByText('Test User')).toBeTruthy();
   });
 
-  it('calls onFreeSlotClick when a free slot is selected', async () => {
+  it('calls onFreeSlotClick when a free slot is selected', () => {
     renderCalendar();
 
-    await waitFor(() => {
-      expect(screen.getByText('Legend:')).toBeTruthy();
-    });
-
-    const freeSlotElements = screen.getAllByText('Free');
-    fireEvent.click(freeSlotElements[freeSlotElements.length - 1]);
+    fireEvent.click(screen.getByRole('button', { name: /Free:/i }));
 
     expect(onFreeSlotClick).toHaveBeenCalledTimes(1);
     expect(onReservationClick).not.toHaveBeenCalled();
