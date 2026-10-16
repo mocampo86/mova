@@ -8,6 +8,13 @@ export type ReservationStatus =
 
 export type ReservationSource = 'Web' | 'Admin' | 'Recurring';
 
+export interface ReservationPriceLine {
+  startAt: string;
+  endAt: string;
+  hourlyRate: number;
+  amount: number;
+}
+
 export interface Reservation {
   id: string;
   complexId: string;
@@ -26,6 +33,9 @@ export interface Reservation {
   cancellationReason?: string | null;
   cancelledByUserId?: string | null;
   cancelledByUserName?: string | null;
+  totalPrice?: number | null;
+  currency?: string | null;
+  priceLines?: ReservationPriceLine[];
 }
 
 export interface CreateMyRecurringReservationRequest {
@@ -36,6 +46,8 @@ export interface CreateMyRecurringReservationRequest {
   startDate: string;
   endDate: string;
   notes?: string;
+  expectedTotalPrice?: number;
+  expectedCurrency?: string;
 }
 
 export interface CreateRecurringReservationForCustomerRequest {
@@ -47,6 +59,8 @@ export interface CreateRecurringReservationForCustomerRequest {
   startDate: string;
   endDate: string;
   notes?: string;
+  expectedTotalPrice?: number;
+  expectedCurrency?: string;
 }
 
 export interface RecurringReservation {
@@ -110,6 +124,8 @@ export interface CreateReservationRequest {
   startAt: string;
   endAt: string;
   notes?: string;
+  expectedTotalPrice?: number;
+  expectedCurrency?: string;
 }
 
 export interface CreateMyReservationRequest {
@@ -117,6 +133,8 @@ export interface CreateMyReservationRequest {
   startAt: string;
   endAt: string;
   notes?: string;
+  expectedTotalPrice?: number;
+  expectedCurrency?: string;
 }
 
 export interface CancelReservationRequest {

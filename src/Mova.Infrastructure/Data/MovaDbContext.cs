@@ -19,6 +19,8 @@ public sealed class MovaDbContext : DbContext
     public DbSet<Sport> Sports => Set<Sport>();
     public DbSet<CourtSport> CourtSports => Set<CourtSport>();
     public DbSet<CourtAvailabilityRule> CourtAvailabilityRules => Set<CourtAvailabilityRule>();
+    public DbSet<CourtRate> CourtRates => Set<CourtRate>();
+    public DbSet<ReservationPriceLine> ReservationPriceLines => Set<ReservationPriceLine>();
     public DbSet<BusinessHours> BusinessHours => Set<BusinessHours>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<RecurringReservation> RecurringReservations => Set<RecurringReservation>();

@@ -15,6 +15,7 @@ import ComplexReservationsPage from '../pages/ComplexReservationsPage';
 import ComplexUsersPage from '../pages/ComplexUsersPage';
 import ConfigurationPage from '../pages/ConfigurationPage';
 import CreateCourtPage from '../pages/CreateCourtPage';
+import CourtRatesPage from '../pages/CourtRatesPage';
 import EditCourtPage from '../pages/EditCourtPage';
 import ComplexDetailPage from '../pages/ComplexDetailPage';
 import ComplexProfilePage from '../pages/ComplexProfilePage';
@@ -49,6 +50,7 @@ export default function AppRouter() {
         <Route path="courts" element={<ComplexCourtsPage />} />
         <Route path="courts/new" element={<CreateCourtPage />} />
         <Route path="courts/:courtId/edit" element={<EditCourtPage />} />
+        <Route path="courts/:courtId/rates" element={<CourtRatesPage />} />
         <Route path="business-hours" element={<BusinessHoursPage />} />
         <Route path="reservations" element={<ComplexReservationsPage />} />
         <Route path="recurring" element={<AdminRecurringReservationsListPage />} />

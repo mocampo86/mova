@@ -24,7 +24,9 @@ public sealed class CreateReservationCommand
         DateTime startAt,
         DateTime endAt,
         string? notes,
-        ReservationSource source)
+        ReservationSource source,
+        decimal? expectedTotalPrice = null,
+        string? expectedCurrency = null)
     {
         SportsComplexId = sportsComplexId;
         CourtId = courtId;
@@ -34,6 +36,8 @@ public sealed class CreateReservationCommand
         EndAt = endAt;
         Notes = notes;
         Source = source;
+        ExpectedTotalPrice = expectedTotalPrice;
+        ExpectedCurrency = expectedCurrency;
     }
 
     public Guid SportsComplexId { get; }
@@ -44,4 +48,6 @@ public sealed class CreateReservationCommand
     public DateTime EndAt { get; }
     public string? Notes { get; }
     public ReservationSource Source { get; }
+    public decimal? ExpectedTotalPrice { get; }
+    public string? ExpectedCurrency { get; }
 }

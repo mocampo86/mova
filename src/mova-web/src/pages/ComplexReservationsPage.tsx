@@ -31,6 +31,9 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAdminComplex } from '../features/complexes/complexApi';
 import { useCourts } from '../features/courts/courtApi';
+import { usePriceQuote } from '../features/rates/rateApi';
+import { formatMoney } from '../features/rates/rateUtils';
+import { ApiError } from '../shared/utils/apiError';
 import type { CourtListFilters } from '../features/courts/courtTypes';
 import UserAutocomplete from '../features/users/UserAutocomplete';
 import type { ComplexUser } from '../features/users/userAdminTypes';
@@ -152,6 +155,25 @@ export default function ComplexReservationsPage() {
   const [createFormError, setCreateFormError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<ComplexUser | null>(null);
 
+  const createStartAtUtc = useMemo(
+    () => (createForm.startAt ? localDateTimeToUtc(timeZoneId, createForm.startAt) : null),
+    [timeZoneId, createForm.startAt]
+  );
+  const createEndAtUtc = useMemo(
+    () => (createForm.endAt ? localDateTimeToUtc(timeZoneId, createForm.endAt) : null),
+    [timeZoneId, createForm.endAt]
+  );
+  const createQuote = usePriceQuote(
+    complexId,
+    createForm.courtId,
+    createOpen && createStartAtUtc && createEndAtUtc && new Date(createEndAtUtc) > new Date(createStartAtUtc)
+      ? createStartAtUtc
+      : null,
+    createOpen && createStartAtUtc && createEndAtUtc && new Date(createEndAtUtc) > new Date(createStartAtUtc)
+      ? createEndAtUtc
+      : null
+  );
+
   const [cancelDialog, setCancelDialog] = useState<{ open: boolean; reservation: Reservation | null }>({
     open: false,
     reservation: null
@@ -217,16 +239,27 @@ export default function ComplexReservationsPage() {
       return;
     }
 
+    const quote = createQuote.data;
+    if (!quote?.isFullyCovered) {
+      setCreateFormError(t('admin.reservations.priceNotConfigured'));
+      return;
+    }
+
     try {
       await createReservation.mutateAsync({
         courtId: createForm.courtId,
         userId: createForm.userId,
         startAt,
         endAt,
-        notes: createForm.notes || undefined
+        notes: createForm.notes || undefined,
+        expectedTotalPrice: quote.totalAmount,
+        expectedCurrency: quote.currency
       });
       handleCreateClose();
-    } catch {
+    } catch (err) {
+      if (err instanceof ApiError && err.code === 'PRICE_CHANGED') {
+        createQuote.refetch();
+      }
       // Error is surfaced via mutation state
     }
   };
@@ -368,6 +401,7 @@ export default function ComplexReservationsPage() {
                       <TableCell>{t('admin.reservations.dateTimeHeader')}</TableCell>
                       <TableCell>{t('admin.reservations.courtHeader')}</TableCell>
                       <TableCell>{t('admin.reservations.userHeader')}</TableCell>
+                      <TableCell>{t('admin.reservations.priceHeader')}</TableCell>
                       <TableCell>{t('admin.reservations.statusHeader')}</TableCell>
                       <TableCell align="right">{t('admin.reservations.actionsHeader')}</TableCell>
                     </TableRow>
@@ -385,6 +419,11 @@ export default function ComplexReservationsPage() {
                         </TableCell>
                         <TableCell>{reservation.courtName}</TableCell>
                         <TableCell>{reservation.userName}</TableCell>
+                        <TableCell>
+                          {reservation.totalPrice != null && reservation.currency
+                            ? formatMoney(reservation.totalPrice, reservation.currency)
+                            : '—'}
+                        </TableCell>
                         <TableCell>
                           <Chip
                             label={statusOptions.find((s) => s.value === reservation.status)?.label ?? reservation.status}
@@ -525,6 +564,29 @@ export default function ComplexReservationsPage() {
               multiline
               rows={2}
             />
+            {createForm.courtId && createQuote.isLoading && (
+              <Typography color="text.secondary">{t('admin.reservations.priceLoading')}</Typography>
+            )}
+            {createForm.courtId && createQuote.isError && (
+              <Alert severity="error">{t('admin.reservations.priceError')}</Alert>
+            )}
+            {createQuote.data && !createQuote.data.isFullyCovered && (
+              <Alert severity="warning">{t('admin.reservations.priceNotConfigured')}</Alert>
+            )}
+            {createQuote.data?.isFullyCovered && (
+              <Stack spacing={0.5}>
+                {createQuote.data.lines.map((line, index) => (
+                  <Typography key={index} variant="body2" color="text.secondary">
+                    {new Date(line.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} –{' '}
+                    {new Date(line.endAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}:{' '}
+                    {formatMoney(line.hourlyRate, createQuote.data.currency)}/h → {formatMoney(line.amount, createQuote.data.currency)}
+                  </Typography>
+                ))}
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  {t('admin.reservations.priceTotal', { amount: formatMoney(createQuote.data.totalAmount, createQuote.data.currency) })}
+                </Typography>
+              </Stack>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -534,10 +596,12 @@ export default function ComplexReservationsPage() {
             onClick={handleCreateSubmit}
             disabled={
               createReservation.isPending ||
+              createQuote.isLoading ||
               !createForm.courtId ||
               !createForm.userId ||
               !createForm.startAt ||
-              !createForm.endAt
+              !createForm.endAt ||
+              !createQuote.data?.isFullyCovered
             }
           >
             {t('admin.reservations.createButton')}
@@ -668,6 +732,20 @@ export default function ComplexReservationsPage() {
                 color={getReservationStatusColor(selectedReservation.status)}
                 size="small"
               />
+            )}
+            {selectedReservation?.totalPrice != null && selectedReservation.currency && (
+              <Stack spacing={0.5}>
+                {(selectedReservation.priceLines ?? []).map((line, index) => (
+                  <Typography key={index} variant="body2" color="text.secondary">
+                    {new Date(line.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} –{' '}
+                    {new Date(line.endAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}:{' '}
+                    {formatMoney(line.hourlyRate, selectedReservation.currency!)}/h → {formatMoney(line.amount, selectedReservation.currency!)}
+                  </Typography>
+                ))}
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  {t('admin.reservations.priceTotal', { amount: formatMoney(selectedReservation.totalPrice, selectedReservation.currency) })}
+                </Typography>
+              </Stack>
             )}
           </Stack>
         </DialogContent>

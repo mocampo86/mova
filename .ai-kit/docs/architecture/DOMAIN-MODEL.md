@@ -49,6 +49,7 @@ A sports facility that owns courts and reservations.
 | Status | enum | Active / Inactive |
 | AllowUserRecurringReservations | bool | Default `true`; controls regular user recurring bookings |
 | TimeZoneId | string? | IANA time zone identifier (e.g. `America/Montevideo`); `null` for unresolved legacy complexes |
+| Currency | string | ISO 4217 currency code (e.g. `UYU`); applies to all court rates and reservations of the complex |
 | CreatedAt | DateTime | UTC |
 | UpdatedAt | DateTime? | UTC |
 
@@ -127,6 +128,38 @@ Defines when a court is available and how long each slot lasts.
 | SlotDurationMinutes | int | Default 60 |
 | IsActive | bool | |
 
+### CourtRate
+
+A configurable hourly price for a court, valid on selected weekdays and a same-day time range. Times are interpreted in the complex's `TimeZoneId`; the currency is inherited from the complex.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | Guid | |
+| CourtId | Guid | |
+| DaysOfWeek | int | Bitmask of applicable days (bit 0 = Sunday … bit 6 = Saturday) |
+| StartTime | TimeSpan | Within the day (00:00–24:00) |
+| EndTime | TimeSpan | Greater than StartTime, at most 24:00; overnight ranges are not allowed |
+| AmountPerHour | decimal | Positive, at most two decimal places |
+| IsActive | bool | Inactive rates do not apply to new reservations |
+| CreatedAt | DateTime | UTC |
+| UpdatedAt | DateTime? | UTC |
+
+Active rates for the same court cannot overlap on a shared weekday.
+
+### ReservationPriceLine
+
+Immutable snapshot of one priced segment of a reservation.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| Id | Guid | |
+| ReservationId | Guid | |
+| CourtRateId | Guid? | Rate applied; kept as reference only (rate changes do not affect the snapshot) |
+| StartAt | DateTime | UTC segment start |
+| EndAt | DateTime | UTC segment end |
+| HourlyRate | decimal | Rate applied per hour |
+| Amount | decimal | Proportional segment amount, rounded to 2 decimals (`AwayFromZero`) |
+
 ### Reservation
 
 A concrete booking of a court for a time range.
@@ -148,6 +181,9 @@ A concrete booking of a court for a time range.
 | CancelledAt | DateTime? | UTC |
 | CancellationReason | string? | |
 | CancelledByUserId | Guid? | Actor who performed the cancellation |
+| TotalPrice | decimal? | Agreed total; `null` for reservations created before pricing existed |
+| Currency | string? | ISO 4217 code snapshot from the complex; `null` for legacy reservations |
+| PriceLines | collection | `ReservationPriceLine` snapshot of the applied segments |
 
 ### RecurringReservation
 
@@ -245,10 +281,13 @@ Record of administrative actions.
 5. A recurring reservation must define an end date and a maximum number of weeks.
 6. Cancellation must be allowed only before a configurable minimum notice period, and can be disabled entirely.
 7. All date/time values are stored in UTC and converted to local time in the frontend using the sports complex's configured IANA time zone.
+8. Every new reservation must be fully covered by active `CourtRate`s; an uncovered interval rejects the reservation (`PRICE_NOT_CONFIGURED`) — a missing rate is never free.
+9. Reservation price = sum of proportional segments (`hourlyRate × minutes / 60`), each segment rounded to 2 decimals `AwayFromZero`; the sum of `PriceLines` always equals `TotalPrice`.
+10. The client sends `expectedTotalPrice`/`expectedCurrency`; if the current calculation differs, confirmation is rejected (`PRICE_CHANGED`).
+11. Recurring reservations price each occurrence independently; if any occurrence lacks coverage the whole series is rejected.
 
 ## Future domain extensions
 
-- Pricing per court and time slot.
 - Payments and deposits.
 - Notifications (email/SMS/WhatsApp).
 - Reputation and comments.

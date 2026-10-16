@@ -21,6 +21,7 @@ public static class SportsComplexInfoMapper
             Status = sportsComplex.Status.ToString(),
             AllowUserRecurringReservations = sportsComplex.AllowUserRecurringReservations,
             TimeZoneId = sportsComplex.TimeZoneId,
+            Currency = sportsComplex.Currency,
             CreatedAt = sportsComplex.CreatedAt,
             UpdatedAt = sportsComplex.UpdatedAt
         };

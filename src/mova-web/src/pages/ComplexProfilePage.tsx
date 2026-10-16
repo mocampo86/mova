@@ -55,7 +55,10 @@ const schema = z.object({
     .min(1, 'Email is required.')
     .email('Email is not valid.')
     .max(255, 'Email must not exceed 255 characters.'),
-  timeZoneId: z.string().min(1, 'Time zone is required.')
+  timeZoneId: z.string().min(1, 'Time zone is required.'),
+  currency: z
+    .string()
+    .regex(/^[A-Z]{3}$/, 'Currency must be a 3-letter ISO code (e.g. UYU).')
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -89,7 +92,8 @@ export default function ComplexProfilePage() {
       longitude: null,
       phoneNumber: '',
       email: '',
-      timeZoneId: DEFAULT_TIME_ZONE_ID
+      timeZoneId: DEFAULT_TIME_ZONE_ID,
+      currency: 'UYU'
     }
   });
 
@@ -104,7 +108,8 @@ export default function ComplexProfilePage() {
         longitude: data.longitude ?? null,
         phoneNumber: data.phoneNumber,
         email: data.email,
-        timeZoneId: data.timeZoneId ?? DEFAULT_TIME_ZONE_ID
+        timeZoneId: data.timeZoneId ?? DEFAULT_TIME_ZONE_ID,
+        currency: data.currency ?? 'UYU'
       });
     }
   }, [data, reset]);
@@ -271,6 +276,19 @@ export default function ComplexProfilePage() {
               fullWidth
             />
           )}
+        />
+
+        <TextField
+          {...register('currency')}
+          label={t('admin.profile.currency')}
+          fullWidth
+          inputProps={{ maxLength: 3 }}
+          onChange={(event) => {
+            event.target.value = event.target.value.toUpperCase();
+            register('currency').onChange(event);
+          }}
+          error={Boolean(errors.currency)}
+          helperText={errors.currency?.message ?? t('admin.profile.currencyHelper')}
         />
 
         <TextField

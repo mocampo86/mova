@@ -44,6 +44,9 @@ public sealed class SportsComplexInfo
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? TimeZoneId { get; set; }
 
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = string.Empty;
+
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
 

@@ -116,6 +116,21 @@ async function setupRecurringMocks(page: Page) {
 
   await apiRoute(page, 'GET', new RegExp(`${API_BASE_URL}/api/v1/complexes/complex-1(\\?.*)?$`), 200, complex);
 
+  await apiRoute(page, 'GET', new RegExp(`${API_BASE_URL}/api/v1/complexes/complex-1/courts/court-1/price-quote(\\?.*)?$`), 200, {
+    totalAmount: 1200,
+    currency: 'UYU',
+    isFullyCovered: true,
+    lines: [
+      {
+        startAt,
+        endAt,
+        hourlyRate: 1200,
+        amount: 1200
+      }
+    ],
+    gaps: []
+  });
+
   await apiRoute(page, 'GET', new RegExp(`${API_BASE_URL}/api/v1/complexes/complex-1/courts(\\?.*)?$`), 200, {
     items: [court],
     page: 1,

@@ -40,7 +40,8 @@ public sealed class UpdateComplexHandler : IUpdateComplexHandler
             command.Longitude,
             command.PhoneNumber,
             command.Email,
-            command.TimeZoneId);
+            command.TimeZoneId,
+            command.Currency ?? sportsComplex.Currency);
 
         var auditLog = AuditLog.Create(
             _currentUser.UserId,

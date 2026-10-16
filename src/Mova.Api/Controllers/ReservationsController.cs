@@ -90,7 +90,10 @@ public sealed class ReservationsController(
             createdByUserId,
             request.StartAt,
             request.EndAt,
-            request.Notes);
+            request.Notes,
+            ReservationSource.Admin,
+            request.ExpectedTotalPrice,
+            request.ExpectedCurrency);
 
         await createValidator.ValidateAndThrowAsync(command, cancellationToken);
 
@@ -160,7 +163,9 @@ public sealed class ReservationsController(
             request.StartAt,
             request.EndAt,
             request.Notes,
-            ReservationSource.Web);
+            ReservationSource.Web,
+            request.ExpectedTotalPrice,
+            request.ExpectedCurrency);
 
         await createValidator.ValidateAndThrowAsync(command, cancellationToken);
 

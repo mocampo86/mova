@@ -3,6 +3,7 @@ using Mova.Application.Reservations.Commands;
 using Mova.Application.Reservations.Handlers;
 using Mova.Domain.Entities;
 using Mova.Domain.Enums;
+using Mova.Domain.Exceptions;
 using Mova.UnitTests.Application.Audit;
 using Mova.UnitTests.Application.Authentication;
 using Mova.UnitTests.Application.Complexes;
@@ -19,6 +20,7 @@ public sealed class CreateRecurringReservationHandlerTests
     private readonly FakeRecurringReservationRepository _recurringReservationRepository = new();
     private readonly FakeReservationRepository _reservationRepository = new();
     private readonly FakeCourtBlockRepository _courtBlockRepository = new();
+    private readonly FakeCourtRateRepository _courtRateRepository = new();
     private readonly FakeAuditLogRepository _auditLogs = new();
     private readonly FakeCurrentUserContext _currentUser = new();
     private readonly FakeUnitOfWork _unitOfWork = new();
@@ -32,6 +34,7 @@ public sealed class CreateRecurringReservationHandlerTests
             _recurringReservationRepository,
             _reservationRepository,
             _courtBlockRepository,
+            _courtRateRepository,
             _auditLogs,
             _currentUser,
             _unitOfWork);
@@ -200,6 +203,55 @@ public sealed class CreateRecurringReservationHandlerTests
             result.Occurrences[0].EndAt);
     }
 
+    [Fact]
+    public async Task HandleAsync_WhenOccurrenceLacksRateCoverage_ThrowsPriceNotConfiguredException()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        _courtRateRepository.Clear();
+        // Occurrences run Monday 23:00 -> Tuesday 00:30 local; the rate only covers
+        // Monday 22:00-24:00, leaving the Tuesday segment uncovered for every occurrence.
+        await _courtRateRepository.AddAsync(CourtRate.Create(
+            court.Id,
+            1 << (int)DayOfWeek.Monday,
+            TimeSpan.FromHours(22),
+            TimeSpan.FromHours(24),
+            100m));
+        var handler = CreateHandler();
+
+        await Assert.ThrowsAsync<PriceNotConfiguredException>(() => handler.HandleAsync(new CreateRecurringReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            DayOfWeek.Monday,
+            new TimeOnly(23, 0),
+            90,
+            new DateOnly(2026, 8, 10),
+            new DateOnly(2026, 8, 31),
+            null,
+            false)));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithMismatchedExpectedSeriesTotal_ThrowsPriceChangedException()
+    {
+        var (complex, court, user) = await CreateScenarioAsync();
+        var handler = CreateHandler();
+
+        await Assert.ThrowsAsync<PriceChangedException>(() => handler.HandleAsync(new CreateRecurringReservationCommand(
+            complex.Id,
+            court.Id,
+            user.Id,
+            DayOfWeek.Monday,
+            new TimeOnly(14, 0),
+            60,
+            new DateOnly(2026, 8, 10),
+            new DateOnly(2026, 8, 31),
+            null,
+            false,
+            ExpectedTotalPrice: 999m,
+            ExpectedCurrency: "UYU")));
+    }
+
     private async Task<(SportsComplex Complex, Court Court, User User)> CreateScenarioAsync()
     {
         var complex = SportsComplex.Create(
@@ -215,6 +267,13 @@ public sealed class CreateRecurringReservationHandlerTests
 
         var court = Court.Create(complex.Id, "Court 1", "Description", "Synthetic", false);
         await _courtRepository.AddAsync(court);
+
+        await _courtRateRepository.AddAsync(CourtRate.Create(
+            court.Id,
+            0b1111111,
+            TimeSpan.Zero,
+            TimeSpan.FromHours(24),
+            100m));
 
         var user = User.CreateFromGoogle(Guid.NewGuid(), $"sub-{Guid.NewGuid()}", $"user-{Guid.NewGuid()}@example.com", "Test User");
         await _userRepository.AddAsync(user);

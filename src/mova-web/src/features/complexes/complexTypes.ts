@@ -19,6 +19,7 @@ export interface SportsComplex {
   status?: string;
   allowUserRecurringReservations: boolean;
   timeZoneId: string;
+  currency?: string;
   createdAt?: string;
   updatedAt?: string | null;
 }
@@ -33,6 +34,7 @@ export interface UpdateComplexRequest {
   latitude?: number | null;
   longitude?: number | null;
   timeZoneId: string;
+  currency: string;
 }
 
 export interface Court {

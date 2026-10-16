@@ -84,6 +84,7 @@ public static class DependencyInjection
         services.AddScoped<ICourtRepository, CourtRepository>();
         services.AddScoped<ISportRepository, SportRepository>();
         services.AddScoped<ICourtAvailabilityRuleRepository, CourtAvailabilityRuleRepository>();
+        services.AddScoped<ICourtRateRepository, CourtRateRepository>();
         services.AddScoped<IBusinessHoursRepository, BusinessHoursRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IRecurringReservationRepository, RecurringReservationRepository>();

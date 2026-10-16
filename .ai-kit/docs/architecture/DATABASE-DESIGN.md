@@ -46,6 +46,7 @@ CREATE TABLE SportsComplexes (
     Status TEXT NOT NULL,
     AllowUserRecurringReservations BOOLEAN NOT NULL DEFAULT TRUE,
     TimeZoneId TEXT,
+    Currency CHAR(3) NOT NULL,
     CreatedAt TIMESTAMPTZ NOT NULL,
     UpdatedAt TIMESTAMPTZ
 );
@@ -132,6 +133,27 @@ CREATE TABLE CourtAvailabilityRules (
 );
 ```
 
+### CourtRates
+
+Hourly prices per court, weekday mask, and same-day time range (interpreted in the complex's `TimeZoneId`). The currency is inherited from `SportsComplexes.Currency`. Overnight ranges are not allowed (`EndTime <= 24:00` and `EndTime > StartTime`).
+
+```sql
+CREATE TABLE CourtRates (
+    Id UUID PRIMARY KEY,
+    CourtId UUID NOT NULL REFERENCES Courts(Id),
+    DaysOfWeek INT NOT NULL CHECK (DaysOfWeek BETWEEN 1 AND 127),
+    StartTime TIME NOT NULL,
+    EndTime TIME NOT NULL,
+    AmountPerHour NUMERIC(18,2) NOT NULL CHECK (AmountPerHour > 0),
+    IsActive BOOLEAN NOT NULL DEFAULT TRUE,
+    CreatedAt TIMESTAMPTZ NOT NULL,
+    UpdatedAt TIMESTAMPTZ,
+    CONSTRAINT chk_rate_time CHECK (StartTime < EndTime)
+);
+```
+
+Active-rate overlap on a shared weekday is enforced in the domain/application layer (bitmask intersection + range intersection), not by a database constraint.
+
 ### Reservations
 
 ```sql
@@ -151,7 +173,28 @@ CREATE TABLE Reservations (
     CancelledAt TIMESTAMPTZ,
     CancellationReason TEXT,
     CancelledByUserId UUID REFERENCES Users(Id),
+    TotalPrice NUMERIC(18,2),
+    Currency VARCHAR(3),
     CONSTRAINT chk_reservation_time CHECK (StartAt < EndAt)
+);
+```
+
+`TotalPrice`/`Currency` are NULL for reservations created before pricing existed; no backfill is performed.
+
+### ReservationPriceLines
+
+Immutable snapshot of the price segments applied to a reservation. The sum of `Amount` always equals `Reservations.TotalPrice`. `CourtRateId` is a reference only: later rate changes or deactivation do not affect stored lines.
+
+```sql
+CREATE TABLE ReservationPriceLines (
+    Id UUID PRIMARY KEY,
+    ReservationId UUID NOT NULL REFERENCES Reservations(Id) ON DELETE CASCADE,
+    CourtRateId UUID REFERENCES CourtRates(Id) ON DELETE SET NULL,
+    StartAt TIMESTAMPTZ NOT NULL,
+    EndAt TIMESTAMPTZ NOT NULL,
+    HourlyRate NUMERIC(18,2) NOT NULL,
+    Amount NUMERIC(18,2) NOT NULL,
+    CONSTRAINT chk_price_line_time CHECK (StartAt < EndAt)
 );
 ```
 

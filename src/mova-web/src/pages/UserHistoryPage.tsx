@@ -20,6 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useMyReservationHistory } from '../features/reservations/reservationApi';
 import { getReservationStatusKey, isCancelledStatus } from '../features/reservations/reservationStatus';
+import { formatMoney } from '../features/rates/rateUtils';
 import type { UserReservationsFilters } from '../features/reservations/reservationTypes';
 
 function formatLocalDateTime(isoString: string): string {
@@ -61,6 +62,7 @@ export default function UserHistoryPage() {
                 <TableCell>{t('common.court')}</TableCell>
                 <TableCell>{t('common.start')}</TableCell>
                 <TableCell>{t('common.end')}</TableCell>
+                <TableCell>{t('common.price')}</TableCell>
                 <TableCell>{t('common.status')}</TableCell>
                 <TableCell>{t('dashboard.historyDetailsHeader')}</TableCell>
               </TableRow>
@@ -68,14 +70,14 @@ export default function UserHistoryPage() {
             <TableBody>
               {isLoading && (
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <Skeleton variant="rectangular" height={120} />
                   </TableCell>
                 </TableRow>
               )}
               {!isLoading && !isError && data?.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <Alert severity="info">{t('dashboard.noHistory')}</Alert>
                   </TableCell>
                 </TableRow>
@@ -87,6 +89,11 @@ export default function UserHistoryPage() {
                     <TableCell>{reservation.courtName}</TableCell>
                     <TableCell>{formatLocalDateTime(reservation.startAt)}</TableCell>
                     <TableCell>{formatLocalDateTime(reservation.endAt)}</TableCell>
+                    <TableCell>
+                      {reservation.totalPrice != null && reservation.currency
+                        ? formatMoney(reservation.totalPrice, reservation.currency)
+                        : '—'}
+                    </TableCell>
                     <TableCell>{t(`status.${getReservationStatusKey(reservation.status)}`)}</TableCell>
                     <TableCell>
                       {isCancelledStatus(reservation.status) && (

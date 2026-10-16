@@ -10,4 +10,5 @@ public sealed record CreateComplexCommand(
     decimal? Longitude,
     string PhoneNumber,
     string Email,
-    string TimeZoneId);
+    string TimeZoneId,
+    string? Currency = null);

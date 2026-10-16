@@ -10,4 +10,6 @@ public sealed record ModifyRecurringReservationFutureCommand(
     int DurationMinutes,
     DateOnly EndDate,
     string? Notes,
-    bool IsAdmin = false);
+    bool IsAdmin = false,
+    decimal? ExpectedTotalPrice = null,
+    string? ExpectedCurrency = null);

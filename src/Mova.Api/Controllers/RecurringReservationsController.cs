@@ -80,7 +80,9 @@ public sealed class RecurringReservationsController(
             request.StartDate,
             request.EndDate,
             request.Notes,
-            authorizationResult.Succeeded);
+            authorizationResult.Succeeded,
+            request.ExpectedTotalPrice,
+            request.ExpectedCurrency);
 
         await createValidator.ValidateAndThrowAsync(command, cancellationToken);
 
@@ -112,7 +114,9 @@ public sealed class RecurringReservationsController(
             request.StartDate,
             request.EndDate,
             request.Notes,
-            true);
+            true,
+            request.ExpectedTotalPrice,
+            request.ExpectedCurrency);
 
         await createValidator.ValidateAndThrowAsync(command, cancellationToken);
 
@@ -188,7 +192,9 @@ public sealed class RecurringReservationsController(
             request.DurationMinutes,
             request.EndDate,
             request.Notes,
-            authorizationResult.Succeeded);
+            authorizationResult.Succeeded,
+            request.ExpectedTotalPrice,
+            request.ExpectedCurrency);
 
         await modifyFutureValidator.ValidateAndThrowAsync(command, cancellationToken);
 
