@@ -133,7 +133,8 @@
       "rateOverlap": "O intervalo de horário se sobrepõe a outra tarifa no mesmo dia.",
       "timezoneNotConfigured": "O complexo não tem um fuso horário válido configurado."
     },
-    "price": "Preço"
+    "price": "Preço",
+    "retry": "Tentar novamente"
   },
   "language": {
     "label": "Idioma",
@@ -205,13 +206,18 @@
     "switchToComplexLink": "Entre como proprietário"
   },
   "complexes": {
-    "title": "Encontrar um complexo esportivo",
-    "subtitle": "Busque complexos ativos por nome, cidade ou endereço.",
-    "searchPlaceholder": "Buscar complexos",
+    "title": "Encontre sua quadra",
+    "subtitle": "Explore complexos e escolha onde jogar.",
+    "searchPlaceholder": "Nome, cidade ou endereço",
     "searchButton": "Buscar",
     "loading": "Carregando complexos…",
     "error": "Não foi possível carregar os complexos. Tente novamente.",
-    "empty": "Nenhum complexo ativo corresponde à sua busca."
+    "empty": "Não encontramos complexos com essa busca.",
+    "searchLabel": "Buscar complexos",
+    "clearSearch": "Limpar busca",
+    "availableTitle": "Complexos disponíveis",
+    "availableCount_one": "{{count}} complexo disponível",
+    "availableCount_other": "{{count}} complexos disponíveis"
   },
   "complexDetail": {
     "loading": "Carregando complexo…",
@@ -287,7 +293,24 @@
       "confirmedToday": "Confirmadas hoje",
       "completedToday": "Concluídas hoje",
       "cancelledToday": "Canceladas hoje",
-      "blockedUsers": "Usuários bloqueados"
+      "blockedUsers": "Usuários bloqueados",
+      "overview": "Visão operacional de hoje",
+      "bookingsToday": "Reservas de hoje",
+      "bookingsDetail": "Confirmadas e concluídas",
+      "courtsDetail": "Quadras ativas",
+      "occupancyToday": "Ocupação de hoje",
+      "occupancyDetail": "Tempo reservado / reservável",
+      "bookedHours": "Horas reservadas",
+      "bookedHoursDetail": "Com base na duração real",
+      "agenda": "Agenda de reservas",
+      "previousDay": "Dia anterior",
+      "nextDay": "Próximo dia",
+      "today": "Hoje",
+      "activity": "Atividade de hoje",
+      "cancelled": "Canceladas",
+      "upcoming": "Próximas reservas",
+      "noUpcoming": "Não há próximas reservas neste dia.",
+      "currentTime": "Hora atual"
     },
     "courts": {
       "title": "Quadras",
@@ -489,7 +512,19 @@
       "priceLoading": "Calculando preço...",
       "priceError": "Não foi possível calcular o preço das ocorrências.",
       "priceNotConfigured": "Este horário não tem tarifa configurada para todas as ocorrências.",
-      "priceSummary": "Preço por ocorrência: {{perOccurrence}} — Total estimado da série ({{count}}): {{total}}"
+      "priceSummary": "Preço por ocorrência: {{perOccurrence}} — Total estimado da série ({{count}}): {{total}}",
+      "sectionCustomerCourt": "Cliente e quadra",
+      "sectionSchedule": "Configuração do horário",
+      "sectionNotes": "Observações adicionais",
+      "summaryTitle": "Resumo da recorrência",
+      "summaryDescription": "Revise o que será criado antes de confirmar.",
+      "summaryFrequency": "Frequência",
+      "summaryWeekly": "Semanal às {{day}}",
+      "summarySchedule": "Horário",
+      "summaryPeriod": "Período",
+      "summaryOccurrences": "Ocorrências estimadas",
+      "summaryPerOccurrence": "Preço por ocorrência",
+      "summaryTotal": "Total estimado"
     },
     "recurringList": {
       "title": "Reservas recorrentes",
@@ -602,7 +637,7 @@
     "openMenu": "abrir menu"
   },
   "dashboard": {
-    "welcome": "Bem-vindo, {{name}}",
+    "welcome": "Olá, {{name}}!",
     "logout": "Sair",
     "errorTitle": "Não foi possível carregar o painel",
     "errorMessage": "O painel não pôde ser carregado. Tente novamente mais tarde.",
@@ -644,7 +679,22 @@
       "priceLoading": "Calculando preço...",
       "priceError": "Não foi possível calcular o preço das ocorrências.",
       "priceNotConfigured": "Este horário não tem tarifa configurada para todas as ocorrências.",
-      "priceSummary": "Preço por ocorrência: {{perOccurrence}} — Total estimado da série ({{count}}): {{total}}"
+      "priceSummary": "Preço por ocorrência: {{perOccurrence}} — Total estimado da série ({{count}}): {{total}}",
+      "sectionWhere": "Onde você quer jogar?",
+      "sectionWhen": "Quando você quer jogar?",
+      "sectionPeriod": "Durante qual período?",
+      "sectionNotes": "Observações adicionais",
+      "periodSummary": "Serão criadas {{count}} reservas, toda {{day}} das {{start}} às {{end}}.",
+      "viewDates": "Ver datas das minhas reservas",
+      "moreDates": "+{{count}} mais",
+      "occurrenceNoRate": "Sem tarifa",
+      "summaryTitle": "Resumo da sua reserva",
+      "summarySchedule": "Horário",
+      "summaryPeriod": "Período",
+      "summaryOccurrences": "Reservas",
+      "summaryPerOccurrence": "Preço por reserva",
+      "summaryTotal": "Total estimado",
+      "confirm": "Confirmar reservas"
     },
     "exploreComplexesTitle": "Buscar complexo",
     "exploreComplexesDescription": "Busque complexos esportivos ativos e consulte disponibilidade.",
@@ -666,7 +716,11 @@
     "historyDetailsHeader": "Detalhes",
     "cancelledBy": "Cancelado por: {{name}}",
     "cancellationReason": "Motivo: {{reason}}",
-    "noCancellationReason": "sem motivo informado"
+    "noCancellationReason": "sem motivo informado",
+    "homeQuestion": "Onde vamos jogar hoje?",
+    "noUpcomingDescription": "Explore complexos esportivos e encontre uma quadra para jogar.",
+    "whereToPlay": "Onde jogar",
+    "viewAvailability": "Ver quadras e horários"
   },
   "seo": {
     "homeTitle": "Encontre seu próximo jogo",

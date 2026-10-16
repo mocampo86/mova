@@ -1,205 +1,44 @@
 import { Link as RouterLink } from 'react-router-dom';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Container,
-  Grid,
-  Skeleton,
-  Stack,
-  Typography
-} from '@mui/material';
+import { Alert, Box, Button, Card, CardActionArea, CardContent, Chip, Grid, Skeleton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useActiveComplexes } from '../features/complexes/complexApi';
 import { useUserDashboard } from '../features/users/useUserDashboard';
+import { getReservationStatusKey } from '../features/reservations/reservationStatus';
+import UserContentContainer from '../layouts/UserContentContainer';
 
-function formatLocalDateTime(isoString: string): string {
-  const date = new Date(isoString);
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+function dateTime(value: string) {
+  return new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value));
+}
+
+function CalendarIcon() {
+  return <Box component="svg" viewBox="0 0 24 24" aria-hidden="true" sx={{ width: 23, height: 23, fill: 'none', stroke: 'currentColor', strokeWidth: 1.8 }}><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M8 3v4m8-4v4M4 10h16" /></Box>;
 }
 
 export default function UserDashboardPage() {
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useUserDashboard();
+  const dashboard = useUserDashboard();
+  const complexes = useActiveComplexes('', 1, 4);
+  const nextReservation = dashboard.data?.upcomingReservations.items[0];
+  const nextComplex = complexes.data?.items.find((complex) => complex.id === nextReservation?.complexId);
+  const name = dashboard.data?.user.fullName || dashboard.data?.user.email || '';
 
-  return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack spacing={4}>
-        {isError && <Alert severity="error">{t('dashboard.errorMessage')}</Alert>}
+  return <UserContentContainer><Stack spacing={{ xs: 3.5, md: 4 }}>
+    {dashboard.isError && <Alert severity="error">{t('dashboard.errorMessage')}</Alert>}
+    <Stack spacing={0.35}>
+      <Typography component="h1" variant="h4" sx={{ fontWeight: 850, fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>{dashboard.isLoading ? <Skeleton width={210} /> : t('dashboard.welcome', { name })}</Typography>
+      <Typography color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.05rem' } }}>{t('dashboard.homeQuestion')}</Typography>
+    </Stack>
 
-        <Box>
-          <Typography component="h1" variant="h4" sx={{ fontWeight: 800 }}>
-            {isLoading || !data ? (
-              <Skeleton variant="text" width={260} />
-            ) : (
-              t('dashboard.welcome', { name: data.user.fullName })
-            )}
-          </Typography>
-          {!isLoading && data && (
-            <Typography color="text.secondary">{data.user.email}</Typography>
-          )}
-        </Box>
+    <Button component={RouterLink} to="/complexes" variant="contained" size="large" startIcon={<CalendarIcon />} sx={{ alignSelf: 'flex-start', minHeight: 52, px: { xs: 2, sm: 2.5 }, fontWeight: 800, borderRadius: 2, maxWidth: '100%' }}>
+      {t('dashboard.browseComplexes')}
+    </Button>
 
-        {data?.activeBlocks && data.activeBlocks.length > 0 && (
-          <Alert severity="warning" variant="outlined">
-            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-              {t('dashboard.activeBlocksTitle')}
-            </Typography>
-            <Stack component="ul" spacing={1} sx={{ pl: 2, m: 0 }}>
-              {data.activeBlocks.map((block) => (
-                <Typography component="li" key={block.id}>
-                  {t('dashboard.activeBlockMessage', {
-                    complex: block.complexName,
-                    reason: block.reason ?? t('dashboard.noReason')
-                  })}
-                </Typography>
-              ))}
-            </Stack>
-          </Alert>
-        )}
+    <Box component="section" aria-labelledby="upcoming-reservations-title"><Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={{ xs: 0.5, sm: 1 }} sx={{ mb: 1.25, minWidth: 0 }}><Typography id="upcoming-reservations-title" component="h2" variant="h6" sx={{ fontWeight: 800 }}>{t('dashboard.upcomingTitle')}</Typography>{nextReservation && <Button component={RouterLink} to="/user/reservations" size="small">{t('dashboard.viewAllReservations')}</Button>}</Stack>
+      {dashboard.isLoading ? <Skeleton variant="rounded" height={150} /> : nextReservation ? <Card variant="outlined" sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 5px 16px rgba(23,43,77,.06)' }}><CardActionArea component={RouterLink} to="/user/reservations"><CardContent sx={{ p: { xs: 2, sm: 2.5 } }}><Stack direction="row" spacing={1.5} alignItems="flex-start"><Box sx={{ width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: 'primary.light', color: 'primary.dark', flexShrink: 0 }}><CalendarIcon /></Box><Box sx={{ minWidth: 0, flexGrow: 1 }}><Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1} sx={{ minWidth: 0 }}><Typography fontWeight={800} sx={{ minWidth: 0, overflowWrap: 'anywhere' }}>{nextReservation.courtName}</Typography><Chip sx={{ flexShrink: 0 }} label={t(`status.${getReservationStatusKey(nextReservation.status)}`)} color="primary" size="small" /></Stack>{nextComplex && <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, overflowWrap: 'anywhere' }}>{nextComplex.name}</Typography>}<Typography color="text.secondary" variant="body2" sx={{ mt: 0.75 }}>{dateTime(nextReservation.startAt)}</Typography></Box></Stack></CardContent></CardActionArea></Card> : <Card variant="outlined" sx={{ borderRadius: 3 }}><CardContent sx={{ p: 2.25 }}><Typography fontWeight={800}>{t('dashboard.noUpcomingReservations')}</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{t('dashboard.noUpcomingDescription')}</Typography><Button component={RouterLink} to="/complexes" sx={{ mt: 1, px: 0 }}>{t('dashboard.browseComplexes')}</Button></CardContent></Card>}
+    </Box>
 
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card variant="outlined" sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography component="h2" variant="h6" sx={{ fontWeight: 700 }}>
-                  {t('dashboard.upcomingTitle')}
-                </Typography>
-
-                {isLoading && (
-                  <Stack spacing={1} sx={{ mt: 2 }}>
-                    <Skeleton variant="text" />
-                    <Skeleton variant="text" />
-                    <Skeleton variant="text" />
-                  </Stack>
-                )}
-
-                {!isLoading && !isError && data && (
-                  <Stack spacing={2} sx={{ mt: 2 }}>
-                    {data.upcomingReservations.items.length === 0 && (
-                      <Typography color="text.secondary">{t('dashboard.noUpcomingReservations')}</Typography>
-                    )}
-                    {data.upcomingReservations.items.slice(0, 5).map((reservation) => (
-                      <Box key={reservation.id}>
-                        <Typography sx={{ fontWeight: 600 }}>{reservation.courtName}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {formatLocalDateTime(reservation.startAt)} - {formatLocalDateTime(reservation.endAt)}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Stack>
-                )}
-              </CardContent>
-              <CardActions>
-                <Button component={RouterLink} to="/user/reservations" size="small">
-                  {t('dashboard.viewAllReservations')}
-                </Button>
-                <Button component={RouterLink} to="/complexes" size="small" variant="contained">
-                  {t('dashboard.newReservation')}
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card variant="outlined" sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography component="h2" variant="h6" sx={{ fontWeight: 700 }}>
-                  {t('dashboard.historyTitle')}
-                </Typography>
-
-                {isLoading && (
-                  <Stack spacing={1} sx={{ mt: 2 }}>
-                    <Skeleton variant="text" />
-                    <Skeleton variant="text" />
-                    <Skeleton variant="text" />
-                  </Stack>
-                )}
-
-                {!isLoading && !isError && data && (
-                  <Stack spacing={2} sx={{ mt: 2 }}>
-                    <Typography>
-                      {t('dashboard.historyCount', { count: data.historySummary.totalItems })}
-                    </Typography>
-                    {data.historySummary.recentReservations.length === 0 && (
-                      <Typography color="text.secondary">{t('dashboard.noHistory')}</Typography>
-                    )}
-                    {data.historySummary.recentReservations.map((reservation) => (
-                      <Box key={reservation.id}>
-                        <Typography sx={{ fontWeight: 600 }}>{reservation.courtName}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {formatLocalDateTime(reservation.startAt)} - {formatLocalDateTime(reservation.endAt)}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Stack>
-                )}
-              </CardContent>
-              <CardActions>
-                <Button component={RouterLink} to="/user/history" size="small">
-                  {t('dashboard.viewAllHistory')}
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <Card variant="outlined" sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography component="h2" variant="h6" sx={{ fontWeight: 700 }}>
-                  {t('dashboard.exploreComplexesTitle')}
-                </Typography>
-                <Typography color="text.secondary" sx={{ mt: 1 }}>
-                  {t('dashboard.exploreComplexesDescription')}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button component={RouterLink} to="/complexes" size="small" variant="contained">
-                  {t('dashboard.browseComplexes')}
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <Card variant="outlined" sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography component="h2" variant="h6" sx={{ fontWeight: 700 }}>
-                  {t('dashboard.recurringTitle')}
-                </Typography>
-                <Typography color="text.secondary" sx={{ mt: 1 }}>
-                  {t('dashboard.recurringDescription')}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button component={RouterLink} to="/complexes" size="small" variant="contained">
-                  {t('dashboard.newRecurringReservation')}
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <Card variant="outlined" sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography component="h2" variant="h6" sx={{ fontWeight: 700 }}>
-                  {t('dashboard.profileTitle')}
-                </Typography>
-                <Typography color="text.secondary" sx={{ mt: 1 }}>
-                  {t('dashboard.profileDescription')}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button component={RouterLink} to="/user/profile" size="small" variant="contained">
-                  {t('dashboard.viewProfile')}
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        </Grid>
-      </Stack>
-    </Container>
-  );
+    <Box component="section" aria-labelledby="where-to-play-title"><Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={{ xs: 0.5, sm: 1 }} sx={{ mb: 1.25, minWidth: 0 }}><Box sx={{ minWidth: 0, maxWidth: '100%' }}><Typography id="where-to-play-title" component="h2" variant="h6" sx={{ fontWeight: 800 }}>{t('dashboard.whereToPlay')}</Typography><Typography variant="body2" color="text.secondary">{t('dashboard.exploreComplexesDescription')}</Typography></Box><Button component={RouterLink} to="/complexes" size="small">{t('common.view')}</Button></Stack>
+      {complexes.isError ? <Alert severity="error">{t('complexes.error')}</Alert> : <Grid container spacing={2}>{complexes.isLoading ? [0, 1].map((key) => <Grid key={key} size={{ xs: 12, sm: 6 }}><Skeleton variant="rounded" height={176} /></Grid>) : complexes.data?.items.map((complex) => <Grid key={complex.id} size={{ xs: 12, sm: 6 }}><Card variant="outlined" sx={{ height: '100%', borderRadius: 3, overflow: 'hidden', boxShadow: '0 3px 12px rgba(23,43,77,.04)' }}><CardActionArea component={RouterLink} to={`/complexes/${complex.id}`} sx={{ height: '100%' }}><CardContent sx={{ p: 2.25 }}><Stack direction="row" spacing={1.5}><Box aria-hidden="true" sx={{ width: 40, height: 40, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: 'grey.100', color: 'primary.main', fontWeight: 900, flexShrink: 0 }}>{complex.name.slice(0, 1).toUpperCase()}</Box><Box sx={{ minWidth: 0 }}><Typography fontWeight={800} sx={{ overflowWrap: 'anywhere' }}>{complex.name}</Typography>{(complex.city || complex.address) && <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, overflowWrap: 'anywhere' }}>{[complex.city, complex.address].filter(Boolean).join(' · ')}</Typography>}</Box></Stack>{complex.description && <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, overflowWrap: 'anywhere' }}>{complex.description}</Typography>}<Typography variant="body2" color="primary.main" sx={{ mt: 1.5, fontWeight: 700 }}>{t('dashboard.viewAvailability')}</Typography></CardContent></CardActionArea></Card></Grid>)}</Grid>}
+    </Box>
+  </Stack></UserContentContainer>;
 }

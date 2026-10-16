@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -88,6 +88,7 @@ function initialCreateForm(timeZoneId?: string | null): {
 export default function ComplexReservationsPage() {
   const { t } = useTranslation();
   const { complexId = '' } = useParams();
+  const location = useLocation();
   const complex = useAdminComplex(complexId);
   const timeZoneId = complex.data?.timeZoneId ?? undefined;
   const [filters, setFilters] = useState<ReservationListFilters>({
@@ -194,6 +195,14 @@ export default function ComplexReservationsPage() {
 
   const [selectedFreeSlot, setSelectedFreeSlot] = useState<FreeCalendarSlot | null>(null);
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+
+  useEffect(() => {
+    const state = location.state as { selectedFreeSlot?: FreeCalendarSlot; selectedReservation?: Reservation } | null;
+    if (!state) return;
+    setView('calendar');
+    if (state.selectedFreeSlot) setSelectedFreeSlot(state.selectedFreeSlot);
+    if (state.selectedReservation) setSelectedReservation(state.selectedReservation);
+  }, [location.state]);
 
   const statusOptions: { value: ReservationStatus | 'All'; label: string }[] = [
     { value: 'All', label: t('status.all') },

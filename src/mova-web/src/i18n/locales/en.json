@@ -133,7 +133,8 @@
       "rateOverlap": "The time range overlaps another rate for the same day.",
       "timezoneNotConfigured": "The complex does not have a valid time zone configured."
     },
-    "price": "Price"
+    "price": "Price",
+    "retry": "Try again"
   },
   "language": {
     "label": "Language",
@@ -205,13 +206,18 @@
     "switchToComplexLink": "Sign in as an owner"
   },
   "complexes": {
-    "title": "Find a sports complex",
-    "subtitle": "Search active complexes by name, city, or address.",
-    "searchPlaceholder": "Search complexes",
+    "title": "Find your court",
+    "subtitle": "Explore complexes and choose where to play.",
+    "searchPlaceholder": "Name, city or address",
     "searchButton": "Search",
     "loading": "Loading complexes…",
     "error": "Complexes could not be loaded. Please try again.",
-    "empty": "No active complexes match your search."
+    "empty": "We could not find complexes matching that search.",
+    "searchLabel": "Search complexes",
+    "clearSearch": "Clear search",
+    "availableTitle": "Available complexes",
+    "availableCount_one": "{{count}} complex available",
+    "availableCount_other": "{{count}} complexes available"
   },
   "complexDetail": {
     "loading": "Loading complex…",
@@ -287,7 +293,24 @@
       "confirmedToday": "Confirmed today",
       "completedToday": "Completed today",
       "cancelledToday": "Cancelled today",
-      "blockedUsers": "Blocked users"
+      "blockedUsers": "Blocked users",
+      "overview": "Today's operational overview",
+      "bookingsToday": "Bookings today",
+      "bookingsDetail": "Confirmed and completed",
+      "courtsDetail": "Active courts",
+      "occupancyToday": "Occupancy today",
+      "occupancyDetail": "Booked time / reservable time",
+      "bookedHours": "Hours booked",
+      "bookedHoursDetail": "Based on actual duration",
+      "agenda": "Reservation agenda",
+      "previousDay": "Previous day",
+      "nextDay": "Next day",
+      "today": "Today",
+      "activity": "Today's activity",
+      "cancelled": "Cancelled",
+      "upcoming": "Upcoming bookings",
+      "noUpcoming": "No upcoming bookings for this day.",
+      "currentTime": "Current time"
     },
     "courts": {
       "title": "Courts",
@@ -489,7 +512,19 @@
       "priceLoading": "Calculating price...",
       "priceError": "Could not calculate the price for the occurrences.",
       "priceNotConfigured": "This time slot has no configured rate for all occurrences.",
-      "priceSummary": "Price per occurrence: {{perOccurrence}} — Estimated series total ({{count}}): {{total}}"
+      "priceSummary": "Price per occurrence: {{perOccurrence}} — Estimated series total ({{count}}): {{total}}",
+      "sectionCustomerCourt": "Customer and court",
+      "sectionSchedule": "Schedule settings",
+      "sectionNotes": "Additional notes",
+      "summaryTitle": "Recurrence summary",
+      "summaryDescription": "Review what will be created before confirming.",
+      "summaryFrequency": "Frequency",
+      "summaryWeekly": "Weekly on {{day}}",
+      "summarySchedule": "Time",
+      "summaryPeriod": "Period",
+      "summaryOccurrences": "Estimated occurrences",
+      "summaryPerOccurrence": "Price per occurrence",
+      "summaryTotal": "Estimated total"
     },
     "recurringList": {
       "title": "Recurring bookings",
@@ -602,7 +637,7 @@
     "openMenu": "open menu"
   },
   "dashboard": {
-    "welcome": "Welcome, {{name}}",
+    "welcome": "Hi, {{name}}!",
     "logout": "Log out",
     "errorTitle": "Unable to load dashboard",
     "errorMessage": "The dashboard could not be loaded. Please try again later.",
@@ -644,7 +679,22 @@
       "priceLoading": "Calculating price...",
       "priceError": "Could not calculate the price for the occurrences.",
       "priceNotConfigured": "This time slot has no configured rate for all occurrences.",
-      "priceSummary": "Price per occurrence: {{perOccurrence}} — Estimated series total ({{count}}): {{total}}"
+      "priceSummary": "Price per occurrence: {{perOccurrence}} — Estimated series total ({{count}}): {{total}}",
+      "sectionWhere": "Where do you want to play?",
+      "sectionWhen": "When do you want to play?",
+      "sectionPeriod": "For what period?",
+      "sectionNotes": "Additional notes",
+      "periodSummary": "{{count}} bookings will be created, every {{day}} from {{start}} to {{end}}.",
+      "viewDates": "View my booking dates",
+      "moreDates": "+{{count}} more",
+      "occurrenceNoRate": "No rate",
+      "summaryTitle": "Booking summary",
+      "summarySchedule": "Time",
+      "summaryPeriod": "Period",
+      "summaryOccurrences": "Bookings",
+      "summaryPerOccurrence": "Price per booking",
+      "summaryTotal": "Estimated total",
+      "confirm": "Confirm bookings"
     },
     "exploreComplexesTitle": "Find a complex",
     "exploreComplexesDescription": "Search active sports complexes and check court availability.",
@@ -666,7 +716,11 @@
     "historyDetailsHeader": "Details",
     "cancelledBy": "Cancelled by: {{name}}",
     "cancellationReason": "Reason: {{reason}}",
-    "noCancellationReason": "No reason provided"
+    "noCancellationReason": "No reason provided",
+    "homeQuestion": "Where are we playing today?",
+    "noUpcomingDescription": "Explore nearby sports complexes and choose a court that works for you.",
+    "whereToPlay": "Where to play",
+    "viewAvailability": "View courts and times"
   },
   "seo": {
     "homeTitle": "Find your next game",
